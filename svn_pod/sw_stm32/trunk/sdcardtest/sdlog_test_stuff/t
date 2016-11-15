@@ -1,0 +1,8 @@
+export fn="sdcard_simulation.tmp"
+sudo rm -f "$fn"
+dd if=/dev/zero of="$fn" bs=512 count=4
+sdlog_test "$fn" w 110 1
+sdlog_test "$fn" w 10 200
+sdlog_test "$fn" w 11 300
+sdlog_test "$fn" w 12 400
+sdlog_test "$fn" r 0 0

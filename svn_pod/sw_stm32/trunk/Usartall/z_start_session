@@ -1,0 +1,10 @@
+cd ../../..
+./z_clean
+
+echo "# Doing svn update"
+svn update
+
+echo "# Doing project root make, twice"
+cd ./sw_stm32/trunk/
+make
+make

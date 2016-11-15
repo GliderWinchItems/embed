@@ -1,0 +1,236 @@
+/******************************************************************************
+* File Name          : sdadc_discovery.txt
+* Date First Issued  : 03/4/2015
+* Board              : Discovery F3 w F373 processor & bms board
+* Description        : Initial shakeout of SDADC usage: notes and description
+*******************************************************************************/
+
+Notes on the SDADC routine and tests.
+
+sdadc_discovery.c runs all three of the SDADC modules in singled-ended mode and is
+capable of handling all 21 possible inputs.  DMA is used for the storing of data
+and a post-DMA interrupt which triggers a lower level interrupt to call a routine
+to handle the filtering of the data stored in the DMA buffer.
+
+Pin mapping--
+
+Two 9 pin D connectors, two 8P8C modular jacks, and one 6P6C connector
+provide two means for connecting inputs.  For example, pin 8 on the 9 pin connector,
+X4, and pin 5 on the 8P8C connector, JP7 connect together, and then connect to
+a resistor divider.  The junction of the resistor divider connects to a SDADC pin on
+the processor, in the foregoing example, PD9, which is SDADC port 4P ('P' stands for
+the plus input).  The table in the following details the connector mapping--
+
+../gitrepo/discoveryf3/docs/spreadhseets/sdadc_pin_mapping.xls
+
+The configuration is based on using the SDADC inputs in a single-ended mode.  In this 
+mode the 'M' input of the differential pair is internally connected to the SDADC ground,
+thus leaving the pin available for single-ended 'P' use.
+
+Note that some pins are common to both SDADC1 and SDADC2.
+
+SDADC port mapping and buffering--
+
+'sdadc_discovery.c' configures each of the three SDADC modules to run under DMA and 
+circular buffer the SDADC readings.  The DMA causes an interrupt when the half-way mark
+and end of the buffer is reached.  At the end of the buffer the DMA automatically
+reloads the buffer address and count.  The DMA interrupt routine sets a flag with each
+interrupt, and sets an index to 0 or 1 to show which half of the buffer has been loaded.
+The interrupt handling also forces an interrupt for low level priority processing which 
+could be used instead of a loop polling the flag.  The three SDADC interrupt vectors are
+used for this post DMA interrupt processing.  
+
+Once started, the SDADC runs in "continuous" mode, and the DMA dutifully stores each 
+conversion in the circular buffer, flagging when the buffer halves are ready for
+use.
+
+The DMA cycle is determined by the buffer size, and the SDADC sequence is determined by the
+number of ports scanned.  The selected SDADC ports are converted and the sequence repeated.
+Each input conversion causes the DMA to store and advance its address.  The DMA buffer size 
+is set by (2 * number-of-sequences * number-of-ports).  The dma data item size is set as
+int16_t for both the DMA and the SDADC.  (One could set them to int32_t, in which case the
+[27:24], 4 bits, would hold the SDADC port number and the lower 16 bits the reading.)  Making
+the number of sequences greater than the number of SDADC ports in scanned in a sequence 
+reduces the rate that the DMA sets the flag and triggers the low priority interrupt.
+
+The DMA buffers are defined as--
+int16_t buff1[2][NUMBERSEQ1][NUMBERSDADC1];
+int16_t buff2[2][NUMBERSEQ2][NUMBERSDADC2];
+int16_t buff3[2][NUMBERSEQ3][NUMBERSDADC3];
+
+As the DMA/SDADC conversion progress, 'k' in the following is the SDADC port; 'j' is the
+sequence; and, 'i' is the buffer half (0|1).  Notes that the port scanning runs 8->0, so 
+k=0 is the highest port number in the scan sequence--
+buff[i][j][k]
+
+The mapping of the SDADC buffer port position --
+
+'sdadc_discovery.h' defines port numbers via bit positions, as shown below.  The SDADC 
+starts a sequence with the highest port number and works toward lower port numbers.  
+A '1' bit defines that port as one to be used.
+//        port number  876543210
+#define SDADC1PORTS  0b001111000;  
+#define SDADC2PORTS  0b100000000;  
+#define SDADC3PORTS  0b111111111;
+The third index of the DMA buffer then holds readings for the SDADC ports in the order 
+selected above, e.g. 
+buff1[i][j][0] = SDADC1 port 6, PB0, X3 pin 5, JP8 pin 8
+buff1[i][j][1] = SDADC1 port 5, PB1, X3 pin 9, JP8 pin 7
+buff1[i][j][2] = SDADC1 port 4, PB2, X3 pin 4, JP8 pin 6
+buff1[i][j][3] = SDADC1 port 3, PE7, X3 pin 8, JP8 pin 5
+At (j+1) the sequence repeats.
+
+Port pin configuration--
+
+The pin configuration is handled in 'sdadc_discovery.c'.  Code for all possible SDADC
+(single-ended) pins are present and grouped by SDADC number.  Also there are some
+duplicates since each SDADC can handle 9 inputs, but there are only 21 possible single-ended
+input pins.
+
+The lines of code that configure the gpio pins are commented "out" or "in", generally should
+be consistent with the SDADCxPORTS defined in the .h file (unless one want to get tricky).  If 
+they are commented out, and therefore not configured, then the SDADC conversion for that 
+port will always read exactly zero (after the -32768 offset is removed).
+
+Offset--
+
+The SDADC readings are offset by 32768.  A zero input voltage stores as -32768.  Maximum 
+is 32767.  For inputs that are 0 to Vref+, adding 32768 to the readings removes the built-in
+ offset, and thus making the readings run from 0 - 65535.
+
+Input impedance and filter cap--
+
+The apparent *average* input impedance is a result of the ADC capacitor switching.  The
+switched capacitor is alternately charged and discharged and this produces a current,
+which is averaged by the capacitance on the input.  Since the average current is proportional
+voltage this average is equivalent of a resistance.  This means the capacitance from the 
+input pin to ground which provides the averaging becomes a factor in the readings.  
+
+No capacitance would mean no averaging and the switched capacitor would be charged from the 
+source resistance during 1/2 of the switching frequency.  The maximum switching frequency
+is 6.0 MHz.  The system clock is being run at 64 MHz which makes the SDADC clock 
+64/12 -> 5 1/3 MHz.  At 5 1/3 MHz the charging duration is .09375 us.  The reference manual 
+shows the switched capacitance to be (0.543+.152) (assuming a gain of 1x).  11.09 time 
+constants are required to charge this capacitor to within one lsb.  A source resistance of 
+no larger than 134,892 meets this requirement.
+
+Capacitance to ground complicates the situation.  Assuming that the switching capacitor
+switch has a sufficiently low resistance the voltage on the external capacitance and the
+switched capacitor ends up with the switched capacitor reducing the voltage on the external
+for each switch cycle. 
+
+Noise--
+
+Displaying the first entry of the first buffer of the DMA double buffer showed only a couple
+of ticks variation between readings.  Looking at the whole buffer, and displaying mean and
+std deviation (since the data comes in too fast for printf) showed large std deviations,
+e.g. 150 ticks.  The mean and std dev from the averaging of 64 readings then showed a std dev
+of around 4-5.  This prompted some investigation.
+
+Since the data comes in too fast for printf to keep up, 'test.c' and 'sdadc_discovery.c' were
+setup to save incoming data, then stop while the 'main' output the raw data.  4096 points.
+
+The switching of LEDs on the DiscoveryF3 board causes a shift in the SDADC readings of roughly 
+20 ticks (out of 65536), 0.3%.  The plot of the data clearly shows a square wave with some other
+noise riding on it.  SDADC modules 1&2 are powered by the Vsdadc12+ pin and the  SDADC3 by 
+Vsdadc+, and these pins also supply the port pins.  Net--switching pins associated with the 
+SDADC modules will show in in the readings.  Turning off the LED switching dropped the 20 ticks
+to around 4-5.
+
+The raw data shows what looks like a sine wave, though it could be triangular, with some noise
+riding on it.  The period appears to be 64 SDADC clock ticks.  The wave has a pk-pk of about
+5 ticks.  The period was not affected by the size of the DMA buffer, nor the other two SDADCs.
+
+Speed/timing--
+
+With the processor running at 64MHz the max SDADC clock is 64/12->5 1/3 MHz.  In continuous scan
+mode this makes one conversion (360 SDADC clock cycles) 67.5 usec.  A sequence of nine conversions 
+(max for one SDADC) is 607.5 usec.  Eight sequences per 1/2 DMA buffer 4.86 ms, and therefore the
+DMA interrupts every 4.86 ms.  
+
+The DMA interrupt triggers an interrupt set to a lower priority level, using the three SDADC vectors.
+These call a filter routine, e.g. 'sdadc_filter.h' which runs the data from the DMA, for each port 
+in the scan sequence, through a cascade of two, three stage cic filters.  The output  of the last 
+filter loads a circular buffer with the filtered reading.  Some other lower interrupt level, or 
+mainline (but not both), can call 'sdadc_filter_get' and it returns a pointer that is null if there 
+is no data, or points to the filtered entry.  A call is made for each port.
+
+Digital filtering--
+
+The decimation rate for the two cic filters can be set by entries 'const uint8_t decimatetbl' and
+'const uint8_t decimatetbl2'.  The first is currently set to 4 and the second to 64.  The smaller
+decimation ratio of the first allows 32b computations, but the second requires 64b.
+
+If the decimation ratio is changed the scaling needs changing.  Currently the line in 'sdadc_filter.c'
+"pbase->cicll.nIn = pbase->cic.lout/128;// Scale stay within bounds"
+scales the result of the first cic by dividing by 128.  Division allows for negative numbers, however
+the earlier line removes the SDADC built-in offset, thus making all readings positive (and therefore
+one could use a shift rather than the division for scaling,...but fixed point division isn't much slower
+than shifting)--
+"pbase->cic.nIn = *pdat++ + 32768; // Remove bias"
+
+Alignment of pins and things--
+
+In 'sdadc_discovery.h' the number of sequences merely facilitates grouping the fast incoming readings
+so that the overhead of the filtering, etc., are is reduced.  The number of ports; the bit selection
+of the port number within the SDADC module; and the configuration of the pins needs to be coordinated.
+
+If the number bits selecting the ports to be scanned, e.g.--
+    #define SDADC2PORTS  0b000000111;  
+does not divide evenly into the number of ports, --
+    #define NUMBERSDADC2		3
+the readings will not fall into the same array location.  Best keep the number of bits for port selection
+the same as the number of ports that is used for setting up, and processing, the array, buffers, etc.
+
+The array position of the port can be confusing.  The port selection bits are by SDADC port number, i.e.
+8,7,6,5,4,3,2,1,0, but these do not correspond linearly to connector pins, or gpio port pins.  Use the
+table in the .h file.  The first DMA, hence array location [0], is the higest port number, and works
+toward lower port numbers.  Changing the bit selection and number of ports scanned sometimes changes the
+array order.  There is no simple mapping.  Very easy to get confused (especially late at night when 
+computers begin to make mistakes).
+
+It takes about 7700 processor ticks for a DMA interrupt when 8 sequences of 9 SDADC ports are stored to do
+the two, three stage cic filtering.  This works out to about 106 ticks per port.  At 64 MHz this is about
+1.6 usec per port, and one port conversion takes 67.5 usec.  With three SDADC modules running that is about
+7% of the processor, i.e. (3*1.6)/67.5.
+
+Switching capacitor--
+
+The SDADC switching capacitor generates a current.  If the input is purely resistive the switching
+capacitor charges up via the source resistance.  However, the input is never purely resistive and has
+at least some stray capacitance.  That capacitance supplies some charge.  If the capacitor is very large
+compared to the switched capacitor and source resistance it acts to average the pulses during the duration
+that the port is being measured.  With 9 ports in a sequence the average current is 1/9 of what it would
+be if the sequence was just one port.
+
+The effect of the external capacitance was checked by noting the reading with various values of external
+capacitance, ranging from 1u to 47p.  The estimates ranged from .67p to .81p which brackets the .695p
+in the Ref Manual.  The results look reasonable.
+
+No divider test--
+
+Since the switching causes a current and an apparent resistive input impedance it is possible to drop
+the voltage to be measured by simply a series resistor and a capacitance to ground to average the voltage.
+This works but the noise with 12.7M and 0.1u appeared to be somewhat higher than, e.g. 1M|10K and 
+100K|1K dividers.  This may be due to pickup.  Touching things may be adding 60Hz pickup.  There isn't 
+a noticeable difference between 1M|10K and 100K|1K dividers when it comes to noise.  
+
+Series resistor on divider--
+
+Placing a 10K series resistor between the input divider and the SDADC port pin and placing the capacitor on
+the divider side of the series resistor improves the noise.  E.g. a 12.7M resistor plus a 10K resistor to 
+a 9v battery and placing a 0.1u cap on either side of the 10K resistor shows the noise improvement when it
+is on the side of the 10K resistor away from the port pin.  The 10K resistor would reduce the peak current
+each switch cycle of the switched capacitor and maybe this is a factor in the noise.
+
+
+
+
+
+
+
+
+
+
+
+

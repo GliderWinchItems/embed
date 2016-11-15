@@ -1,0 +1,10 @@
+#!/bin/bash
+# socat_client_client
+# command line
+# 1. Start port forwarding
+#    ssh -T -L32123:127.0.0.1:$1 -p 41576 hub-server@72.64.251.177
+#      where $1 is the local port assigned to the forwarded port, e.g. 32140
+# 2. Start hub-server
+# 3. Start link between the above with the following, with forwarded port, e.g. 32140
+# 4. Make connections to localhost: 32123
+socat TCP4:localhost:32123,nodelay TCP4:localhost:$1,nodelay

@@ -1,0 +1,45 @@
+#!/bin/bash
+# Execute example: updateFITUP 72.77.164.207
+# 08/19/2012 deh
+
+# The "open" for .profile needs to be in same directory as the program
+cd /home/$USER
+
+DA=$HOME/svn_pod/sw_PC/trunk/dateselect
+
+# Check the IP address for validity and try to update one of the following--
+# .profile",".bash_profile",".bashrc" (Ubuntu, Fedora, Suse)
+$DA/checkIP $1; OUT=$?
+# echo 'checkIP' return code
+echo $OUT
+
+# Exit if the IP argument did not pass the check 
+if  [ $OUT != 0 ] ; then 
+	echo "FAILED MISERABLY (check IP and update file fault)"
+	exit $OUT
+fi
+
+# Alway let the hapless Op know something is working
+echo "SUCCESS with .profile edit"
+
+# Run the svn IP 'switch --relocate' script
+# Pass the directory of the svn and the file with the (checked) new ip address
+cd $DA
+$DA/svnrelocate ~/svn_common $1
+$DA/svnrelocate ~/svn_pod $1
+$DA/svnrelocate ~/svn_sensor $1
+$DA/svnrelocate ~/svn_discoveryf4 $1
+$DA/svnrelocate ~/svn_ultrasonic $1
+$DA/svnrelocate ~/svn_sensor2 $1
+$DA/svnrelocate ~/svn_et $1
+
+# Instructions
+echo NOTE:
+echo For the new IP address to be used in other commands you need to log-off/re-log-in, or
+echo shutdown and reboot.
+echo
+
+
+# Return checkIP routine's error return.
+exit 0
+

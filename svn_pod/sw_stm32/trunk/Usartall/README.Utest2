@@ -1,0 +1,119 @@
+09/24/2010
+Notes on Utest2.c
+
+This routine was used to 'make' & test the usart routines.  The various 
+combinatons of usart strategies (e.g. 'min', 'int', 'dma', and 'cir') for
+the different usarts (USART1, 2, 3) are tested in routines with names
+of the form:
+Utest2.c.usartXrxAAAtxBBB
+Copy the routine of interest to Utest2.c, and 'make clean', 'make' 
+(or 'make flash').
+
+It should produce the like following (note: the different test 
+routines are not identical)--
+�
+This printf - the number is 314159265
+1 The quick brown fox jumped over a lazy dog's back
+2 The quick brown fox jumped over a lazy dog's back
+3 The quick brown fox jumped over a lazy dog's back
+4 The quick brown fox jumped over a lazy dog's back
+5 The quick brown fox jumped over a lazy dog's back
+6 The quick brown fox jumped over a lazy dog's back
+
+zyxwvutsrq
+sine of 707106781 is 785398163, scaled upwards by 1000000000
+
+[If I type in on the keyboard, when I hit Enter the chars
+typed in should play back, e.g.]--
+
+This is from the keyboard.
+
+
+1. Building
+
+At the maindirectory--
+'make' builds 'Utest2.c '
+'make flash' builds 'Utest2.c' and flash the stm32
+'make clean' cleans main directory and subdirectoris (but leaves .a files intact)
+'make libmisc' makes 'libmiscstm32.a'
+'make libusart' makes 'libusartsmt32.a'
+
+Some changes that may be required if the board is not an 
+Olimex stm32_P103 (or H103) with Rlink jtag--
+- LED gpio pin (Utest2.c)
+- USART number (Utest2.c)
+- Path to toolchain (Makefile)
+- openocd path and jtag parameters
+
+
+2. The subroutines not in the toolchain come from the following directories
+
+'libopenstm32/'  -- only .h files used
+'libusartstm32/' -- usart library
+'libmiscstm32/'  -- get started and system routines
+
+
+3. Makefile
+
+Directory--
+
+The directory for the gcc toolchain may need changing to match
+you installation location.  The following are pertinent to this--
+
+# Prefix the name for the particular toolchain
+PREFIX		= arm-none-eabi
+# The path for the commands to find the compiler, linker, et al.
+TOOLDIR 	= $(HOME)/CodeSourcery/Sourcery_G++_Lite/bin
+CC		= $(TOOLDIR)/$(PREFIX)-gcc
+LD		= $(TOOLDIR)/$(PREFIX)-ld
+OBJCOPY		= $(TOOLDIR)/$(PREFIX)-objcopy
+OBJDUMP		= $(TOOLDIR)/$(PREFIX)-objdump
+
+Optimization--
+
+The optimization setting of '-O0' is easier for debugging with the 
+.list file, but quite inefficient code.  '-Os' does a good job.
+'-O3' fails due to something with initialization of non-zero 
+static variables.  I didn't get the cause sorted out.  When 'Utest.c'
+was compiled with with '-O3' the const char strings were place in
+static ram and the pointers in the control blocks for the usarts
+were not initialized, resulting in the usart program attempting to
+load a bogus address, causing a hard fault.
+
+# Compiler flags -Os = no optimization, -Os = minimum space, -O3 = fastest
+CFLAGS		= -Os -g -Wall -Wextra -Iinclude -fno-common \
+		  -mcpu=cortex-m3 -mthumb
+
+
+JTAG--
+
+The makefile will automatically flash the program if the jtag interface is defined in the following--
+
+# Paths for openocd and automatic flashing
+OPENOCD_BASE	= /usr
+OPENOCD		= $(OPENOCD_BASE)/bin/openocd
+OPENOCD_SCRIPTS	= $(OPENOCD_BASE)/share/openocd/scripts
+OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/rlink.cfg
+
+The following specifies the board script--
+OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
+
+
+4. vector.c
+
+Some modifications to the 'libopenstm32' were made to change
+the naming to CMSIS conventions (I think!).
+
+5. Usart intialization
+
+The uarts are setup for 8N1, hard coded.  The call to the initialization
+in the main program sets the baud rate.  Using 'minicom' on the PC side
+I tested the speeds up to the max of 921,600.
+
+6. Misc
+
+- expect the following warning due to the 'putc' to satisfy the 
+tiny 'printf' conflicting with the usual library function--
+Utest2.c:46: warning: conflicting types for built-in function 'putc'
+
+

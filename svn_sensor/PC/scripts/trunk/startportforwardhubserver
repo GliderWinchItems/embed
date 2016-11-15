@@ -1,0 +1,17 @@
+#!/bin/bash
+# portfwd
+# Start port forward, then hub-server
+# 04-13-2014
+
+PT=32123
+
+echo "Starting port forwarding to local port $PT"
+ssh -T -L$PT:localhost:32123 -p 41576 hub-server@$FITIP &
+
+echo "Starting hub-server" 
+hub-server 0.0.0.0 $PT 127.0.0.1 32123 &
+
+echo "Done"
+
+exit
+

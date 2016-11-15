@@ -1,0 +1,10 @@
+export TTY="/dev/ttyACM0"
+
+if [ ! -e $TTY -o ! -c $TTY ]; then
+    echo "# Can't find \"$TTY\""
+    exit 1
+fi
+
+sudo chown wellsca:wellsca "$TTY"
+sudo chmod 777 "$TTY"
+sudo minicom -D "$TTY" -b 115200

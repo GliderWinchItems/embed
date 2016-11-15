@@ -1,0 +1,155 @@
+README.db
+
+05/02/2016
+
+1.  ../gitrepo/svn_common/trunk/db/db_update
+  Has a full path name, e.g. 
+connect 'jdbc:derby://localhost:1527//home/deh/gitrepo/svn_common/trunk/db/pcc';
+  That needs to be updated for your computer, namely the 'home/deh' part.
+
+
+
+05/16/2015
+
+Notes on the db strategy
+
+
+1.  CAN unit layout
+
+Low flash (0x08000000 - 0z08005000): Loader program (ldr.c)
+
+Mid flash (0x08005000 - ...) Application program
+
+High flash sections--
+  The .ld file defines the locations, i.e. addresses, as
+  a label "__appparam.."
+  Short tables
+  a.  Top table
+     __appparm0a
+      CAN unit (ldr) CAN ID
+      Command CAN ID table for Application program
+  b.  CRC table for app
+     __appparm0b
+  c.  Reserved
+     __appparm0c
+  d.  Reserved
+     __appparm0d
+  Parameter for functions
+  1  First function table
+  2  Second function table
+  ...
+
+Example for 256K|20K flash|ram, size 0x0800--
+RAM              0x20000000         0x00005000         xrw
+FLASH            0x08005000         0x00038000         xr
+FLASHP0a         0x0803fe00         0x00000200         xr
+FLASHP0b         0x0803fc00         0x00000200         xr
+FLASHP0c         0x0803fa00         0x00000200         xr
+FLASHP0d         0x0803f800         0x00000200         xr
+FLASHP1          0x0803f000         0x00000800         xr
+FLASHP2          0x0803e800         0x00000800         xr
+FLASHP3          0x0803e000         0x00000800         xr
+FLASHP4          0x0803d800         0x00000800         xr
+FLASHP5          0x0803d000         0x00000800         xr
+
+2.  Loading scheme
+
+  Loader--
+  This is a "permanent" program that has a CAN ID embedded that
+acts somewhat like a serial number.  The CAN ID associates with 
+that particular piece of hardware.
+
+  The loader is capable of loading flash over the CAN bus.  The loading
+host, i.e. PC,  uses the unit's CAN ID for sending/receiving.
+
+  When the board powers up the loader program waits for a short period
+(green LED flashing on the POD board) for the PC to initiate a loading.
+If it times out it forces watchdog timeout which resets the processor, but
+upon power up the prior condition is noted and the program directly jumps
+to the app program in a state of having come out of reset.
+
+  The app program needs CAN IDs, so for loading the app the process is 
+for the loader to also load the top flash table with the command CAN ID's that
+the app will require to subsequently load the parameter tables for each
+function.
+
+  App--
+
+  The app handles the loading and updating of a flash table for each of 
+the functions, e.g. tension drum #1, drum #2, cable+_angle.  The db provides
+the table for each function.  
+
+Initial--
+
+  The loader program (ldr.c) must be given the CANID_NAME, which in the db
+table, CANID, defines the hex value for that CAN ID (entirely arbitrary), and
+the program compiled and flashed.
+
+  The initial tables are then compiled and loaded
+
+  The application is compiled and loaded.
+
+Updating manually--
+
+  The changes are made in the db tables in the files named:
+xxxx_INSERT.sql
+
+  The db is rebuilt and loaded.
+  ./mmdb
+
+STM32 programs--
+
+RULE: Only the .c program that implements the pointer versus parameter list array
+should use the #define file.  If a program uses a #define from the database generated 
+file, then a change in the database might require a compilation and loading of the program.
+
+
+
+What I have combines most of the above into a smaller number of tables.  The downside is 
+that one has to manage the data more carefully. 
+
+- Database rejects CAN ID assignments (CAN ID name versus hex assignment) that are duplicate, 
+  so multiple assignments (of name or hex) are easily caught.
+
+- However, nothing to prevent assigning the same CAN ID to function instances.  
+  A CAN ID that is put in the parameter table for a function instance only needs to be in the 
+  CAN ID table, so the same CAN ID can be assigned to multiple "slots" in the table.  
+  However, the parameter name must be unique.  
+
+- Changing boards, e.g. tension for drum 1, 
+
+   requires re-calibration of the offset and scale.
+
+Loading parameters--
+
+E.g. ../svn_sensor/sensor/cansender/trunk/db
+./mmdbtest_1C (or ./mmtest_1C to skip update from database)
+If the following error comes up, then the problem is in the mmtest_1C with the idx_v_val.c
+in ../svn_common/trunk/db where the flat table of parameter values for each possible function is
+not being selected by the name in mmtest_1C.  If the table is not present, then something is missing
+in the additions to the database tables when that function and/or function instance was setup.  Also,
+check spelling.
+
+The #define (e.g. "../db/gen.h") are mostly not used by C programs.  Only the ones
+that serve as check, e.g. parameter table size, should be appear in a C program.
+The C program uses the struct for the function type to access all parameters/etc.  The java
+program that generates the table of 4 byte values uses the database directly.  Net--the
+#define for the most part are not needed and are there due to faulty thinking earlier.
+
+########## First table CANSEND_2
+  CLEAN   cansender_param.o
+  CLEAN   tension_a_param: .bin .srec .list .map
+ arm-none-eabi-gcc	-std=gnu99 -g -Os -Wall -Wextra -mlittle-endian -mthumb -mthumb-interwork -nostartfiles -fno-common -mcpu=cortex-m3 -Wstrict-prototypes  -msoft-float -I./../../../../../svn_pod/sw_stm32/trunk/lib/libopenstm32  -I./../../../../../svn_pod/sw_stm32/trunk/lib/libsupportstm32  -I./../../../../sw_f103/trunk/lib/libsensormisc  -I./../../../../common_all/trunk  -I./../../../../../svn_common/trunk -DCANSEND_2  -c -o cansender_param.o cansender_param.c
+cansender_param.c:37:0: error: expected identifier or '(' at end of input
+ 
+ ^
+make: *** [cansender_param.o] Error 1
+
+  
+ 
+
+  
+
+
+
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# command line
+# socat_server <uart device>
+# Examples--
+# socat_server /dev/ttyUSB0
+# socat_server /dev/ttyUSB3
+# socat_server /dev/ttyACM0
+#
+socat TCP-LISTEN:32124,fork,reuseaddr,nodelay FILE:$1,b230400,raw,echo=0,crtscts=0 &
+
+exit
+

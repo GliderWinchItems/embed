@@ -1,0 +1,19 @@
+README.canid
+06/08/2014
+
+
+gps_pol.c  (interrupt level: main)
+  gpsfix_canmsg_add (add to log an can buffers)
+  gpsfix_canmsg_get_log
+  gpsfix_canmsg_get_can
+
+	checksum error ctr		(CAN_UNITID_CO_OLI | CAN_DATAID29_1_GPS_CHKSUM_ER )
+	time GPS->SYS update ctr	(CAN_UNITID_CO_OLI | CAN_DATAID29_3_GPS_FLAGCTR )
+	latitude/longitude		(CAN_UNITID_CO_OLI | (CAN_DATAID_LAT_LONG << CAN_DATAID_SHIFT)
+	height				(CAN_UNITID_CO_OLI | (CAN_DATAID_HEIGHT   << CAN_DATAID_SHIFT)
+	fix error			(CAN_UNITID_CO_OLI | CAN_DATAID29_2_GPS_NO_FIX )
+
+Tim4_pod_se.c (interrupt level: 0x20)
+        time sync msg			CAN_TIMESYNC1								0x00200000
+		
+

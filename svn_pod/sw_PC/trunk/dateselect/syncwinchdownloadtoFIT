@@ -1,0 +1,6 @@
+# syncwinchdownloadtoFIT: 11-05-2012, send all of ~/winch/download to FIT
+rsync -av -e 'ssh -p 41574' ~/winch/download/* $USER@$FITIP:/winch/download/
+
+
+
+

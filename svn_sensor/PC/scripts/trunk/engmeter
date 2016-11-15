@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+echo "starting hub-server if not already running"
+pgrep hub-server && echo "hub-server is alreadyrunning"
+pgrep hub-server || echo "hub-server will be started"
+pgrep hub-server || hub-server 0.0.0.0 32123 &
+
+echo "starting socat if not already running"
+pgrep socat && echo "socat is already running"
+pgrep socat || echo "socat will be started with /deb/ttyUSB0"
+pgrep socat || socat_client /dev/ttyUSB0
+
+cd $HOME/githubs/GliderWinchj2/dist
+echo "starting java meter program"
+java -jar Meter_RPM.jar localhost 32123
+exit
+

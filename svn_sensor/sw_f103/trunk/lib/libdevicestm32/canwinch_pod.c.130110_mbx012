@@ -1,0 +1,587 @@
+/******************** (C) COPYRIGHT 2012 **************************************
+* File Name          : canwinch_pod.c
+* Hackerees          : deh
+* Date First Issued  : 12/07/2012
+* Board              : STM32F103VxT6_pod_mm
+* Description        : CAN routines for winch instrumentation--POD board
+*******************************************************************************/
+/* 
+Page numbers: Ref Manual RM0008 rev 14
+CAN starts at p 628.
+
+TIM7 & TIM5 are used for low priority processing after a CAN interrupt.
+
+High priority msgs (RESETALL, TIMESYNC1,2,3 are assigned to FIFO 1, others to FIFO 0.
+
+
+*/
+
+#include "libmiscstm32/systick1.h"
+#include "libusartstm32/nvicdirect.h" 
+#include "libopenstm32/gpio.h"
+#include "libopenstm32/rcc.h"
+#include "libopenstm32/can.h"
+#include "PODpinconfig.h"
+#include "pinconfig.h"
+
+#include "canwinch_pod.h"
+
+/* The following variables are used by peripherals in their 'init' routines to set dividers 	*/
+/* (see 'lib/libmiscstm32/clockspecifysetup.c') */
+extern unsigned int	pclk1_freq;	/*	SYSCLKX/PCLK1DIV	E.g. 72000000 	*/
+extern unsigned int	sysclk_freq;	/* 	SYSCLK freq		E.g. 72000000	*/
+
+/* Interrupts with received messages that are accepted by the hardware filtering are stored in
+   a buffer.  The mainline gets a pointer to the buffer, or a NULL if the buffer is empty. */
+// The following is for non-high priority CAN msgs (e.g. sensor readings, date/time/tick count, prog loadiing)
+
+#define CANRCVBUFSIZE	32
+static struct CANRCVBUF canbuf[CANRCVBUFSIZE];	// CAN message circular buffer
+static int canbufIDXm = 0;		// Index for mainline removing data from buffer
+static int canbufIDXi = 0;		// Index for interrupt routine adding data
+// The following is for high priority CAN msgs (e.g. RESETALL, TIMESYNCx)
+
+#define CANRCVTIMBUFSIZE	8	// Can data plus timer ticks 
+static struct CANRCVTIMBUF cantimbuf[CANRCVTIMBUFSIZE];	// CAN message circular buffer
+static int canbuftimIDXm = 0;		// Index for mainline removing data from buffer
+static int canbuftimIDXi = 0;		// Index for interrupt routine adding data
+
+/* Pointers to functions to be executed under a low priority interrupt, forced by a CAN interrupt */
+void 	(*highpriority_ptr)(void);	// Address of function to call TIM7 forced interrupt
+void 	(*lowpriority_ptr)(void);	// Address of function to call TIM5 forced interrupt
+
+/* Transmit buffering */
+#define CANXMTBUFSIZE	8		// Number of message that can be queued for sending
+static int canxmtIDXi = 0;		// Index into buffer with xmt messages (interrupt/sending)
+static int canxmtIDXm = 0;		// Index into buffer to next available slot to add a xmt message
+static struct CANRCVBUF canxmtbuf[CANXMTBUFSIZE];	// Messages queued for sending
+
+/* Macros for advancing buffering indices with wrap-around */
+#define advidx_canbuf(idx)    idx += 1; if (idx >= CANRCVBUFSIZE)    {idx = 0;}
+#define advidx_cantimbuf(idx) idx += 1; if (idx >= CANRCVTIMBUFSIZE) {idx = 0;}
+#define advidx_canxmtbuf(idx) idx += 1; if (idx >= CANXMTBUFSIZE)    {idx = 0;}
+
+#define CAN_TIMEOUT	2000000		// Break 'while' loop count
+/******************************************************************************
+ * int can_setup_pod(unsigned int baudrate, unsigned int mode, port);
+ * @brief 	: Setup CAN pins and hardware
+ * @param	: baudrate (Hz), e.g. 500000
+ * @param	: mode: Silent | Loopback = (CAN_BTR_SILM | CAN_BTR_LBKM)
+ * @param	: port: 0 = PA 11|12; 2 = PB; 3 = PD 0|1;  (1 = not valid; >3 not valid; < 0 not valid)
+ * @return	:  n = remaining counts; 0 = enter init mode timedout;-1 = exit init mode timeout; -2 = bad port
+*******************************************************************************/
+int can_setup_pod(unsigned int baudrate, unsigned int mode, int port)
+{
+	int can_timeout;	// Counter for breaking 'while' loops
+
+	/* Enable clocking to CAN module */
+	RCC_APB1ENR |= (1<<25);		// CAN1_EN p 144
+
+	RCC_APB2ENR |= RCC_APB2ENR_AFIOEN;	// enable clock for Alternate Function
+
+/* NOTE: The following statement is located in '../lib/libmiscstm32/clocksetup.c' & 'clockspecifysetup.c' */
+//	RCC_APB2ENR |= 0x7c;	// Enable A thru Ebvc 
+
+	 /* Note: calculations for PCLK1 = 36MHz */
+//	unsigned int brp = (pclk1_freq / 18) / 500000;	// baudrate is set to 500k bit/s
+
+	/* REMAP p 180
+	Bits 14:13 CAN_REMAP[1:0]: CAN alternate function remapping
+            These bits are set and cleared by software. They control the mapping of alternate functions
+            CAN_RX and CAN_TX in devices with a single CAN interface.
+            00: CAN_RX mapped to PA11, CAN_TX mapped to PA12
+            01: Not used
+            10: CAN_RX mapped to PB8, CAN_TX mapped to PB9 (not available on 36-pin package)
+            11: CAN_RX mapped to PD0, CAN_TX mapped to PD1 
+	OLIMEX = 0x2
+	*/
+
+	/* Setup remapping and configure port pins */
+	switch (port)
+	{
+	case 0:	// CAN on port A
+		/*  Setup CAN TXD: PA12 for alternate function push/pull output p 156, p 163  */
+		GPIOA_CRH &= ~(0xf << 4*4);	// Clear CNF:MODE bits
+		GPIOA_CRH |= (((GPIO_CNF_OUTPUT_ALTFN_PUSHPULL<<2) | GPIO_MODE_OUTPUT_50_MHZ) << (4*4)) ;
+
+		/* Setup CAN RXD: PB11 for input pull up p 164, 167 */
+		configure_pin_input_pull_up_dn ( (volatile u32 *)GPIOA, 11, 1);	// PA11, input w pull-up
+		AFIO_MAPR |= (0x0 << 13);	 // 00: CAN_RX mapped to PA11, CAN_TX mapped to PA12 p 179
+		break;
+
+	case 2:	// CAN on port B
+		/*  Setup CAN TXD: PB9 for alternate function push/pull output p 156, p 163  */
+		GPIOB_CRH &= ~(0xf << 1*4);	// Clear CNF:MODE bits
+		GPIOB_CRH |= (((GPIO_CNF_OUTPUT_ALTFN_PUSHPULL<<2) | GPIO_MODE_OUTPUT_50_MHZ) << (1*4)) ;
+
+		/* Setup CAN RXD: PB8 for input pull up p 164, 167 */
+		configure_pin_input_pull_up_dn ( (volatile u32 *)GPIOB, 8, 1);	// PB8, input w pull-up
+
+		AFIO_MAPR |= (0x2 << 13);	 // 00: CAN_RX mapped to PA11, CAN_TX mapped to PA12 p 179
+		break;
+
+	case 3:	// CAN on port D
+		/*  Setup CAN TXD: PD1 for alternate function push/pull output p 156, p 163  */
+		GPIOD_CRL &= ~(0xf << 1*4);	// Clear CNF:MODE bits
+		GPIOD_CRL |= (((GPIO_CNF_OUTPUT_ALTFN_PUSHPULL<<2) | GPIO_MODE_OUTPUT_50_MHZ) << (1*4)) ;
+
+		/* Setup CAN RXD: PD0 for input pull up p 164, 167 */
+		configure_pin_input_pull_up_dn ( (volatile u32 *)GPIOD, 0, 1);	// PD0, input w pull-up
+		AFIO_MAPR |= (0x3 << 13);	 // 00: CAN_RX mapped to PA11, CAN_TX mapped to PA12 p 179
+		break;
+	default:
+		return -2;
+		break;
+
+	}
+
+	/* ---------- Set Initialization mode ------------------ */
+	/* Request initialization p 632, 648.  DEBUG freeze bit on */
+	CAN_MCR(CAN1) = CAN_MCR_DBF | CAN_MCR_INRQ;
+
+	/* The initialization request (above) causes the INAK bit to be set.  This bit goes off when 11 consecutive
+	   recessive bits have been received p 633 */
+	can_timeout = CAN_TIMEOUT;	// Counter to break loop for timeout
+	while ( ((CAN_MSR(CAN1) & CAN_MSR_INAK) == 0 ) && (can_timeout-- >= 2) );	// Wait until initialization mode starts or times out
+	if (can_timeout <= 0 ) return 0;	// Timed out
+
+	/* Compute BRP register value, given the baud rate and pclk1_freq, and sampling intervals */
+	/* p 645 */
+	/* set BTR register so that sample point is at about 72% bit time from bit start */
+#define TBS1	12	// Bit segment 1
+#define TBS2	5	// Bit segment 2
+	unsigned int brp;		// Baud rate code
+	brp = (pclk1_freq/(1 + TBS1 + TBS2)) / baudrate;
+
+//brp = 32; // $$$$ DEBUG
+
+        /* SJW--Resynchronization jump width: These bits define the maximum number of time quanta the CAN hardware 
+	   is allowed to lengthen or shorten a bit to perform the resynchronization. p 640 */
+#define SJW 4	
+
+	/* Clear and set bit fields p 657 */
+	//                         SJW                      TBS2                       TBS1                      BRP
+	CAN_BTR(CAN1) &= ~( ((          0x03) << 24) | ((           0x07) << 20) | ((           0x0F) << 16) | ((          0x1FF) << 0) ); 
+	CAN_BTR(CAN1) |=  ( (((SJW-1) & 0x03) << 24) | (((TBS2-1) & 0x07) << 20) | (((TBS1-1) & 0x0F) << 16) | (((brp-1) & 0x1FF) << 0) );
+
+	// Loopback, Silent Mode (self-test) (BTR p 657)
+	CAN_BTR(CAN1) &= ~(CAN_BTR_SILM | CAN_BTR_LBKM); // Silent mode | Loopback mode
+	CAN_BTR(CAN1) |= (mode & (CAN_BTR_SILM | CAN_BTR_LBKM) );
+
+	/* Leave initialization mode */
+	CAN_MCR(CAN1) &= ~CAN_MCR_INRQ;
+	can_timeout = CAN_TIMEOUT;	// Counter to break loop for timeout
+	while ( ((CAN_MSR(CAN1) & CAN_MSR_INAK) != 0 ) && (can_timeout-- >= 0) );	// Wait until initialization mode starts or times out
+	if (can_timeout <= 0 ) return -1;	// Timed out
+
+/* At this point HANG with--
+> mdw 0x40006400 8
+0x40006400: 00010000 00000009 1c000000 00000000 00000000 00000000 00000000 434b0003
+*/
+
+
+	/* Set and enable interrupt controller for doing software interrupt */
+	// TIM7 handles high priority CAN msgs, e.g. RESETALL, TIMESYNCx
+	NVICIPR (NVIC_TIM7_IRQ, NVIC_TIM7_IRQ_PRIORITY );	// Set interrupt priority ('../lib/libusartstm32/nvicdirect.h')
+	NVICISER(NVIC_TIM7_IRQ);			// Enable interrupt controller ('../lib/libusartstm32/nvicdirect.h')
+
+	// TIM5 handles non-high priority msgs, e.g. sensor readings
+	NVICIPR (NVIC_TIM5_IRQ, NVIC_TIM5_IRQ_PRIORITY );	// Set interrupt priority ('../lib/libusartstm32/nvicdirect.h')
+	NVICISER(NVIC_TIM5_IRQ);			// Enable interrupt controller ('../lib/libusartstm32/nvicdirect.h')
+
+	/* Set and enable interrupt controller for CAN interrupts */
+	NVICIPR (NVIC_CAN_RX1_IRQ, NVIC_CAN_RX1_IRQ_PRIORITY );	// Set interrupt priority
+	NVICISER(NVIC_CAN_RX1_IRQ);				// Enable interrupt controller
+
+	NVICIPR (NVIC_CAN_SCE_IRQ, NVIC_CAN_SCE_IRQ_PRIORITY );// Set interrupt priority
+	NVICISER(NVIC_CAN_SCE_IRQ);				// Enable interrupt controller
+
+	NVICIPR (NVIC_USB_HP_CAN_TX_IRQ, NVIC_USB_HP_CAN_TX_IRQ_PRIORITY );// Set interrupt priority
+	NVICISER(NVIC_USB_HP_CAN_TX_IRQ);				// Enable interrupt controller
+
+	NVICIPR (NVIC_USB_LP_CAN_RX0_IRQ, NVIC_USB_LP_CAN_RX0_IRQ_PRIORITY );// Set interrupt priority
+	NVICISER(NVIC_USB_LP_CAN_RX0_IRQ);				// Enable interrupt controller
+
+	/* CAN interrupt enable register (CAN_IER) */
+	/* Bit 1 FMPIE0: FIFO message pending interrupt enable
+	       0: No interrupt generated when state of FMP[1:0] bits are not 00b.
+	       1: Interrupt generated when state of FMP[1:0] bits are not 00b.
+	   Bit 4 FMPIE1: FIFO message pending interrupt enable
+	       0: No interrupt generated when state of FMP[1:0] bits are not 00b.
+	       1: Interrupt generated when state of FMP[1:0] bits are not 00b. */
+	CAN_IER(CAN1) |= CAN_IER_FMPIE0;	// FIFO 0 p 655
+	CAN_IER(CAN1) |= CAN_IER_FMPIE1;	// FIFO 1 p 655
+	CAN_IER(CAN1) |= 0x1;	// Bit0: 1: Interrupt generated when RQCPx bit is set. p 656.
+
+
+	/* CAN error status register (CAN_ESR) */
+
+	return (CAN_TIMEOUT - can_timeout);
+}
+/******************************************************************************
+ * int can_init_pod(unsigned int baudrate, unsigned int mode, int port);
+ * @param	: baudrate (Hz), e.g. 500000
+ * @param	: mode: Silent | Loopback = (CAN_BTR_SILM | CAN_BTR_LBKM)
+ * @param	: port: 0 = PA 11|12; 2 = PB; 3 = PD 0|1;  (1 = not valid; >3 not valid; < 0 not valid)
+ * @return	:  n = remaining counts; 0 = enter init mode timedout;-1 = exit init mode timeout; -2 = bad port
+*******************************************************************************/
+int can_init_pod(unsigned int baudrate, unsigned int mode, int port)
+{
+	int can_ret;	// CAN initialization error return
+
+//  CAN_wrFilter (33, STANDARD_FORMAT);        // Enable reception of messages
+
+/* p 633
+24.5   Test mode
+       Test mode can be selected by the SILM and LBKM bits in the CAN_BTR register. These bits
+       must be configured while bxCAN is in Initialization mode. Once test mode has been
+       selected, the INRQ bit in the CAN_MCR register must be reset to enter Normal mode.
+24.5.1 Silent mode
+       The bxCAN can be put in Silent mode by setting the SILM bit in the CAN_BTR register.
+       In Silent mode, the bxCAN is able to receive valid data frames and valid remote frames, but
+       it sends only recessive bits on the CAN bus and it cannot start a transmission. If the bxCAN
+       has to send a dominant bit (ACK bit, overload flag, active error flag), the bit is rerouted
+       internally so that the CAN Core monitors this dominant bit, although the CAN bus may
+*/
+
+	if ( (can_ret = can_setup_pod (baudrate, mode, port)) <0 ) return can_ret;		// setup CAN pins, etc.
+
+//	CAN_MSR(CAN1) = 0;
+//	while ( (CAN_MSR(CAN1) & CAN_MSR_INAK) == 1 );	// Wait until CAN ends intialization mode
+
+	/* Wait until ready */
+	while ( (CAN_TSR(CAN1) & CAN_TSR_TME0) == 0);         // Wait for transmit mailbox 0 to be empty
+
+	return can_ret;
+}
+
+/*******************************************************************************
+ * void can_nxp_setRS(int rs);
+ * @brief 	: Set RS input to NXP CAN driver (TJA1051) (on some PODs)
+ * @param	: rs: 0 = SILENT mode; not-zero = NORMAL mode 
+ * @return	: Nothing for now.
+*******************************************************************************/
+void can_nxp_setRS(int rs)
+{
+	/* RS (S) control PB7 (on sensor board) PD11 on pod board */
+	// Floating input = resistor controls slope
+	// Pin HI = Normal mode
+	// Pin LO = sleep/silent mode
+	configure_pin ((volatile u32 *)GPIOD, 11);	// configured for push-pull output
+	if (rs == 0)
+		GPIO_BRR(GPIOD) |= (1<<11);	// Set bit LO for SILENT mode
+	else
+		GPIO_BSRR(GPIOD) |= (1<<11);	// Set bit HI for NORMAL mode
+	return;
+}
+
+/*******************************************************************************
+ * void can_filter_unitid(unsigned int myunitid);
+ * @brief 	: Setup filter bank for Checksum check & Program loading
+ * @param	: "my" can id
+ * @return	: Nothing for now.
+*******************************************************************************/
+void can_filter_unitid(unsigned int myunitid)
+{
+/* p 632
+      To initialize the registers associated with the CAN filter banks (mode, scale, FIFO
+      assignment, activation and filter values), software has to set the FINIT bit (CAN_FMR). Filter
+      initialization also can be done outside the initialization mode.
+Note: When FINIT=1, CAN reception is deactivated.
+      The filter values also can be modified by deactivating the associated filter activation bits (in
+      the CAN_FA1R register).
+      If a filter bank is not used, it is recommended to leave it non active (leave the corresponding
+      FACT bit cleared).
+*/
+	/* CAN filter master register p 665 */
+	CAN_FMR(CAN1)  |= CAN_FMR_FINIT;	// FINIT = 1; Initialization mode ON for setting up filter banks
+
+	/* CAN filter scale register p 666.  Default is dual 16 bit mode. */
+	// CAN_FS1R(CAN1) |= ????
+
+	/* CAN filter mode register  p 666 */
+	// CAN_FM1R(CAN1) |= ????
+
+	/* This register can only be modified when the FACTx bit of the CAN_FAxR register is cleared
+	   or when the FINIT bit of the CAN_FMR register is set. */
+
+	/*   Set 16 bit filter mask and ID  */
+	CAN_FiR1(CAN1, 0) = CAN_UNITID_MASK | CAN_RESETALL;	// All units accept this msg
+	CAN_FiR2(CAN1, 0) = CAN_UNITID_MASK | CAN_TIMESYNC1;	// All units accept this msg
+	CAN_FiR1(CAN1, 1) = CAN_UNITID_MASK | CAN_TIMESYNC2;	// All units accept this msg
+	CAN_FiR2(CAN1, 1) = CAN_UNITID_MASK | CAN_TIMESYNC3;	// All units accept this msg
+	CAN_FiR1(CAN1, 2) = CAN_UNITID_MASK | myunitid;		// 'IAMUNITNUMBER' is unique to this unit
+	CAN_FiR2(CAN1, 2) = CAN_UNITID_MASK | myunitid;		// 'IAMUNITNUMBER' is unique to this unit
+	// Note:  If the "odd" 16 bit mask|id were zero, then it would pass all msgs (???), so duplicate last entry.
+
+	/* Assign filter to FIFO 1. Default: All messages pass through FIFO p 667 */
+	CAN_FFA1R(CAN1) |= 0x03;	// Filter banks 0 and 1 pass through FIFO 1
+
+	/* Filter activation */
+	/* Bits 27:0 FACTx: Filter active
+            The software sets this bit to activate Filter x. To modify the Filter x registers (CAN_FxR[0:7]),
+            the FACTx bit must be cleared or the FINIT bit of the CAN_FMR register must be set.
+            0: Filter x is not active
+            1: Filter x is active */
+	CAN_FA1R(CAN1) |= 0x07;	// Activate filter banks 0, 1, 2. p 667
+
+	/* Remove filter registers from initialization mode */
+	CAN_FMR(CAN1)  &= ~CAN_FMR_FINIT;	// FINIT = 0; Set initialization mode off for filter banks p 665
+
+ 	/* Enable interrupt */
+//	CAN_IER(CAN1) |= 0x1;	// Bit0: 1: Interrupt generated when RQCPx bit is set. p 656.
+
+	return;
+}
+/******************************************************************************
+ * struct CANRCVBUF * canrcv_get(void);
+ * @brief	: Get pointer to non-high priority CAN msg buffer
+ * @return	: struct with pointer to buffer, ptr = zero if no new data
+ ******************************************************************************/
+struct CANRCVBUF * canrcv_get(void)
+{
+	struct CANRCVBUF * p;
+	if (canbufIDXi == canbufIDXm) return 0;	// Return showing no new data
+	p = &canbuf[canbufIDXm];
+	canbufIDXm += 1;			// Advance index ('m' = mainline)
+	if (canbufIDXm >= CANRCVBUFSIZE) canbufIDXm = 0; // Wrap around end	
+	return p;				// Return pointer to buffer
+}
+/******************************************************************************
+ * struct CANRCVTIMBUF * canrcvtim_get(void);
+ * @brief	: Get pointer to high priority CAN msg buffer
+ * @return	: struct with pointer to buffer, ptr = zero if no new data
+ ******************************************************************************/
+struct CANRCVTIMBUF * canrcvtim_get(void)
+{
+	struct CANRCVTIMBUF * p;
+	if (canbuftimIDXi == canbuftimIDXm) return 0;	// Return showing no new data
+
+	p = &cantimbuf[canbuftimIDXm];	// Get return pointer value	
+// Advance index ('m' = mainline)
+	return p;			// Return pointer to buffer
+}
+/*---------------------------------------------------------------------------------------------
+ * static int loadmbx(struct CANRCVBUF * px)
+ * @brief	: Load mailbox
+ * @param	: pointer to struct with msg: id & data
+ * @return	: 0 = no input buffers remain to be loaded into mailboxes; not zero = more to do
+ ----------------------------------------------------------------------------------------------*/
+int can_debug0 = 0;
+
+static unsigned int loadmbx(struct CANRCVBUF * px)
+{
+	unsigned int mbox;
+
+	/* p 651 Bits 25:24 CODE[1:0]: Mailbox code
+            In case at least one transmit mailbox is free, the code value is equal to the number of the
+            next transmit mailbox free.
+            In case all transmit mailboxes are pending, the code value is equal to the number of the
+            transmit mailbox with the lowest priority. */
+
+	/* Load mbx's until either the buffer has been drained OR all mailboxes are loaded. */
+	while ( (canxmtIDXi != canxmtIDXm) &&  (  (CAN_TSR(CAN1) && CAN_TSR_CODE_MASK) != (3 << 24) ) )
+	{
+		/* Get next available mbx number: 0, 1, 2 and translate to base address offset: 0x180, 0x190, 0x1A0 */
+		mbox = ( ((CAN_TSR(CAN1) >> 20) & (0x3 << 4)) + 0x180); 	// Get next available mbx address offset
+	
+		/* Load the available mailbox with the message. */
+		CAN_TIxR (CAN1, (mbox)) = px->id;	// CAN TIxR  mailbox identifier register p 659
+		CAN_TDLxR(CAN1, (mbox)) = px->cd.ui[0];	// CAN TDLxR mailbox  data low  register p 661 
+		CAN_TDHxR(CAN1, (mbox)) = px->cd.ui[1];	// CAN TDHxR mailbox  data high register p 661
+
+		/* Set length */
+		if (px->cd.ui[1] == 0)
+		{
+			CAN_TDTxR(CAN1, (mbox)) = 4;
+			if (px->cd.ui[0] == 0)
+			{ // Here, both fields are zero so send it as a RTR
+				CAN_TDTxR(CAN1, (mbox)) = 0;	// Number of bytes = 0
+				CAN_TIxR (CAN1, (mbox)) |= 0x2; // RTR
+			}
+		}
+		else
+		{ 
+			if (px->cd.ui[0] == 0)
+			{ // Here, low word of 32b is zero, send all 8 bytes
+				CAN_TDTxR(CAN1, (mbox)) = 8;	// Number of bytes = 0
+			}
+		}		
+
+		/* Advance buffer index */
+		advidx_canxmtbuf (canxmtIDXi);	// Macro
+
+		/* Request a transmission */
+		CAN_TIxR (CAN1, (mbox)) |= 0x1;	// Set TXRQ bit in ID register of mailbox
+	}
+
+	return (canxmtIDXi != canxmtIDXm); // Return status of msg buffer
+}
+/******************************************************************************
+ * int can_msg_put(struct CANRCVBUF * px);
+ * @brief	: Setup a msg to be sent
+ * @param	: pointer to struct with msg: id & data
+ * @return	: 0 = no input buffers remain to be loaded into mailboxes; not zero = more to do
+ ******************************************************************************/
+int can_msg_put(struct CANRCVBUF * px)
+{
+	/* Copy msg into buffer */
+	canxmtbuf[canxmtIDXm] = *px;	// Add msg to buffer
+
+	/* Advance buffer index */
+	advidx_canxmtbuf (canxmtIDXm);	
+can_debug0 += 1;	// Buffer msgs added
+
+	/* Enable interrupt, in case it is not already set */
+	/* p 655 Bit 0 TMEIE: Transmit mailbox empty interrupt enable
+		0: No interrupt when RQCPx bit is set.
+		1: Interrupt generated when RQCPx bit is set. */
+//	CAN_IER(CAN1) |= 0x1;	// Bit0: 1: Interrupt generated when RQCPx bit is set. p 655,6.
+
+	return	loadmbx(&canxmtbuf[canxmtIDXi]); //
+}
+/*#######################################################################################
+ * ISR routines for CAN:There four interrupt vectors, p 647 fig 235
+ *####################################################################################### */
+/*---------------------------------------------------------------------------------------------
+ * static void tx_common(int tsr_shift);
+ * @brief	: Handle RCPx flags for tx mailbox interrupt
+ * @param	: shift = number of shifts to access RCPx in CAN_TSR
+ * @return	: none
+ ----------------------------------------------------------------------------------------------*/
+unsigned int can_terr[3];
+
+static void tx_common(int tsr_shift)
+{
+	/* Get status and isolate TERRx, ALSTx, TXOKx, RCPx p 651 */
+	unsigned int temp = ((CAN_TSR(CAN1) >> tsr_shift) & 0xf);
+
+	if (temp != 0)	// Does this mailbox have any ISR flags ON?
+	{ // Here, yes.  
+		if ((temp & 0x1) != 0)	// RCPx ON
+		{ // Here, yes.
+			if ((temp & 0x8) != 0) can_terr[tsr_shift >> 3] += 1; // Count errors
+			CAN_TSR(CAN1) |= (0x1 << tsr_shift);	// Clear RCPx (which clears TERRx, ALSTx, TXOKx)
+			loadmbx(&canxmtbuf[canxmtIDXi]);	// Load any empty mailbox if buffer has data
+		}
+	}
+	return;
+}
+/*#######################################################################################
+ * ISR routine for CAN: "Transmit Interrupt" -- RQCP0,1,2 
+ *####################################################################################### */
+/* p 647 The transmit interrupt can be generated by the following events:
+–   Transmit mailbox 0 becomes empty, RQCP0 bit in the CAN_TSR register set.
+–   Transmit mailbox 1 becomes empty, RQCP1 bit in the CAN_TSR register set.
+–   Transmit mailbox 2 becomes empty, RQCP2 bit in the CAN_TSR register set. */
+void USB_HP_CAN_TX_IRQHandler(void)
+{
+	int temp;
+
+	/* Handle each mailbox */
+	tx_common(0);	// Mailbox 0
+
+	tx_common(8);	// Mailbox 1
+
+	tx_common(16);	// Mailbox 2
+
+can_debug0 -= 1;	// Buffer msgs removed
+
+
+	temp = CAN_TSR(CAN1);	// Prevent tail-chaining
+	return;
+}
+
+/*#######################################################################################
+ * ISR routine for CAN: "FIFO 0 interrupt" -- FMP0, FULL0, FOVR0
+ *####################################################################################### */
+/* p 647 The FIFO 0 interrupt can be generated by the following three events (only X = enabled):
+X   Reception of a new message, FMP0 bits in the CAN_RF0R register are not ‘00’.
+–   FIFO0 full condition, FULL0 bit in the CAN_RF0R register set.
+–   FIFO0 overrun condition, FOVR0 bit in the CAN_RF0R register set. */
+void USB_LP_CAN_RX0_IRQHandler(void)
+{
+	int temp;
+	/* Save message in a circular buffer */
+	canbuf[canbufIDXi].id     = CAN_RI0R(CAN1);	// ID, RTR, IDE
+	canbuf[canbufIDXi].cd.ull = CAN_RDL0R(CAN1);	// Data (32b) High, Data (32b) Low
+
+	/* Release FIFO 0 */	
+	CAN_RF0R(CAN1) |= CAN_RF0R_RFOM0;	// Write bit 5
+
+	/* Advance index in circular buffer */
+	canbufIDXi += 1;
+	if (canbufIDXi >= CANRCVBUFSIZE) canbufIDXi = 0;// Reset to beginning
+		
+	/* Trigger a pending interrupt for TIM5, which will cause a chain of related routines to execute */
+	NVICISPR(NVIC_TIM5_IRQ);	// Set pending (low priority) interrupt for TIM5 ('../lib/libusartstm32/nvicdirect.h')
+
+	temp = CAN_RF0R(CAN1);	// Read register to avoid tail-chaining
+	return;
+}
+/*#######################################################################################
+ * ISR routine for CAN: "FIFO 1 interrupt" -- FMP1, FULL1, FOVR1
+ *####################################################################################### */
+
+/* p 647,8 The FIFO 1 interrupt can be generated by the following three events (only X = enabled):
+X   Reception of a new message, FMP1 bits in the CAN_RF1R register are not ‘00’.
+–   FIFO1 full condition, FULL1 bit in the CAN_RF1R register set.
+–   FIFO1 overrun condition, FOVR1 bit in the CAN_RF1R register set. */
+void CAN_RX1_Handler(void)
+{ // Here, FMP0 bits are not 00.
+	int temp;
+	/* Save time & message in a circular buffer */
+	cantimbuf[canbuftimIDXi].U.ull    = SYSTICK_getcount32();// Get current tick time
+	cantimbuf[canbuftimIDXi].R.id     = CAN_RI0R(CAN1);	// ID, RTR, IDE
+	cantimbuf[canbuftimIDXi].R.cd.ull = CAN_RDL0R(CAN1);	// Data (32b) High, Data (32b) Low
+
+	/* Release FIFO 1 */	
+	CAN_RF1R(CAN1) |= CAN_RF1R_RFOM1;		// Write bit 5 to release FIFO msg
+
+	/* Advance index in circular buffer */
+	canbuftimIDXi += 1;
+	if (canbuftimIDXi >= CANRCVTIMBUFSIZE) canbuftimIDXi = 0;// Reset to beginning
+
+	/* Trigger a pending interrupt for TIM7, which will cause a chain of related routines to execute */
+	NVICISPR(NVIC_TIM7_IRQ);	// Set pending (low priority) interrupt for TIM7 ('../lib/libusartstm32/nvicdirect.h')
+
+	temp = CAN_RF1R(CAN1);	// Read register to avoid tail-chaining
+	return;
+}
+/*#######################################################################################
+ * ISR routine for CAN: "Status Change Error" -- EWGF, EPVF, BOFF, WKUI, SLAKI
+ *####################################################################################### */
+/* p 648 The error and status change interrupt can be generated by the following events:
+–   Error condition, for more details on error conditions please refer to the CAN Error
+    Status register (CAN_ESR).
+–   Wakeup condition, SOF monitored on the CAN Rx signal.
+–   Entry into Sleep mode. */
+void CAN_SCE_Handler(void)
+{
+	return;
+}
+/*#######################################################################################
+ * ISR routine for TIM7 (low priority level)
+ *####################################################################################### */
+void TIM7_IRQHandler(void)
+{
+/* This interrupt is caused by the CAN FIFO 1 (time sync message) interrupt for further processing at a low interrupt priority */
+	/* Call other routines if an address is set up */
+	if (highpriority_ptr != 0)	// Having no address for the following is bad.
+		(*highpriority_ptr)();	// Go do something
+	return;
+}
+/*#######################################################################################
+ * ISR routine for TIM5 (low priority level)
+ *####################################################################################### */
+void TIM5_IRQHandler(void)
+{
+/* This interrupt is caused by the CAN FIFO 1 (time sync message) interrupt for further processing at a low interrupt priority */
+	/* Call other routines if an address is set up */
+	if (lowpriority_ptr != 0)	// Having no address for the following is bad.
+		(*lowpriority_ptr)();	// Go do something
+	return;
+}
+
+
+

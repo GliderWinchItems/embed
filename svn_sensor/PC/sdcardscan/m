@@ -1,0 +1,2 @@
+rm -f sdcardscan
+gcc -o sdcardscan sdcardscan.c

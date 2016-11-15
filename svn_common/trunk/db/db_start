@@ -1,0 +1,55 @@
+#!/bin/bash
+# db_start
+# 09/05/2016
+#
+# Check for the presence of the database folder and make
+#   make the directory if it is not there.  If it is already
+#   present, check for a couple of database files to see if
+#   it looks like a data base has been created.
+# If you get all confused, delete the pcc directory and rerun.
+#
+
+
+# Start the derby server and place in the background
+echo
+echo "Startup in background: startNetworkServer"
+echo "If this returns with 'Address already in use' then"
+echo "stop the NetworkServer with: stopNetworkServer" 
+echo
+stopNetworkServer
+sleep 2
+startNetworkServer &
+# Pause long enough for server to start
+sleep 4
+echo 
+
+
+if [ -r pcc ]; then
+  echo "pcc--readable directory found"
+  if [ -r pcc/seg0 ]; then
+     echo "  pcc/seg0 was found"
+     echo "    Assuming database does NOT NEED TO BE CREATED."
+  else
+     echo "Removing pcc directory that does not have /seg0"
+     rm -r pcc
+     echo "    CREATING database shell"
+     ./db_create
+  fi
+else
+  echo "CREATING database shell"
+  ./db_create
+fi
+echo "Maybe sucksess with start and database being present or newly created"  
+echo "derby NetworkServer is now running"
+echo
+echo "To stop the server execute: stopNetworkServer" 
+echo
+echo "If a new database was created the tables need to be built and values inserted."
+echo "  To create the database tables and insert values execute: ./db_updatej"
+echo "     Otherwise continue happily along the way knowing you performed well."
+echo
+echo "Press enter to return with command prompt and NetworkServer will be running in the background."
+echo
+
+exit
+

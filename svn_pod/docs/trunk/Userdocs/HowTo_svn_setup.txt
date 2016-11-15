@@ -1,0 +1,176 @@
+./HowTo setup svn access on FIT server
+11/20/2011  DEH
+
+Current IP address 72.91.36.125
+
+======= WINDOWS =====================================================
+
+1.  Download and install svn-tortoise
+
+http://tortoisesvn.net/downloads.html
+
+2.  PuTTY should already be installed and working with the server
+
+(See '../svn_pod/docs/trunk/HowTo_PuTTY.txt')  
+The name of the saved settings in PuTTY will be needed.
+
+3.  Execute Tortoise settings
+
+Click "Network" in window on left.
+Check that "SSH client:" in the windows shows a path.  If the install 
+uses defaults, then it should be:
+"C:\Program Files\TortoiseSVN\bin\TortoisePlink.exe"
+
+Close window
+
+4.  Create an empty directory where the svn will be stored.
+
+On my Vista laptop: Computer, E:, then created "testsvn" directory.
+
+5. Setup Tortoisesvn
+
+Put cursor on the directory icon created in step 4. and *right* click.
+A menu pops up.  Select TortoiseSVN, then move over into sub-menu.
+Select "Repo-browser" and double click.  A box with "URL" pops up.  Enter--
+svn+ssh://georgesm@FITSSH/svn_pod
+A bigger window should pop up saying, things such as "Wait".  It takes a little
+while.  If there is success, there will be a file list.  Clicking on one of them
+brings up the file.
+
+6.  Checkout a copy of the respository
+
+Put the cursor on the directory and right click.  This time select
+the checkout.  This time it will copy the latest version of the repository 
+into the directory.
+
+7. Updating the copy
+
+After the initial "checkout" the update only updates the files that
+have changed.
+
+8.  Saving changes--"commit"
+
+Right click on the directory and select "commit".
+
+
+
+
+
+Helpful www--
+http://www.vectorns.com/blog/11-tortoisesvn-over-ssh-on-windows-via-putty
+http://tortoisesvn.net/ssh_howto.html
+
+
+======= LINUX =====================================================
+
+Step 0 Install subversion (Ubuntu)
+
+sudo apt-get install subversion
+
+Step 1 Setup subversion for port number and user--
+
+cd ~/.subversion
+gedit config
+
+When gedit comes up--
+Use Search/Find and enter 'tunnel' to locate
+the lines--
+### Section for configuring tunnel agents.
+[tunnels]
+
+Add a line so that it reads --
+### Section for configuring tunnel agents.
+[tunnels]
+sshtunnel = ssh -p 41574 -l <user> -i /home/xxx/.ssh/id_NAME_rsa.pub
+Where-- 
+<user> would be the *FIT server* user name, e.g. georgesm, spencerkw, wellsca
+xxx is the user name on your PC, e.g. gsm, deh,...
+id_NAME_rsa.pub is the name of the public key of the generate key pair.
+
+Note: I don't know why the '-i' option was need when I did the Toshiba laptop (Ubuntu).
+It wasn't needed on the SUSE 11.2 desktop.  Maybe the /etc/ssh/sshd_coinfig
+files settings between the systems are slightly different (i.e. there are a
+gazillion options, some of which are not shown in the comments in the file).
+
+Save (ctl S) and exit gedit.
+
+
+Start 'sshd'
+cd /etc/rc.d   [SUSE]
+cd /etc/init.d [Ubuntu]
+sudo ./sshd start
+
+Step 3 Try ssh'ing to the unit--
+
+At command prompt--
+ssh 72.91.36.125 -p 41574
+
+The first time it will give--
+deh@P4-1:~> ssh 72.91.36.125 -p 41574
+The authenticity of host '[72.91.36.125]:41573 ([72.91.36.125]:41573)' can't be established.
+RSA key fingerprint is e9:f8:aa:92:03:28:49:9d:15:0c:bd:82:6b:c8:88:96.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[72.91.36.125]:41573' (RSA) to the list of known hosts.
+Last login: Sun Oct 31 12:37:22 2010 from 192.168.1.6
+Have a lot of fun...
+deh@Acer-150A:~> 
+[At this point you have a command line into the Acer netbook.]
+
+End ssh session with the 'exit' command.
+
+Step 4 To checkout a svn copy
+
+Make a directory for the svn--
+
+cd ~ [Go to home directory]
+mkdir svn_pod [directory for repository copy]
+svn co svn+sshtunnelFIT://72.91.36.125/svn_pod
+
+If it works expect something like the following (this may take a few minutes
+before you see anything happending, then there can be long pauses between
+what is displayed.  It doesn't end until the "revision" number comes up.)--
+deh@P4-1:~/test> svn co svn+sshtunnel://192.168.1.7/DNS-321/deh/svn_stm32
+Killed by signal 15.
+A    svn_stm32/Usartall
+A    svn_stm32/Usartall/trunk
+A    svn_stm32/Usartall/trunk/Utest2.c.usart1.rxinttxint
+A    svn_stm32/Usartall/trunk/Utest2.c.usart1.rxmintxdma
+A    svn_stm32/Usartall/trunk/Utest2.c.usart2.rxinttxint
+...
+Checked out revision 6.
+Killed by signal 15.
+deh@P4-1:~/test> 
+
+Note the revision number is given at the end.
+
+
+Step 7 Changing IP addresses
+
+When the server IP address changes 
+cd ~/test
+svn switch --relocate 72.91.36.125 192.168.1.71 
+svn switch --relocate svn+sshtunnelfit://72.91.36.125/svn_pod svn+tunnelfit://10.1.1.100/svn_pod
+To check if the change "took"--
+svn info--
+
+deh@P4-1:~/test100/svn_pod> svn info
+Path: .
+URL: svn+sshtunnelfit://10.1.1.100/svn_pod
+Repository Root: svn+sshtunnelfit://10.1.1.100/svn_pod
+Repository UUID: 900eff0e-d345-40af-95fc-a62b781a0c03
+Revision: 404
+Node Kind: directory
+Schedule: normal
+Last Changed Author: deh
+Last Changed Rev: 404
+Last Changed Date: 2011-11-09 11:27:05 -0500 (Wed, 09 Nov 2011)
+
+This switches from the www IP address to my 
+local network address, i.e.
+svn switch --relocate <old ip> <new ip>
+
+
+
+
+
+

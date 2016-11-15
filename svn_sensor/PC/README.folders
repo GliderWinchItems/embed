@@ -1,0 +1,64 @@
+README.folders
+
+06/20/2014
+
+A few words on the folders at this level--
+
+hub-server 
+  tags/ has the versions for use.  
+
+nush
+  "no user shell" for use with setting a secure ssh connect to hub-server
+only.
+
+scipts
+  Useful scripts
+
+sdcopy
+  Copy SD card written with the logger to HD file.  The unused/zero'd blocks
+are not copied.
+
+sdlog_sdck
+  Check the SD card written by the logger for errors.
+
+SD-read
+  Read the SD card or file and dump blocks by entering block number and count.
+It tests the date/time search.
+
+SD_read_packet
+
+SD-timechk
+  Read the SD card or file and display "change times," i.e. the packet, unwound
+to show CAN id, payload, and date/time is displayed when the next packet does not
+have the same date/time, or is one tick greater than before.  Good for checking
+the logger logging.
+
+sdtogate
+  SD-read hacked to convert the SD card or file to gateway format, suitable for 
+simulating the gateway, or running 'cangate' on the data.
+
+sensor
+  Obsolete.  Early version for monitoring the CAN bus on the F103 which later was
+converted to the F4 Discovery and became 'cangate' in 'svn_discoveryf4'.
+  
+
+deh@dehmain:~/svn_sensor/PC$ date
+Fri Jun 20 21:28:58 EDT 2014
+deh@dehmain:~/svn_sensor/PC$ ls -l
+total 56
+drwxrwxr-x 3 deh deh 4096 Sep 17  2013 co_monitor
+drwxrwxr-x 8 deh deh 4096 May 27 13:12 hub-server
+-rw-rw-r-- 1 deh deh  655 Mar 20 15:09 hub-server-sock-data.c
+drwxrwxr-x 6 deh deh 4096 Sep 17  2013 Laprs232
+drwxrwxr-x 3 deh deh 4096 Mar  4 21:38 nush
+drwxrwxr-x 5 deh deh 4096 Apr 13 21:57 scripts
+drwxrwxr-x 3 deh deh 4096 Sep 17  2013 sdcardscan
+drwxrwxr-x 6 deh deh 4096 Jun 18 21:33 sdcopy
+drwxrwxr-x 3 deh deh 4096 Jun 18 21:33 sdlog_sdck
+drwxrwxr-x 6 deh deh 4096 May 20 22:57 SD-read
+drwxrwxr-x 3 deh deh 4096 May 18 17:04 SD_read_packet
+drwxrwxr-x 6 deh deh 4096 Jun 16 15:19 SD-timechk
+drwxrwxr-x 6 deh deh 4096 Jun 20 21:15 sdtogate
+drwxrwxr-x 4 deh deh 4096 Sep 17  2013 sensor
+deh@dehmain:~/svn_sensor/PC$ 
+

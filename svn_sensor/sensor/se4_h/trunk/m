@@ -1,0 +1,19 @@
+#!/bin/bash
+# 01/08/2015
+# checkstruct <.txt file path/name>
+# Runs programs that--
+# 1) strips the 'struct' definitions in a .txt file to a .h file named 'tmpstruct.h'
+# 2) runs the 'parse.c' and makes a file with the names and expected sizes of the structs.
+# 3) compiles a program using the above files and compares the sizes of the structs
+#    that the compiler generates with the expected sizes and lists differences.
+# 'tmpstruct.h' is copied to the local directory for use in the program compiling, but
+#    removed at the end of the script so one doesn't compile using an obsolete struct.
+#
+~/svn_discoveryf4/PC/sensor/cangate/trunk/checkstruct  ~/svn_discoveryf4/PC/sensor/cangate/test/testmsg2B.txt
+
+exit
+
+
+
+
+

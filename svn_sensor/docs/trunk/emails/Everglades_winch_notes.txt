@@ -1,0 +1,35 @@
+Don,
+
+>From my notes of 20130224.1000 made on the Labelle winch.
+
+The tow harness -- Measurements were made before adding the load cell & pod.  We measured three parts with the canopy collapsed:
+
+    A - 373" - Line from glider to weak link.
+    B -  30" - Length of parachute canopy.
+    C - 107" - Length of parachute suspension lines.
+
+    I don't remembering measuring the weak link (between A & B, but I remember it to be about 3" long.
+
+Tow line drum & two line
+
+    33.75" - OD of tow line drum.
+     2.25" - OD of tow line drum to OD of tow line (all line spooled up).
+     4.8mm - OD of tow line.
+
+Pressure gauge
+
+    0.383" - OD of pressure gauge hydraulic tubing.
+
+Front pulley
+
+    13" - OD of front pulley
+    5/8" - OD to ID of front pulley (depth of groove)
+    2.25" - ID of holes in front pulley.
+    0.50" - Web between holes.
+    8 - Number of holes.
+
+Char1ie
+
+Addendum--
+
+6" depth, rim-to-OD of line.

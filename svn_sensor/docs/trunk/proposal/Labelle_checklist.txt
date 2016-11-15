@@ -1,0 +1,70 @@
+Labelle_checklist.txt
+02/18/2013
+03/13/2013 update
+
+Labelle Airport
+301 E Cowboy Way
+Labelle, FL, 33935
+Entry key code: *1228
+
+Back entry--
+Industrial Loop 
+
+Club president
+Dylan Caldwell 
+cell(?) phone: 239-537-2318
+
+Charlie Wells
+home: 727-797-4821
+cell: 727-542-3180
+
+
+- Cell phone
+- Cash
+- GPS w address
+
+- Lunch
+- Sun Hat
+- Sun Shirt
+
+- Chairs
+
+- Camcorder
+- Camera
+- 2nd WWVB watch
+
+- Vinyl tape (load-cell connector)
+
+- Rope (tie POD to chute?)
+
+- Laptop
+- 12v->110v converter
+- RS-232
+- BOX
+- LiPo chgr
+
+- Calipers - measure fitting for pressure gauge
+- Tape measure
+- Rolling measure
+- Duct tape
+
+
+02/24
+- Check for manifold pressure fitting
+- location for drive shaft sensor
+- Sheave encoding mounting
+
+
+03/17
+- Drum OD diameter, rim thickness (inertia computation)
+- Torque sensing arm length
+- Torque sensing cylinder diameter
+- Drum effective dia 
+	after launch
+	after retrieve
+- Winch GPS
+- log time of flights
+- Measure distance between runway lights
+Gauge calibration?
+- Could we hold drive shaft; pull on line with load-cell & netbook to measure tension versus gauge reading?
+

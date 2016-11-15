@@ -1,0 +1,55 @@
+README.loader
+09/08/2016
+
+Notes on loading sensor board
+
+1. loader 
+
+Theoretically this is only done once.
+
+This goes in "low core"--0x08000000 - 0x08004FFF.
+
+The "app" loads at 0x08005000.
+
+The loader flashs the LED when it starts and waits looking for CAN msgs that would re-load
+the app program, and when it times out it resets and coming out of reset it sees it was a 
+software forced reset and branches to the app program.
+
+Recompile the loader routine--
+
+Edit to designate "permanent serial number"--
+../svn_sensor/sensor/ldrfixed/trunk/ldr.c
+
+Edit the following IAMUNITNUMBER to CANID_UNIT_1B. 
+
+/* &&&&&&&&&&&&& Each node on the CAN bus gets a unit number &&&&&&&&&&&&&&&&&&&&&&&&&& */
+#include "../../../../svn_common/trunk/db/gen_db.h"
+#define	  IAMUNITNUMBER		CANID_UNIT_1C	/* Fixed loader (serial number concept) */
+#define   BOARDTYPE		3		/* Board type (e.g. shaft encoder, manifold pressure, tension,... */
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
+
+Put a tag on the board with "_1B"
+
+FYI:
+
+The compiling will pickup the #define, in the file "gen_db.h" generated from the derby database by the java program "pcc_gen_defines".
+
+The java program, "Pcc_defines.java", is located in--
+~/GliderWinchItems/db/pcc_gen_defines/src/derbytest
+
+The file gen_db.h is located in--
+~/gitrepo/svn_common/trunk/db
+
+To compile & flash
+
+./mm && make flash
+
+2.  Load the upper flash with the parameters for the program
+
+This needs to be done a) the first time the program is used, or b) when the parameters change.
+
+3.  Load the program
+
+Loading and reloading the program does not affect the parameters in upper flash.
+
+

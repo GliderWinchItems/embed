@@ -1,0 +1,90 @@
+Partlist exported from /MD0/home/deh/eagle/STM32F103VxT6_pod_mm/VET6_POD.sch at  5/22/2011 11:54:02 
+
+Qty Value                   Device                  Parts                                                                                                              
+1                           PINHD-1X6               TO_RJ-1                                                                                                            
+7   +7V                     SOLPAD035               P9, P10, P11, P13, P14, P28, P30                                                                                   
+2   .1u                     C-USC0603               C114, C116                                                                                                         
+22  .1u                     C-USC0805               C1, C3, C4, C5, C6, C7, C9, C14, C100, C102, C104, C105, C107, C109, C110, C111, C112, C113, C118, C119, C120, C122
+2   1K                      R-US_R0603              R110, R112                                                                                                         
+4   1M                      R-US_M0805              R17, R30, R105, R109                                                                                               
+5   1M                      R-US_R0603              R6, R7, R11, R16, R104                                                                                             
+5   1n                      C-USC0603               C17, C18, C22, C121, C123                                                                                          
+1   2.2u@16v                C-USC0603               C10                                                                                                                
+2   2K                      R-US_R0603              R27, R103                                                                                                          
+1   3.9K                    R-US_M0805              R3                                                                                                                 
+2   4.7u@10V                CPOL-USCT3528           C13, C16                                                                                                           
+1   4.7u@10v                C-USC0805               C12                                                                                                                
+3   4.7u@10v                C-USC1206               C101, C117, C127                                                                                                   
+1   4.7u@10v                CPOL-USCT3528           C8                                                                                                                 
+1   7.15K                   R-US_M0805              R106                                                                                                               
+1   10 MHZ                  CRYTALHC49UP            X1                                                                                                                 
+2   10K                     R-EU_R0603              THRM, THRM100                                                                                                      
+6   10K                     R-US_M0805              R2, R4, R18, R20, R123, R125                                                                                       
+7   10K                     R-US_R0603              R8, R21, R23, R25, R29, R111, R120                                                                                 
+5   10K                     REXB-38V                RA1, RA2, RA3, RA100, U$3                                                                                          
+2   10p                     C-USC0603               C103, C106                                                                                                         
+2   15p                     C-USC0603               C11, C15                                                                                                           
+1   18K                     R-US_M0805              R1                                                                                                                 
+3   20K                     TRIM_US-                R117, R118, R119                                                                                                   
+7   22u@6.3v                C-USC1206               C19, C20, C21, C124, C125, C126, C128                                                                              
+1   33K                     R-US_R0603              R19                                                                                                                
+1   47K                     R-US_M0805              R107                                                                                                               
+1   47u                     CPOL-USCT3528           C2                                                                                                                 
+1   56                      R-US_M0805              R15                                                                                                                
+1   100                     R-US_M0805              R113                                                                                                               
+5   100                     R-US_R0603              R12, R31, R33, R114, R124                                                                                          
+1   120                     R-US_R0603              R100                                                                                                               
+1   200K                    R-US_R0603              R32                                                                                                                
+8   330                     R-US_R0603              R22, R24, R26, R28, R115, R116, R121, R122                                                                         
+8   470K                    R-US_R0603              R5, R9, R10, R13, R14, R101, R102, R108                                                                            
+2   470p                    C-USC0603               C108, C115                                                                                                         
+4   510                     R-US_R0603              R34, R35, R36, R37                                                                                                 
+1   32768                   CRYTAL                  X101                                                                                                               
+1   ACCEL                   PINHD-1X6               JP7                                                                                                                
+2   AD7799                  AD7799                  IC7, IC104                                                                                                         
+3   AO6604                  AO6604                  QQ1, QQ2, QQ100                                                                                                    
+1   BATT                    PINHD-1X3               JP2                                                                                                                
+1   BEEP                    SOLPAD035               P29                                                                                                                
+1   BOOT0                   PINHD-1X2               JP4                                                                                                                
+1   BOOT1                   SOLDPAD028              BOOT1                                                                                                              
+1   E-SWITCH                E-SWITCH                SW100                                                                                                              
+1   ENC_1                   PINHD-1X4               JP5                                                                                                                
+1   ENC_2                   PINHD-1X4               JP6                                                                                                                
+1   FOX924B                 FOX924B                 X100                                                                                                               
+3   GND                     SOLPAD035               P2, P3, P4                                                                                                         
+1   GPS                     PINHD-1X5               JP1                                                                                                                
+1   IN337                   IN337                   IC9                                                                                                                
+2   IRLML2060               IRLML2060               Q1, Q102                                                                                                           
+3   IRLML5103               IRLML5103               Q100, Q101, Q103                                                                                                   
+1   JTAG                    PINHD-2X10_KEYED        JTAG                                                                                                               
+2   LED1210_2               LED1210_2               LED1, LED2                                                                                                         
+1   MAX3232CDW              MAX232ECWE              IC2                                                                                                                
+1   MAX3488CSA              MAX488CSA               IC100                                                                                                              
+1   MCP1702                 MCP1702                 IC4                                                                                                                
+1   MCP2551                 MCP2551                 IC103                                                                                                              
+2   MIC5205                 MIC5205                 IC6, IC8                                                                                                           
+1   OSC_IN                  SOLPAD035               P17                                                                                                                
+5   P9                      SOLPAD035               P1, P5, P6, P7, P8                                                                                                 
+1   PC8                     SOLPAD035               P16                                                                                                                
+1   PD0                     SOLPAD035               P12                                                                                                                
+1   PE2_FET                 SOLPAD035               P15                                                                                                                
+1   PE8                     SOLDPAD028              P25                                                                                                                
+1   PE9                     SOLDPAD028              P26                                                                                                                
+1   PE10                    SOLDPAD028              P27                                                                                                                
+1   PE11                    SOLDPAD028              P21                                                                                                                
+1   PE12                    SOLDPAD028              P22                                                                                                                
+1   PE13                    SOLDPAD028              P24                                                                                                                
+1   PE14                    SOLDPAD028              P23                                                                                                                
+1   PSW_1                   SOLPAD035               P18                                                                                                                
+1   PSW_2                   SOLPAD035               P19                                                                                                                
+1   PWR                     PINHD-1X2               JP3                                                                                                                
+1   REG113                  REG113                  IC102                                                                                                              
+1   RJ-45                   8P8CJACK                U$1                                                                                                                
+1   SD_SMD_PADSSTRAIN_HOLES SD_SMD_PADSSTRAIN_HOLES U$2                                                                                                                
+1   SOLDPAD028              SOLDPAD028              P20                                                                                                                
+3   SOLPAD0.6               SOLPAD0.6               P33, P34, P35                                                                                                      
+2   SOLPAD028               SOLDPAD028              P31, P32                                                                                                           
+14  SOLPAD060               SOLPAD060               BLK1, BLK2, BLK3, RED1, RED2, RED3, SHD1, SHD2, WHT1, WHT2, WHT3, YEL1, YEL2, YEL3                                 
+1   STM32F10XVXT6           STM32F10XVXT6           IC5                                                                                                                
+1   XBEE-PROSMD             XBEE-PROSMD             IC101                                                                                                              
+2   XC6701                  XC6701                  IC1, IC3                                                                                                           

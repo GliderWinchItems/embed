@@ -1,0 +1,82 @@
+Subdirectories--
+
+deh@P4-1:~/svn_pod/sw_stm32/trunk>  date; ls -l
+Sat Oct 15 12:04:09 EDT 2011
+total 68
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:52 32KHztest
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:52 ad7799test
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:49 adctest
+drwxr-xr-x 4 deh users 4096 2011-10-15 11:48 devices
+drwxr-xr-x 3 deh users 4096 2011-09-21 20:14 gpiotest
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:49 gpstest
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:47 gpstest2
+drwxr-xr-x 7 deh users 4096 2011-08-29 19:48 lib
+-rw-r--r-- 1 deh users  261 2011-10-08 19:21 Makefile
+-rw-r--r-- 1 deh users 2257 2011-10-15 12:02 README
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:50 sdcardtest
+drwxr-xr-x 4 deh users 4096 2011-10-15 11:50 sdcardtest2
+drwxr-xr-x 3 deh users 4096 2011-10-15 11:51 sdcardtest3
+drwxr-xr-x 3 deh users 4096 2011-10-14 15:33 sdcardtest4
+drwxr-xr-x 3 deh users 4096 2011-09-13 20:38 settlingtimetest
+drwxr-xr-x 3 deh users 4096 2011-09-13 20:35 timecaltest
+drwxr-xr-x 3 deh users 4096 2011-08-07 17:17 Usartall
+
+
+Test routines--
+
+The 'test directories have test routines used in the development/debugging of 
+companion routines in libraries.  As each 'test routine was developed it tends
+to make use of previously code.  In some cases the previous 'test routine was copied 
+to the new directory and hacked.
+
+In the order that they were developed, a brief description
+of the test routine and companion subroutines--
+
+Usartall - (lib/libusartstm32, lib/libmiscstm32)
+ A series of USART routines for USARTs 1,2,3 and different
+strategies, involving dma, interrupt, buffering, etc.  Changing
+USARTS, e.g. USART1 to USART2 can be done by find/replace on
+the main program.
+
+gpiotest - (devices/PODpinconfig)
+ Setup of the gpio pins for the POD board.  The .h file
+has macros for turning switches on/off, enabling power
+supply regulators, LEDs, etc.
+
+ad7799test - (devices/spi1ad7799, ad7799_comm)
+ Initializatin, read, write of the ad7799 sigma-delta
+ADC unit.
+
+32KHztest - (devices/32KHz, pwrctl)
+ Initialization and testing of 32 KHz osc, RTC, backup registers
+and STANDBY mode entry/exit.
+
+gpstest - 
+ Uses gps, and timers to show timer ticks between 1 pps pulses
+
+gpstest2 -
+ gpstest with outputs that can be used to calibrate 32 KHz osc freq
+
+adctest - (adcpod, rtctimers)
+ In progress
+
+sdcardtest - spi2 and sd card  Olimex
+sdcardtest2- spi2 and sd card. Olimex CAW's directory
+sdcardtest3- spi2 and sd card. POD (essentially sdcardtest)
+sdcardtest4- spi2 and sd card. POD (essentially sdcardtest2)
+
+settlingtimetest - not finished
+
+timecaltest - not finished (use gpstest2)
+
+Usartall - very early work on stm32 programming for USART (use ../lib/libusartstm32)
+
+lib
+  Libraries (see README in lib/)
+
+devices
+  Library with pod board-specific routines
+
+Makefile
+ Makefile for this level
+

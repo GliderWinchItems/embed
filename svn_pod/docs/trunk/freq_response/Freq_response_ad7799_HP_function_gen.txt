@@ -1,0 +1,91 @@
+AD7799 freq response measurement: Notes
+
+12/01/2011
+
+Setup--
+
+In place of Load cell a D connector with the following resistor
+network.
+
+A bridge with 390 resistors across the four pins:
++5/gnd/signal+/signal-
+
+The HP 3310A Function Generator was connected to ground and
+via a 330K resistor to the signal+ pin.
+
+A trimming resistor of 22K was shunted across the 390 ohm resistor
+that goes from +5 to signal-.  With this trimming resistor in place
+the DC(-) offset pot on the HP would allow adjustment to the zero as
+observed with the 'm' command on 'pod-v1'.
+
+General strategy--Let the POD log for a short period of time on each 
+setting of the HP, and record the time that the HP settings were 
+changed.  The readback of the logged data will have time stamps that
+will tie back to HP settings recorded below.
+
+BOARD: #1
+
+Square wave measurement--
+
+
+File capture (EST): 201112011208_sq.txt
+HP function: SQ
+Range: 0.01
+Freq: 20
+Amplitude: low
+Start time (gps): 17:05:46
+Change amplitude at approx: 17:07:00
+Amplitude change stable at approx: 17:07:24, 
+  and about -378 to +388 (these are calibrated
+  values that 'm' command shows and not the raw
+  values in the packets logged).
+
+Sine wave measurement
+
+File capture (EST): 2011120112...._sn.txt
+HP function: SINE
+Range: .01
+Freq: 20
+
+Range Time  Freq
+.001  23:20  20
+.001  24:10  40
+.01   25:10   5
+.01   26:45  10
+.01   27:50  20
+.01   28.45  40
+.01   29:45  50
+.1    30:30   5
+.1    31:15  15
+.1    32:00  20
+.1    32:45  40
+.1    33:20  50
+1     33:50   5
+1     34:20  10
+1     34:40  20
+1     35:00  40
+1     35:20  50
+10    35:40   5
+10    36:20  10
+10    36:40  20
+10    37:00  40
+10    37:20  50
+100   37:40   5
+100   38:00  10
+100   38:20  20
+100   38:40  40
+100   39:00  50
+1K    39:20   5
+
+
+
+Notes:
+Changes of freq are not instantaneous.
+The jiggling of the HP may vary the zero offset slightly.
+
+
+
+
+
+
+

@@ -1,0 +1,3 @@
+#!/bin/bash
+# Logger #1
+cd ..; ./mmdb;cd db;./mmtest_E

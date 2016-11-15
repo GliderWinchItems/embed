@@ -1,0 +1,8 @@
+echo =================================================================================================================
+rm -f *.o sdcardtest4.map
+cd ..
+make
+cd sdcardtest4/
+fgrep sdlog_ *.map | fgrep -v sdlog_test.o
+cd ..
+make | fgrep -i error

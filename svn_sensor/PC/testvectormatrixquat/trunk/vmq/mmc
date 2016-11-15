@@ -1,0 +1,14 @@
+#!/bin/bash
+echo ==================================================================================================================================================================
+echo 
+DIR=/home/deh/svn_sensor/common_all/trunk
+$DIR/mmchk ../../../../sw_f103/trunk/lib/libvectormatrixquat 	1 
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+$DIR/mmchk ../../../../PC/testvectormatrixquat/trunk/vmq 	1
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+ 
+exit 0
+
+

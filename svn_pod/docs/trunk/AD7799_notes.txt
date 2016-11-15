@@ -1,0 +1,21 @@
+06-23-2011
+
+AD7799 Notes
+
+Current drain:
+
+SYSCLK: 48 MHz external osc
+AHB  divide by 2
+APB1 divide by 2
+APB2 divide by 8
+
+RS232 on, one LED on: 52 ma
+RS232 off & LED off: 41 ma
+RS232 on & LED off: 47 ma
+
+Rough Calibration
+
+1# = 7500 ADC reading (very crude)
+
+1# = 1620 ADC reading delta
+

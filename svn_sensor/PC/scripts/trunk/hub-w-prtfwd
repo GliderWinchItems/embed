@@ -1,0 +1,72 @@
+#!/bin/bash
+# hub-w-prtfwd
+# Start port forwarding with connection to netbook
+# 03-04-2014; 04-14-2014
+
+# Usage: hub-w-netbook [[listening_ip listening_port remote_user_ip remote_port ] conect_ip connect_port] 
+# Where:
+#  connect_ip connect_port default = $FITIP 
+
+# Default connect ip and port: connect port for hub-server (local forwarded port)
+CPRT=32123
+
+# Default remote machine user, port
+RPRT=32124
+
+# arg 1 = localhost port on this machine (32123 default)
+if [ $# -gt 2 ] ; then
+	echo "Two arguments max allowed, e.g."
+	echo "hub-w-netbook 32140 32124 32123"
+	echo "Where in this example:"
+	echo "32140 = hub-server connect port"
+	echo 
+	exit	
+fi
+
+# Substitute command line port number
+if [ $# -eq 1 ] ; then
+	CPRT=$1
+fi
+
+echo "LOCALPORT TO BE USED IS $CPRT" # Let the hapless OP know what is going on
+
+# By-pass setting up the port forwarding if the port is already present
+nc -z localhost $CPRT; XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "Starting port forwarding to netbook--command being executed is:"
+	echo "    ssh -T -L$CPRT:127.0.0.1:32123 -p 41576 hub-server@$FITIP"
+	ssh -T -L$CPRT:127.0.0.1:32123 -p 41576 hub-server@$FITIP &
+
+# One second delay loop if localhost port is present
+XA=1
+CTR=0
+while [ $XA -ne 0 ]
+do 
+	nc -z localhost $CPRT
+	XA=`echo $?`
+	if [ $XA -ne 0 ] ; then
+		echo "$CTR Waiting for connect on port $CPRT"
+		CTR=`expr $CTR + 1`
+		sleep 1
+	fi
+done
+
+else
+	echo "PORT $CPRT is already present so a ssh port forward was not started"
+fi
+
+echo "SUCCESS.  PORT $CPRT IS PRESENT"
+echo
+echo "The following command will start a netcat terminal"
+echo "nc localhost $RPRT"
+echo
+
+# Start hub-server
+echo "hub-server 0.0.0.0 $RPRT 127.0.0.1 $CPRT"
+
+hub-server 0.0.0.0 $RPRT 127.0.0.1 $CPRT &
+
+exit
+
+
+

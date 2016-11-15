@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "Setting stlink permissions"
+../../../common_all/trunk/stlinkpermissions
+

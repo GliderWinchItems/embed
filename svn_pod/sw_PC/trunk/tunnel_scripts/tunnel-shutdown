@@ -1,0 +1,8 @@
+export pid=$(tunnel-running -z)
+
+if [ $pid = 0 ]; then
+    echo "# The tunnel is not up"
+    exit 0
+fi
+kill $pid
+exit 0

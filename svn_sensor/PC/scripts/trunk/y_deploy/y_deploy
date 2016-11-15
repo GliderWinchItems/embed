@@ -1,0 +1,13 @@
+#!/bin/bash
+# y_deploy - copy script to /usr/local/bin
+# 03/04/2014
+
+cd ..
+cp hub-w-netbook /usr/local/bin
+cp socat_client /usr/local/bin
+cp socat_client_client /usr/local/bin
+cp socat_server /usr/local/bin
+echo "scripts have been copied to /usr/local/bin"
+echo
+exit
+

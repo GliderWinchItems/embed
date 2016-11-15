@@ -1,0 +1,22 @@
+# testmsg1.txt
+# CAN test msgs for 'cangate'
+# 12-15-2013
+#
+# Time between msgs (ms) (decimal) Time between repeat of sequence (microsec) (decimal)
+T 16000  0
+#
+# All input is ascii/hex
+#
+# 11b id  data ct data bytes
+C D040000C 00000008 fedcba9876543210
+#
+# 11b id  data ct data bytes
+##C 8a400000 00000004 aabbccdd
+#
+# 11b id  data ct data bytes 
+##C 8a600000 00000000 00000000
+#
+# 29b id  data ct data bytes
+##C 8a88888c 00000008 eeccaa8866442200
+#
+

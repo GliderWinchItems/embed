@@ -1,0 +1,27 @@
+echo 
+echo 
+export FLOAT_TYPE=hard
+echo $FLOAT_TYPE
+echo
+#echo 0000000000000000000  f3 common_all  00000000000000000000000000000000000000000000000000
+#cd ../../../common_all_f3
+#make clean
+#make
+echo 1111111111111111111  common routines  1111111111111111111111111111111111111111111111
+cd ../../../../svn_common/trunk
+#make clean
+make
+echo 2222222222222222222  libmiscsf3  2222222222222222222222222222222222222222222222
+cd ../../git_discoveryf3/lib/libmiscf3
+make clean
+make
+echo 3333333333333333333  libusartstm32f3  333333333333333333333333333333333333333333333
+cd ../libusartstm32f3
+make clean
+export STM32TYPE=STM32F373
+make
+echo 666666666666666666  test_sdadc  666666666666666666666666666666666666666666666666666666666
+cd ../../sensor/test_sdadc/trunk
+make clean
+make
+

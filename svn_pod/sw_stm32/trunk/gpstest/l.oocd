@@ -1,0 +1,3 @@
+reset halt
+flash write_image erase gpstest.srec
+reset run

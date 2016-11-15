@@ -1,0 +1,5 @@
+./m
+cp -p z_test/sc* z_test/nc* z_test/sort_tmp z_test/tn z_test/uart .
+
+echo "# Connect to: \"localhost 32123\""
+./hub-server

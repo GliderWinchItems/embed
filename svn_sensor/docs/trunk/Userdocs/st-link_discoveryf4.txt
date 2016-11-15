@@ -1,0 +1,115 @@
+stlink_discoveryf4.txt
+09/17/2014
+
+Setup--
+
+1.  Remove two jumpers on Discovery F4 board at 'cn3', i.e. move 
+    to ST-LINK position.
+
+2.  Wire cable from 6 pin header 'cn2' to 20 pin JTAG type connector.
+
+Pin D. F4 signal JTAG pin Brd sig  
+1   10K to gnd      5      JTDI   PA15
+2   T JCLK          9      JCK    PA14
+3   gnd             4      gnd
+4   T JTMS          7      JTMS   PA13
+5   T NRST         15      NRST   10K to +
+6   T SWO          13      JTDO   PB3
+
+(I don't think PA15 needs to be connected)
+
+3.  Software details - 'Makefile'
+
+The following for switching between Rlink and ST-LINK
+
+OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/rlink.cfg
+#OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/stlink-v2.cfg
+
+OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
+#OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103_stlink.cfg
+
+4.  Software details - 'openocd'
+
+The 'board' specification needs to be modified to tell openocd that ST-LINK 
+is being used.
+
+In  /usr/local/share/openocd/scripts/board/olimex_stm32_h103.cfg
+
+Change 
+  source [find target/stm32f1x.cfg]
+To
+  source [find target/stm32f1x_stlink.cfg]
+
+And save as-- 
+ board/olimex_stm32_h103_stlink.cfg
+
+5.  Operation
+
+Resetting the ST-LINK appears to only be possible by unplugging the USB 
+cable to the ST-LINK of the Discovery F4.
+
+Each time the ST-LINK is reset the permissions have to be reset.
+
+The following script will do it--'stlinkpermissions'.  I placed it in 
+/usr/local/bin--
+
+#!/bin/sh
+# Test scripts
+
+# Find the line 'lsusb' output that has the ST-LINK
+BUS="$(lsusb | awk /ST-LINK/ | sed -e 's/D.*$//' -e 's/Bus //' -e 's/ //')"
+DEV="$(lsusb | awk /ST-LINK/ | sed -e 's/:.*$//' -e 's/Bus //' -e 's/[0-9][0-9][0-9]//' -e 's/Device //' -e 's/ //')"
+
+# Give the hapless Op something gloat over
+echo "/dev/bus/usb/$BUS/$DEV"
+
+# Change the permissions
+sudo chown $USER /dev/bus/usb/$BUS/$DEV
+#ls -l /dev/bus/usb/$BUS
+exit
+
+
+The following line sets up the ST-LINK with F103.  I made this a script in ~/bin
+calling it 'jtagf4x' (since 'jtag' does the F103/Rlink, and 'jtagf4' does the 
+Discovery F4)--
+
+openocd -s /usr/local/share/openocd/scripts -f interface/stlink-v2.cfg -f board/olimex_stm32_h103_stlink.cfg
+
+Open up another terminal window--
+
+telnet localhost 4444
+
+6.  Glitches
+
+After successfully starting ST-LINK, then exiting, the next execution 
+gives (amongst the other output)
+   Error: reset device failed
+Another attempt at execution gives
+   Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+
+Cycle the power by pulling the USB cable, execute the new USB permissions,
+and it works.
+
+Switching from ST-LINK to Rlink may require cycling the power on the F103 board.
+
+
+7.  www
+
+http://www2.keil.com/coresight/coresight-connectors/
+
+8.  Toolchain
+
+Most F103 Makefile have the CodeSourcery hard coded, so the .arm_tools is not used, however
+to set .arm_tools, execute
+~/.arm_tools_codesourcery
+
+For the SWD, set the environmental variable, e.g.--
+stlinkpermissions && export JTAG_TYPE=stlink && ./mm && make flash
+
+
+
+
+
+
+
+

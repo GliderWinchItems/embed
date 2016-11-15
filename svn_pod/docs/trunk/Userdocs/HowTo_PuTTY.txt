@@ -1,0 +1,198 @@
+﻿How To Setup Putty to SSH
+11/19/2011 DEH
+
+======= WINDOWS =====================================================
+
+PuTTY will be used for--
+
+- For moving the logged data in the POD onto a file of a local computer.  An alternative is to use
+Hyperterm, or Teraterm, but PuTTY will server several other uses.
+
+- SSH (Secure SHell connection) to FIT server.  SSH is uses encryption keys and is a secure
+way to connect to another computer.
+
+- Access SVN using Windows
+
+
+A.  General scheme for handling/distributing field data--
+
+1.  Get data from POD to a PC file
+
+After the day at the field, the POD is connected to the PC and the data captured
+to a file on the PC.  PuTTY is used in the serial mode to send commands and receive
+data from the POD.
+
+2.  Send PC file to FIT server
+
+The PC file is then sent to the FIT server.  'psftp' is used to transfer
+the file using the 'put' command.
+
+3.  Others access the file on the FIT server.  
+
+'psftp' is used to upload the file to "users" using the 'get' command.
+After upload the raw data is then reformatted, expanded using a rudimentary program.
+This is done after upload since the amount of data expands and one goal
+is to keep the amount of file transfer time down.
+
+
+B. Putty 
+
+1. Install Putty suite: putty-0.61-installer.exe
+
+Web site:
+http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+
+File:
+http://the.earth.li/~sgtatham/putty/latest/x86/putty-0.61-installer.exe
+
+Setup to SSH into server requires generating a pair of keys.  The
+private key stays on your computer.  The public key is emailed and
+placed on the FIT server.  The server then will accept SSH connections
+from your computer, i.e. a computer with the private key.
+
+2. Generate key-pair needed for login to server
+
+a. execute 'PuTTYgen'--
+   C:, Program Files, PuTTY, puttygen
+
+Use defaults: (SSH-2 RSA), 1024 bits
+
+b. Click 'Generate' button
+
+Move mouse around to generate randomness.  Keep moving until the 
+green progress bar finishes.
+
+Skip entering a key passphrase unless you are worried other will use
+your computer and use the key.  The idea of the passphrase is that someone
+that uses your computer will not be able to unlock the private unless they
+have the passphrase.  Generally, a nuisance.
+
+c. Save PRIVATE key 
+
+Saving the PUBLIC key DOES NOT work.  It needs to be copy and pasted into an email, or into
+Notebook and saved as a file.  The "save" puts "newline" in the middle of the key.  It needs
+to be one long string.
+
+- Click private key and enter a name you wish to call it e.g. "FIT"
+
+d. Copy *entire* public key in the window (just below "Key" "Public key for pasting into OpenSSH
+authorized_keys file:" and paste into an email to 
+dhaselwood@verizon.net
+The public key looks like this:
+ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAIBmIm9JFBU+pae4WljPOmn9FiFbtdeNF3CO0d6mlFTRJKVnQU0vjPsotH8jlONUqptE88YuBIW1jjiJOldtInxaEg3M+NND8VrPedzBszByTr5sewVxGfjEzlmVHKbRPivqvPPZ7xslOr/4izvoh+J2Hv+Jfn4D18KKaABT3w== rsa-key-20111120
+
+I receive the email with the public key and paste into the FIT in your user area.  When PuTTY, psftp, or svn 
+tries to connect to the FIT server it uses this key instead of a password.
+
+3. Connect to FIT PC using PuTTY, i.e. generally termed "ssh into the FIT."
+
+a.  Execute PuTTY.
+
+b.  One-time setup--
+
+Host Name (or IP address): <user>@72.91.36.125
+e.g.: georgesm@72.91.36.125
+
+Port: change 22 to 41574
+
+Connection type: SSH 
+
+In left vertical window, click on Connection, SSH (expand), Auth (not expanded).  This will bring
+up "Options controlling SSH authentication" window.  In the window, click "Browse"
+and find the private key saved when it was generated, e.g. 'FIT.ppk'.  Don't click on the 
+"Open" button.  With that in the window, click on Session (top most item on the vertical window).
+Enter some identifier in the "Saved Sessions" windows, e.g. "FITSSH", then
+click on Save.  This will save these settings which can be used the next time;
+merely double clicking FITSSH will make the connection and autmoatic login.
+
+Clicking on "Open" should bring up a DOS-like window with "login".  The first time this is done the
+authentication protocol will warn that this is a unknown host.  Answer "yes",
+
+The key authentication should take place automatically and you then get a prompt from the server, e.g "  At this 
+point the Windows machine acts like a terminal connected a linux system, i.e. it is a secure, remote 
+terminal into the FIT PC server (which is running Ubuntu Linux).
+
+Try--
+cd / [changes directory to root]
+ls -l   [lists files]
+cd winch/download [changes directory to /winch/download
+ls -l  [lists downloaded files not transfered]
+cd ../fielddata [this goes up one level, then down into 'fieldata']
+
+To exit the SSH session--
+exit
+
+
+C. Setup of PuTTY to connect to POD via USB/Serial port
+
+1.  Plug usb<->serial cable in to PC and BOX.
+
+2.  Find COM number that Windows assigns to the usb/serial port.
+
+Control Panel, Device Manager, Ports--should show something
+like--"Prolific USB-to-Serial Comm Port (COM6)"  In this case
+COM6 is what is needed in PuTTY.
+
+3.  Start PuTTY
+
+Click "Serial" button (default is SSH).
+Enter COM port in "Serial Line" window" e.g. COM6
+Enter "Speed" 115200 (9600 is default)
+
+In vertical window on left, click "serial" (at the bottom)
+Set "Flow Control" to "None" 
+
+Go to "Session, logging" and then in "Session logging:" set 
+"All session output".  Enter the file path/name--
+POD&Y&M&D&T.log
+This will generate a file name that has "POD" with the year,
+month, day, time and .log, e.g. POD20111119221324.log.
+The file name will be different each time, so there is no need
+to deal with overwriting, or appending to an existing file.
+
+Go to "Sessions" and click on "Save" to save the configuration.
+
+In subsequent session, the configuration can be loaded by
+selecting the previously saved name, e.g. "POD" and double
+click to open it.
+
+Ater openging the window show the POD.  There may not be any
+data showing.  To activate the POD--
+<enter>	 [Clears any previous "pause" during a readback still in effect]
+x<enter> [Should show the menu]
+
+- It may take a couple of the above.
+
+- If the unit is in deepsleep, pressing the pushbutton
+on the BOX should wake it up.  If the battery is too low the
+wake up will result in an immediate reversion to deepsleep, in which
+case the battery charger needs to bring the battery up above the 
+cutoff voltage.
+
+4. Capturing the POD data to the PC.
+
+The data comes out of the POD in reverse time order, i.e. the first packet
+sent is the most recent packet written.  During the readback the
+"*" command pauses the readback and displays the date/time of the 
+most recent record.  <enter> then resumes the readback.  When a 
+time period sufficient to cover the data of interest has been read back
+the readback can be terminated by 'x<enter>' command.
+
+e<enter> [Just to be sure the readback starts with the most recent
+          data]
+r<enter> [The data will begin streaming by]
+*<enter> [Pauses the readback and shows the current date/time]
+<enter>  [Resumes readback]
+
+
+
+
+
+
+
+Helper site for key generation--
+http://linux-sxs.org/networking/openssh.putty.html
+
+
+
+

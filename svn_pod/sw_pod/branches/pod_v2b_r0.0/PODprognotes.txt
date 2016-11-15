@@ -1,0 +1,23 @@
+PODprognotes.txt
+01/09/2014
+
+
+1.  UART4 baud rate
+
+The Garmin GPS speed is not the same for POD 1 and POD 2.
+
+Before compiling/flashing, comment/uncomment the code.
+
+p1_initialization.c
+Line 125, 128 or thereabouts
+
+
+2. Timeouts
+
+#defines for gps timeout and launch detection thresholds--
+
+p1_common.h
+Line 363-396
+
+
+

@@ -1,0 +1,76 @@
+Cloning
+
+11-25-2013
+
+
+1.  Directory tree needs to be at same level as clone
+
+'Makefile' has path statements to find the various libraries.  If
+the directory level is different, then all those path statements
+need to be changed.
+
+Example: Clone uarttest to spi2test:
+
+Setup the directory tree--
+
+~/svn_discoveryf4
+  | tests  sw_discoveryf4 ...
+    spi2test  uarttest
+    | trunk   |trunk
+      files    files
+
+To do this:
+cd ~/svn_discoveryf4/tests
+mkdir spi2test/trunk
+cd spi2test/trunk 
+cp ../../uarttest/trunk/* . [copy all files]
+
+Clean up unwanted files
+rm *~ *.list *.hex *.bin *.srec 
+rm uarttest
+
+Change names
+mv uarttest.c spi2test.c [main source]
+mv uarttest.h spi2test.h [If present]
+mv uarttest.ld spi2test.ld [linker script]
+
+2. Change names in files with editor
+
+spi2test.c: In header, name, date, etc.
+mm:
+      from
+  cd ../../../tests/uarttest/trunk
+      to
+  cd ../../../tests/spitest/trunk
+
+Makefile:
+      from
+  NAME	= uarttest
+      to
+  NAME	= spi2test
+
+3. Check that it compiles
+
+./mm
+It should end with something similar to--
+~/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-eabi-size build/stm32f4_usb_cdc.elf
+   text	   data	    bss	    dec	    hex	filename
+  44712	   1732	   5064	  51508	   c934	build/stm32f4_usb_cdc.elf
+
+4. Adding a subroutine
+
+   a.  Copy a subroutine to be hacked: xxx.c and xxx.h
+   b.  Fix up the header name, date, etc.
+   c.  In the .h file change the #define that prevents recursion, e.g.
+#ifndef __SPI2RW
+#define __SPI2RW
+       Clean out all the other crap, but leave the ending
+#endif    
+    
+   d.  Add subroutine to 'Makefile' sources
+	from
+SRCS = $(NAME).c startup_stm32f4xx.s syscalls.c 
+	to
+SRCS = $(NAME).c startup_stm32f4xx.s syscalls.c spi2rw.c
+
+

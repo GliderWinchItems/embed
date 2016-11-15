@@ -1,0 +1,42 @@
+Setup notes--
+
+1. JTAG
+
+- Enable permissions:
+
+Find usb port:
+deh@P4-1:~> lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 05e3:0606 Genesys Logic, Inc. USB 2.0 Hub / D-Link DUB-H4 USB 2.0 Hub
+Bus 001 Device 003: ID 05e3:0606 Genesys Logic, Inc. USB 2.0 Hub / D-Link DUB-H4 USB 2.0 Hub
+Bus 001 Device 004: ID 067b:2303 Prolific Technology, Inc. PL2303 Serial Port
+Bus 001 Device 005: ID 05e3:070e Genesys Logic, Inc. X-PRO CR20xA USB 2.0 Internal Card Reader
+Bus 001 Device 006: ID 05e3:0606 Genesys Logic, Inc. USB 2.0 Hub / D-Link DUB-H4 USB 2.0 Hub
+Bus 001 Device 007: ID 138e:9000 Jungo LTD Raisonance S.A. STM32 ARM evaluation board
+Bus 002 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
+
+Go do directory and change permissions:
+cd /dev/bus/usb/001
+sudo chown deh:users *
+<enter password>
+
+Make a hand script--
+deh@P4-1:~/bin> cat jtag
+openocd -f interface/rlink.cfg -f board/olimex_stm32_h103.cfg
+
+Test:
+deh@P4-1:/dev/bus/usb/001> jtag
+Open On-Chip Debugger 0.4.0 (2011-06-01-15:40)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.berlios.de/doc/doxygen/bugs.html
+1000 kHz
+jtag_nsrst_delay: 100
+jtag_ntrst_delay: 100
+Info : clock speed 375 kHz
+Info : JTAG tap: stm32.cpu tap/device found: 0x3ba00477 (mfg: 0x23b, part: 0xba00, ver: 0x3)
+Info : JTAG tap: stm32.bs tap/device found: 0x06414041 (mfg: 0x020, part: 0x6414, ver: 0x0)
+Info : stm32.cpu: hardware has 6 breakpoints, 4 watchpoints
+
+
+

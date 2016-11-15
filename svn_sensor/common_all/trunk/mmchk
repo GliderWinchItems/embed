@@ -1,0 +1,34 @@
+#!/bin/bash
+# Check for failure of a bash command
+#02/07/2015
+
+
+# Navigate to directory
+cd $1
+# Check if navigation failed
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo FAILED TO CD TO DIRECTORY
+	echo $1
+	exit 1
+fi
+
+# Check if 'make clean' is requested
+if [ $2 -ne 0 ] ; then
+	make clean
+fi
+
+# Run 'make'
+make
+# Check if 'make' failed
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo MAKE FAILED
+	echo $1
+	exit 1
+fi
+
+
+
+
+

@@ -1,0 +1,266 @@
+README.howtodb
+
+09/10/2016
+
+Notes on how to do things--
+
+The following is based on manual operations that use SQL files (and not a
+custom program working directly with the database).
+
+The database tables are located in--
+gitrepo/svn_common/trunk/db
+
+These are .sql files that have commands that the derby tools program, 'ij',
+uses to work with the database.
+
+The naming of the files is done by tables to make it easier to follow.  One
+could just as well have one big file.  The naming convention used is--
+<table name>_CREATE.sql [for a file that creates the table]
+<table name>_INSERT.sql [for a file the 'inserts' data into the previously created table]
+
+BE CAREFUL with ',' and single quote pairing.  An extraneous or missing one will throw
+the rest of the table off.  Likewise ';' ends a command line.
+
+1.  Howto: Change & update a parameter
+
+Given that the "unit" and "functions", have been setup.
+
+Modify the value for the particular parameter to be changed, which will be found in--
+PARAM_VAL.sql
+
+Values for parameters are grouped by 'function' *instance*.  There can be multiple instances
+of a 'function type'.
+
+For example the following sets the number of milliseconds between heartbeat msgs to for
+the 2nd instance of the logger function to 2000 ms or 2.0 seconds--
+INSERT INTO PARAM_VAL VALUES ('LOGGER_2','LOGGER_HEARTBEAT1_CT'		,'2000', 	'LOGGER',	'Logger_2: 3 Heartbeat count of time (ms) between msgs');
+
+After saving the file, update the database--
+
+If the database server has not been started since the computer was booted, or it was 
+stopped you might need--
+./db_start
+The following should stop, then start, the server, but it is timing dependent as some it
+takes a noticeable amount of time for it start up.  Give it 10 secs or more before deciding
+that it is not working!
+
+Go to directory with the program for the unit and execute the script--
+
+cd ~/gitrepo/svn_sensor/sensor/tension/trunk/db
+./mmdbtest_15
+
+After updating the database this script will compile the parameter tables and load
+them into the high flash.
+
+This operation does not affect the program.  The following compiles and loads the program
+without changing the parameters in highflash--
+cd ~/gitrepo/svn_sensor/sensor/tension/trunk
+./mm
+
+Note: If the value to be changed is the hex value of a CAN ID, then the change to the value 
+is made in CANID_INSERT.sql.  If it is a different CANID, then PARAM_VAL in 
+PARAM_VAL_INSERT.sql would be assigned a different name (which would be in the CANID table).
+
+2.  Howto: Add a parameter to an existing function--
+
+This a bit more complicated as it affect the program as well as the database.
+
+a.  Add the parameter to
+PARAM_LIST.sql
+using the other entries as a template.
+
+Note: PRIMARY KEY(FUNCTION_TYPE,PARAM_NAME) in the CREATE file says that the combination of
+function type and parameter name must be unique, i.e. not duplicated.  The description must also
+be unique.
+
+The parameter name is arbitrary, and it applies to all instances of that function.
+
+b.  Add the parameter to all instances of the function in PARAM_VAL_INSERT.sql
+
+Use the existing entries as a template.
+
+The PARAM_NAME must match the one used in the PARAM_LIST.sql file.  This used later to 'join' the
+files when generating the 4 byte parameter values in the java program.
+
+Insert the value appropriate for each instance for the new parameter.
+
+Tip: using cut & paste makes this easy and reduces spelling errors.
+
+c.  Add the parameter to the program struct, for example--
+See the following files in
+~/gitrepo/svn_sensor/sensor/tension/trunk
+This is somewhat complex example that structs or structs--
+  1) tension_idx_v_struct.h
+The naming convention that evolved was--
+struct xxxxxxLC  [e.g. struct TENSIONLC]
+Somewhere in the program there will instances of this struct, one for each
+instance of the function type (which in this case is TENSION_a).
+
+It is appropriate for the instance(s) of the struct declared in the subroutine that handles
+this function, e.g.--
+tension_a_functionS.c
+
+It is appropriate for the use of this parameter to reside in the subroutine for this function,
+e.g. tension_a_functionS.c, as the concept of functions is that they are to be independent of 
+other functions and as much as possible and easily separable.
+
+  2) tension_idx_v_struct.c
+This program is a one-for-one storing of a four byte value that resides in high flash into a
+struct in sram.  Since the alignment of structs and other values withing a struct are not
+strictly guaranteed (e.g. for an embedded struct the compiler will do an "align" which may 
+leave a gap).  
+
+tension_idx_v_struct.c can be used as a template.
+Note the 'union'.  The union is required for the compiler to generate a floating pt number,
+given a 4 byte value.  Without this the compiler will convert what it thinks is an integer into
+float when the 4 bytes are already the float.  
+
+The source code looks messy.  The compiled code is very simple.
+
+The value within brackets, e.g. [TENSION_a_AD7799_1_SCALE] comes from the #define that is generated
+by the java program using the database, more specifically, it is the PARAM_CODE in the 
+PARAM_LIST_INSERT.sql.  The code serves as an index in the high flash flat table.  If all the
+entries are maintained in order, then the #define would not be needed and the index could simply be 
+0,1,2,... but this is a big 'if'.
+
+  3) Update the database as in the first Howto.
+
+Tip: On the command line use 'tee', e.g.
+./mmdbtest | tee z
+This will send a copy of what appears on the console to a file named 'y'.  One can the do a quick
+search for errors by either
+cat y | grep 'ERROR'
+or, open y up in an editor.
+
+  4) Compile and debug the additions
+
+The added parameter means additional code somewhere in the program.
+
+d.  If a CAN ID is involved, an entry is made in the CANID table.
+
+The CANID name is then used in the PARAM_VAL table for the value.  Note that the CAN ID values have
+the TYP_CANID in the PARAM_LIST.sql file.  This tells the java program to look up the value for this
+parameter in the CANID table.  
+
+3.  Adding a new unit
+
+The new unit may use the same functions as other units, or it may carry entirely new functions.
+
+a.  CANID_INSERT.sql
+
+  1) CAN unit ID--
+The can unit must be assigned.  This is the CAN id that is essentially a serial number for
+the unit.  Under ideal conditions the program loader for this unit and this CAN ID would
+never be changed.
+
+The naming convention that evolved is--
+CANID_UNIT_xxxxx  [where xxxxx is the name of unit]
+for example--
+'CANID_UNIT_18', '03400000', 'UNIT_18', 'U8','Gateway3: 2 CAN');
+
+The CANID_TYPE is arbitrary, but convenient to number them sequentially as units are added.  It has
+to be unique.
+
+The CAN_MSG_FMT field refers to the type of payload.  The types are defined in PAYLOAD_TYPE_INSERT.sql.
+A java program can use this to use the appropriate routine unpack the payload.
+
+  2) Command CAN ID
+A command CANID is needed for implementing the loading of program and function parameters over the 
+CAN bus.  The naming convention is--
+CANID_CMD_xxxx_y [xxxx = function type, y = instance]
+For example,
+CANID_CMD_GPS_1
+
+  3) Message CAN ID
+Many functions respond to some type of poll msg.  The response CAN ID is enteredm, e.g. 
+CANID_MSG_TENSION_a21
+is the msg that the TENSION_a function, instance 21 (2nd POD board port, on drum #1) sends
+when the polling msg, as defined in the parameter list is received.
+
+b. CAN_UNIT_INSERT.sql
+
+Example,
+('CAN_UNIT_E' ,  9,'PROG_LOGGER' , 1,'CANID_UNIT_E' ,'Logger1: sensor board w ublox gps & SD card');
+
+The unit name is arbitrary (but unique) and is best consistent with the naming of the CAN ID.
+The CAN_UNIT_CODE is merely a sequential number since for most programs comparision is faster to a
+number than a ascii string.
+
+The 'skip' field tells a (future) program to skip trying to load this program over the CAN bus.
+
+The CANID name must match the one in the CANID table.
+
+c.  FUNCTION_CODES_INSERT.sql
+
+The following iilustrates two units implementing the same program that handles two different functions--
+
+('GPS_1'		,'GPS',			'UNIT_E',	7,	'GPS_1: ublox: time sync distribution msg' );
+('LOGGER_1'		,'LOGGER',		'UNIT_E',	20,	'Logger 1: sensor board w SD card' );
+
+('GPS_2'		,'GPS',			'UNIT_1A',	22,	'GPS_2: ublox: time sync distribution msg' );
+('LOGGER_2'		,'LOGGER',		'UNIT_1A',	21,	'Logger 2: sensor board w SD card' );
+
+In this example there are two logger/gps units, each implementing one instance of GPS and LOGGER function types.
+
+Note the function code numbers must be unique.
+
+d.  FUNCTIONS_INSERT.sql
+
+Note: it is easy to  mispell FUNCTIONS to FUNCTION.
+
+('GPS_1',	'CANID_CMD_GPS_1',		'CAN_UNIT_E',	'GPS',		'GPS_1 time sync distribution msg' );
+('LOGGER_1',	'CANID_CMD_LOGGER_1',		'CAN_UNIT_E',	'LOGGER',	'Logger_1' );
+('GPS_2',	'CANID_CMD_GPS_2',		'CAN_UNIT_1A',	'GPS',		'GPS_2 time sync distribution msg ' );
+('LOGGER_2',	'CANID_CMD_LOGGER_2',		'CAN_UNIT_1A',	'LOGGER',	'Logger_2' );
+
+(One will immediately see the similarity to FUNCTION_CODES_INSERT.sql.  There is redundancy that could be taken out.)
+
+e.  FUNCTIONS_TYPE.sql
+
+This provides a code number versus function type name--
+('GPS',		12,	'GPS' );
+('LOGGER',	13,	'Logger' );
+
+f.  Update & debug
+
+Update the database--
+cd ~/gitrepo/svn_common/trunk/db
+./db_start
+or if started--
+./db_updatej | tee z
+cat z | grep 'ERROR'
+
+Fix errors.  Then,
+
+less idx_v_val
+
+There should be two tables of interest present--
+
+For example, 'cansender', the first instance should have this--
+
+// =====================================================================
+#ifdef CAN_UNIT_1B	// a #define is used to select the following
+const struct FUNC_CANID func_canid[] = {
+{   0x03E00000, CAN_UNIT_1B_CMDID_TABLE_SIZE },	/* {Unit CAN ID, Number of CAN IDs that follow} */
+{  14,  0xA0200000 }, /*   1 CAN_UNIT_1B          CANID_CMD_CANSENDER_1	 Cansender_1: Sensor board test*/
+};
+#endif
+...
+// =====================================================================
+#ifdef CANSENDER_1	// Include following parameters?
+const uint32_t paramval[] = {
+ CANSENDER_1_PARAM_SIZE,	/* Number of param entries that follow */
+ 0x00000000 , /*   1 0                    6  Cansender_1: 1 CRC                                                              */
+ 0x00000001 , /*   2 1                    5  Cansender_1: 2 Version number                                                   */
+ 0x000001F4 , /*   3 500                  6  Cansender_1: 3 Heartbeat count of time (ms) between msgs                        */
+ 0xF0200000 , /*   4 CANID_HB_CANSENDER_1  17  Cansender_1: 4 CANID: Hearbeat sends running count                              */
+ 0xE2000000 , /*   5 CANID_POLL_CANSENDER  17  Cansender  : 5 CANID: Poll this cansender                                       */
+ 0xE2200000 , /*   6 CANID_POLLR_CANSENDER_1  17  Cansender_1: 6 CANID: Response to POLL                                          */
+};
+#endif
+...
+
+The first is the table with the unit CAN ID and CMD CAN ID for high flash.
+The second is the four byte values for the parameter list.
+
+

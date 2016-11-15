@@ -1,0 +1,45 @@
+#!/bin/bash
+# Assumes the database is in an updated state
+echo ==================================================================================================================================================================
+export FLOAT_TYPE=soft
+echo $FLOAT_TYPE
+cd ../../../../svn_pod/sw_stm32/trunk/devices
+#make clean
+make
+cd ../lib/libmi*
+#make clean
+make
+cd ../libu*
+#make clean
+make
+cd ../libsu*
+#make clean
+make
+
+cd ../../../../../svn_sensor/sw_f103/trunk/lib/libdev*
+#make clean
+make
+
+cd ../lib*sensormisc
+make clean
+make
+cd ../../../../../svn_common/trunk
+#make clean
+make
+
+# And now compile the main program and junk associated with
+cd ../../svn_sensor/sensor/co1_sensor_ublox/trunk
+make clean
+# The high flash table is defined in the .ld file.  We have two
+# types of processors: VE - 512K|64K, VC - 128K|20K.  The
+# following compiles both versions from the same .c source code,
+# but with different high flash defines in the .ld files.
+#
+# VE version--
+export LDRAPPLD=ldrapp_VE.ld
+make
+make flash
+
+# TODO
+
+exit

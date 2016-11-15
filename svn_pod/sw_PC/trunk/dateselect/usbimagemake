@@ -1,0 +1,49 @@
+#!/bin/bash
+# 08/27/2012
+# usbimagemake
+#
+# usbimagemake <input DEVICE> <output FILE>
+# usbimagemake /dev/sdc ubuntu_12.04LTS_live_image/120827.1237 
+#
+# Compress USB drive image onto the HD image
+date
+echo "I shall now copy the input USB drive to a file"
+sudo dd if=$1 conv=sync,noerror | gzip -c  > $2.gz
+date
+
+# Upload file to FIT server
+echo "I shall now upload the file to the wonderful FIT PC server!"
+scp -P 41574 $USER@FITIP:/usbdriveimage/$2
+date
+echo "Wow, it is done"
+
+# Make md5sum of uncompressed file
+gunzip -c  $2.gz > $2.md5sum.uncompressed
+
+# Make md5sum of compressed file
+md5sum $2.gz > $2.md5sum.compressed
+
+echo "md5sum: compressed "
+cat $2.md5sum.compressed
+echo "md5sum: uncompressed "
+cat $2.md5sum.uncompressed
+
+# Upload 'md5sum's to FIT
+echo "I shall now upload the md5sums to the wonderful FIT PC server!"
+scp -P 41574 $USER@FITIP:/usbdriveimage/$2.md5sum.compressed
+scp -P 41574 $USER@FITIP:/usbdriveimage/$2.md5sum.uncompressed
+date
+echo "Wow, that, too, is done"
+echo 
+
+# Count blocks of uncompressed file
+echo "block count of uncompressed file"
+gunzip -c $2.gz | sudo dd of-/dev/null
+echo "make this into a file=="
+echo "<echo block count> > x"
+echo "scp -P 41574 x $USER@$FITIP:/usbdriveimage/<$2.blockcount.uncompressed"
+echo
+
+exit
+
+

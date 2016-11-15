@@ -1,0 +1,183 @@
+ hub-server_startup_instructions.txt
+02/22/2014
+
+
+1.  Overview
+
+The following is focuses on the details of running hub-server with local
+connections.
+
+Found in--
+ ../svn_sensor/PC/hub-server/tags/rev_5/
+
+To make starting the program simple the executable files for hub-server and
+scripts, e.g. hub-server-start, are best copied to 
+ /usr/local/bin
+as PATH usually has this included in the search.
+
+The building and copying is accomplished by the following commands--
+
+cd svn_sensor/PC/hub-server/tags/rev_5
+sudo ./hub-server-deploy
+
+This will compile, then copy the executable files into /usr/local/bin.
+
+For normal operation:
+  Usage: hub-server [hostname [port]]
+
+Or, for connecting hub-server to a *server* program, i.e. it provides hub-server with 
+the option of specifying client connections, as well as the main server.  For this
+use the following form--
+  Usage: hub-server <listen_ipad> <listen_port> {<connect_ipad> <connect_port>}
+With this form of command line, any number of internet addresses (ipad) and port pairs for
+a server connection can be specified.
+
+If you just invoke "hub-server" without any arguments, the defaults are defined as--
+
+  char *host_name = "0.0.0.0";  /* Host (ipad) to bind listening socket */
+  char *svcs_name = "32123";    /* Service (port) to bind listening socket */
+
+This will cause 'hub-server' to listen on port 32123, and the 0.0.0.0 means on "any"
+interface, which usually means a connection request made via the ethernet, wifi, or localhost will 
+all be accepted.
+
+To restrict the acceptance of connections specify the internet address of the interface, e.g.
+
+ hub-server localhost [only accepts connections from the same machnine, 127.0.0.1)
+
+ hub-server 192.168.1.5 [example of only accepting connections via the wifi interface)
+
+ hub-server 10.1.1.104 [example of only accepting connections via the ethernet interface)
+
+The addresses of the interfaces can be obtained with the command--
+ ifconfig
+
+Example of the output from this command:
+
+deh@dehmain:~$ ifconfig
+eth0      Link encap:Ethernet  HWaddr 30:85:a9:21:fd:62  
+          inet addr:10.1.1.104  Bcast:10.1.1.255  Mask:255.255.255.0
+          inet6 addr: fe80::3285:a9ff:fe21:fd62/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:371042 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:361369 errors:0 dropped:0 overruns:0 carrier:3
+          collisions:0 txqueuelen:1000 
+          RX bytes:91946541 (91.9 MB)  TX bytes:28000989 (28.0 MB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:259523 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:259523 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:19072699 (19.0 MB)  TX bytes:19072699 (19.0 MB)
+
+wlan0     Link encap:Ethernet  HWaddr 68:5d:43:a8:01:9c  
+          inet addr:192.168.1.5  Bcast:192.168.1.255  Mask:255.255.255.0
+          inet6 addr: fe80::6a5d:43ff:fea8:19c/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:27279 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2172 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:3578901 (3.5 MB)  TX bytes:252311 (252.3 KB)
+
+
+2. Ports
+
+The port number is arbitrary, however the machine(s) running hub-server need to have the firewall open
+for the port number.  32123 is the default.  If hub-servers are chained together then the port numbers
+on each instance of the hub-server needs to be different (unless ssh port forwarding is used).
+
+
+Note that using the "any" interface option tends to reduce security, e.g. someone might be able to
+connect via wi-fi, if the wi-fi is enabled.
+
+3. Typical setup
+
+hub-server is started with the defaults on the machine that has the usb/serial port
+connection to the CAN bus gateway.  The startup sequence is to start hub-server, then
+socat which will make the first connection to hub-server.  At this point messages on 
+the CAN bus will be coming in to hub-server.
+
+This sequence can be automated by running the a script, e.g.--
+
+ hub-server-start /dev/ttyUSB0
+
+Programs can then connecto to hub-server locally, e.g.
+ nc localhost 32123 [runs an instance of netcat to display raw messages]
+ cangate 127.0.0.1 32123 [program with a running summary of messages]deh@dehmain:~$ ifconfig
+eth0      Link encap:Ethernet  HWaddr 30:85:a9:21:fd:62  
+          inet addr:10.1.1.104  Bcast:10.1.1.255  Mask:255.255.255.0
+          inet6 addr: fe80::3285:a9ff:fe21:fd62/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:371042 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:361369 errors:0 dropped:0 overruns:0 carrier:3
+          collisions:0 txqueuelen:1000 
+          RX bytes:91946541 (91.9 MB)  TX bytes:28000989 (28.0 MB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:259523 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:259523 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:19072699 (19.0 MB)  TX bytes:19072699 (19.0 MB)
+
+wlan0     Link encap:Ethernet  HWaddr 68:5d:43:a8:01:9c  
+          inet addr:192.168.1.5  Bcast:192.168.1.255  Mask:255.255.255.0
+          inet6 addr: fe80::6a5d:43ff:fea8:19c/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:27279 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2172 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:3578901 (3.5 MB)  TX bytes:252311 (252.3 KB)
+
+ 
+Programs on the same network can also connect, however the firewall must be
+open on the machine running hub-server.  The relavant commands are--
+
+sudo ufw status [list status of the firewall]
+sudo ufw disable [disables the fireall]
+sudo ufw enable [enables the firewall]
+sudo ufw allow 32123 [allows connections to come in on port 32123]
+sudo ufw deny 32123 [denies external connections on port 32123]
+
+So, open port 32123--
+sudo allow 32123
+
+ Laptop A the run programs to connect to hub-server, e.g.--
+  nc 10.1.1.104 32123
+  cangate 10.1.1.104 32123
+ Laptop B might run a Java program
+
+ All programs will receive incoming messages from all the other programs, including
+the instance of socat that connects to the CAN bus gateway.
+
+4. Adding instances of hub-server
+
+A second instance of hub-server can be started (presumably on a different machine,
+but even that is not a restriction).  Care has to be taken that the port numbers do not
+conflict.  To start a second instance one might use the following--
+
+On laptop A--
+
+hub-server localhost 32140 [Starts and waitings for programs on the same machine to connect]
+socat tcp:localhost:32140 tcp:10.1.1.104:32123 [connects this 2nd local hub-server to the first one]
+
+At this point programs on laptop A can connect locally, e.g.--
+ nc localhost 32140
+Or, connect to the first machine, e.g.--
+ nc 10.1.1.104 32123
+
+Generally, there isn't much advantage to having more than one instance of hub-server when there
+is a local network as the local network is usually fast.  The fastest connection, of course, is
+'localhost' where the tcp connection is all internal.
+
+
+ 
+
+
+
+

@@ -1,0 +1,25 @@
+#/bin/bash
+
+export flag=""
+
+export TTY="/dev/ttyACM0"
+if [ -c "$TTY" ]; then
+	export PORT=32124
+	export BPS=b115200
+	echo "# Starting tty-server on \"$TTY\" @ $BPS bps, listening on $PORT"
+    socat TCP-LISTEN:$PORT,fork,reuseaddr FILE:$TTY,$BPS,raw &
+    export flag="ok"
+fi
+
+export TTY="/dev/ttyUSB0"
+if [ -c "$TTY" ]; then
+	export PORT=32125
+	export BPS=b115200
+	echo "# Starting tty-server on \"$TTY\" @ $BPS bps, listening on $PORT"
+    socat TCP-LISTEN:$PORT,fork,reuseaddr FILE:$TTY,$BPS,raw &
+    export flag="ok"
+fi
+
+if [ -z "$flag" ]; then
+	echo "# No tty devices found\!"
+fi

@@ -1,0 +1,38 @@
+echo "ij tool update"
+
+# Make a temporary file that is the script used by 'ij' (derby database tools)
+#   This needed to get HOME into the ij script
+#
+rm x
+echo "-- db_update: script (NOTE: this is not a bash script)" x
+echo "-- connect to database" >> x
+echo "connect 'jdbc:derby://localhost:1527/$HOME/gitrepo/svn_common/trunk/db/pcc';" >>x
+echo "-- Do a complete rebuild of the database" >>x
+echo "run 'LOAD_PCC_DB.sql';" >>x
+echo "-- "
+echo "exit;"
+
+# Execute 'ij' and run the database re-build
+ij x
+
+# Note: 'x' is not removed so one can take a look at it (for debugging?)
+
+# These two java programs use the database to generate two files that are used
+#   by the STM32 programs to get the parameter values and a (just a few key values)
+#   from the #defines.
+
+echo "java defines"
+cd ~/GliderWinchItems/db/pcc_gen_defines/dist
+java -jar pcc_gen_defines.jar | tee ~/gitrepo/svn_common/trunk/db/gen_db.h
+
+echo "java defines static final"
+cd ~/GliderWinchItems/db/pcc_gen_static_final/dist
+java -jar pcc_gen_static_final.jar | tee ~/gitrepo/svn_common/trunk/db/pcc_static_final.java
+
+echo "java table gen"
+cd ~/GliderWinchItems/db/pcc_values_table/dist
+java -jar pcc_values_table.jar | tee ~/gitrepo/svn_common/trunk/db/idx_v_val.c
+
+
+
+exit;

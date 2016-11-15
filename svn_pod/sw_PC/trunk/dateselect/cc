@@ -1,0 +1,9 @@
+# Compile this masterpiece if necessary
+gcc dateselect.c -o dateselect
+# Compile these mongrels if needed
+cd ../read*
+gcc reformat.c -o reformat -lm
+gcc reformat2.c -o reformat2 -lm
+cd ../dateselect
+# Compile the time float program 
+gcc float_time.c -o float_time

@@ -1,0 +1,27 @@
+1.  CAN
+
+Need to mention CAN is the basis.  The text doesn't mention CAN but it 
+is based on a network that is basically CAN.  Not any network would 
+work, e.g. ethernet.
+
+
+2. Abnormal conditions
+
+This seems to place the burden of a sensor knowning it is reporting
+incorrect data on the sensor which is seems unrealistic.  E.g. how does
+the cable angle sensor know that it is reporting incorrect values?  It,
+or some other monitoring program, could determine that the angle reported
+is incorrect by combining the other launch data and estimating what would
+be a reasonable angle.  E.g. it would not be reasonable during the ground 
+run for the cable angle to be 20 degs, nor 50 degs 5 secs into the launch.  
+There is some profile for the angle, given the time, distance, etc. that 
+is reasonable.  It would be possible for the cable angle sensor to receive
+all the launch data and do this, but that adds greatly to the complexity of
+the sensor.
+
+There is similar logic for the other sensors.  It seems like there should be
+some sort of "monitor" that checks that the data are reasonable.  The most
+important one is the tension sensing.  For at given torque command the tension,
+after 
+
+

@@ -1,0 +1,6 @@
+rm -rf a.out *.tmp tmp.* *~ *.o *.log
+rm -rf hub-server hub-server-test hub-server-proxy
+rm -rf sc* nc* sort_tmp tn uart
+killall socat
+killall hub-server
+killall nc

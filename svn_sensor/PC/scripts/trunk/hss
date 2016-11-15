@@ -1,0 +1,7 @@
+ps aux >hss.tmp
+head -1 hss.tmp
+fgrep hub-server	hss.tmp | fgrep -v fgrep
+fgrep socat 		hss.tmp | fgrep -v fgrep
+fgrep ' nc '		hss.tmp | fgrep -v fgrep
+fgrep nush			hss.tmp | fgrep -v fgrep
+rm -f hss.tmp

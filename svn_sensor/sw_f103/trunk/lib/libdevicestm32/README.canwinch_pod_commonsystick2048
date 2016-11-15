@@ -1,0 +1,41 @@
+canwinch_pod_common_systick2048.ch
+
+07/08/2013 - svn_sensor rev 202
+
+A report on progress.  I've been going round 'n round with the timing on the sensor.  I think I have it sorted and working, i.e. it is behaving as I expect.
+
+Review--
+
+'co':
+
+The 'co' locks a timer to the 1 PPS GPS, with the timer generating 64 interrupts per sec, and the GPS time is subdivided for time stamping the incoming messages during the 1/64th sec interval.  The jitter on the phasing is on the order of +/- 1 or 2 ticks per GPS pulse, i.e. a couple of 1/64E6 sec ticks per second.
+
+Upon each timer interrupt it puts out a "time sync" message, a message with top CAN bus priority.  
+
+Any incoming message with a CAN id in the range gets a time stamp and is buffered, and subsequently written to the SD card.
+
+"sensor":
+
+The scheme for the sensors is that they will sync their timing to the CAN bus time sync messages, if the time sync messages are present.  If no time sync messages, then they make the measurement and put out results on the CAN using the unadjusted, free-running internal clock.
+
+The process for the synchronizing sensor is similar to the 'co', in that an accurate internal timing interrupt has to be generated at rate that is "x" times the time sync.  For the 'co' it is 64 interrupts per sec, given a 1 PPS GPS pulse.  For the 'sensor' it is 2048 interrupts per sec, given 64 time sync messages per second.  A big difference, however, is that GPS 1 pps has a jitter less than a microsecond, and the timer input capture is hardware.  For the sensor the faux input capture has substantial jitter since it is generated via an interrupt and software.
+
+I had thought that the sensors could get away with using the internal rc oscillators, spec'ed at +/- 1.5%.  The time syncing would eliminate the error.  It appears there is considerable jitter on the rc oscillator.  With a 2 sec average of the ticks per time sync message, the xtal osc shows a deviation of about 2 parts in 1E6 (1E6 is the number of ticks in 1/64th sec with a 64E6 system clock).  The rc oscillator is more like 20.
+
+The sensors get the timing correction from the FIFO1 interrupt.  The "FIFO1" interrupt priority set high and FIFO1 only passes time sync messages.  The FIFO1 interrupt does several things.  As early as possible it stores the DWT (32b) system counter.  This is approximates the hardware input capture, but adds some jitter.
+
+The main problem--
+
+The bugaboo that took a while to figure out had to do with the phasing in of the 2048 interrupts to the incoming 64 per second.  The schemes would "sort of work" then go off into the weeds.  The problem was that when the systick timer interrupt at the end/beginning (demarcation) of a 1/64th sec interval was almost dead-on with the incoming time sync message FIFO1 interrupt there can be two FIFO1 interrupts occur within one systick cycle.  Given some jitter, one time sync is a bit late and the next a bit early so both fall within the same 1/64th sec as far as the systick timer is concerned.  Likewise, the next interval might not experience any time sync message.  
+
+Helping a lot is an offset that accounts for the delay between the time of the subdivided 1 PPS GPS pulse and the arrival of the message and interrupt at the sensors.  About 5600 ticks.  That offset allows the systick interrupt and FIFO1 time sync message interrupts to normally not interfere.  The simple original code would work OK with when the offset was in place, and with the xtal osc.  When the offset was set to zero it would phase-in, then go off into the weeds, and slowly repeat.  I then discovered that even with the offset the rc osc it would do it too.  Anyway, the current code stores all the time sync message times during the 1/64th sec interval and handles the 0, 1, and 2 time sync cases...I think correctly.
+
+Item.  Why 2048 rate?  The 2048 is used to sample the strain gauge ADC in the pod, figuring it is a rate high enough so that after filtering the conversion rate not being sync'ed to the processor gets smoothed out.  There is a similar situation with the ADC's since without retriggering (which is possible) the ADC cycle doesn't work out to be an even 1/64th second, and furthermore, the processor rate isn't exact either.  Net, the 2048 interrupts sync'ed to the time message is the way to get the ADC's sync'd to absolute time in the 1/64th measuring interval.
+
+
+Pressure, temperature, throttle, rpm--
+
+This "may be working".  An adc routine takes care of the pressure, thermistor, and throttle.  A timer routine takes care of the rpm sensor, currently being fed with a 60 Hz AC wall wart in place of an engine spark.  Two messages.  One with throttle and thermistor, the other with pressure and rpm.  Each 4 byte values.  I can suck on the tube to the pressure sensor and see the changes in the hex flying by on the 'co' serial port monitoring.  The rpm looks reasonable.  In fact that is what got me back digging into the timing.  The rpm was showing 60.2 at first.  Then I round a mistake in my timing correction and it was then 60.0, but the lower order bits seemed to have too much jitter.
+
+
+

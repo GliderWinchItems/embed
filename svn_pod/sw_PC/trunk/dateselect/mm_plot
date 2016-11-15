@@ -1,0 +1,30 @@
+#!/bin/bash
+# Convert and plot data from the raw unformatted data file inside the .gz file
+# 05-19-2012 deh
+
+# This script might be located in ~/bin, so navigate to where the action starts
+DATESELDIR=/home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+# Directory where files retrieved from FIT are stored
+SAVEDIR=/home/$USER/winch/download
+
+
+# Usage: ./mm_plot 120211.125217
+# Where 120211.125217 is an example of 'yymmdd.hhmmss'
+
+# Pack up files for sending
+cd $SAVEDIR
+OUTFILE=$1.gz
+tar -zxf $OUTFILE
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'reformat2' outputs stdout with 'RM' appended (ReformattedMerged)
+cd $DATESELDIR
+../read*/reformat $SAVEDIR/$1 | sort -k 1 | tee $SAVEDIR/$1RS | ../read*/reformat2 | tee $SAVEDIR/$1RM | ./float_time | tee $SAVEDIR/$1FT
+
+# Plot the file and save plot image as a png file
+./podplot $SAVEDIR/$1FT
+
+exit
+

@@ -1,0 +1,140 @@
+#! /bin/bash
+# 11-07-2012
+# progload
+# compile and serial port load pod program
+#
+# no arguments
+#   default directory, name, port
+# one argument
+#   If *dev* found, then assume it is a "/dev/ttyxxx" type of argument
+#   If *dev* not found, then it is the file name 
+# two arguments
+#   1st: path to directory with source code and binary
+#   2nd: file name
+# three arguments
+#   1st: path to directory with source code and binary
+#   2nd: file name
+#   3rd: port (e.g. "/dev/ttyUSB1")
+# more than three aruments
+#   error message
+#
+
+DEFAULTPATHFILE=$HOME/svn_pod/sw_pod/branches/pod_v2b_r0.0
+DEFAULTPROG=pod_v1.bin
+DEFAULTUSB=/dev/ttyUSB0
+
+echo ""
+if [ $# -gt 3 ] ; then
+	echo "$# is too many arguments"
+	exit
+fi
+
+# Nothing specified
+case "$#" in
+	0)
+	echo "Use defaults"
+	COMPDIR=$DEFAULTPATHFILE
+	PROG=$DEFAULTPROG
+	USBN=$DEFAULTUSB
+	;;
+esac
+
+# One argument: Program specified or serial port redefined
+case "$#" in
+	1)
+	# Look for the "dev" in something like "/dev/ttyUSB1"
+	case "$1" in
+	*dev*)
+		# Here, *dev* was found, so argument must be the port device
+		COMPDIR=$DEFAULTPATHFILE
+		PROG=$DEFAULTPROG
+		USBN=$1
+		;;
+
+	*)
+	# Here, *dev* was not found, so the argument must be the file name
+		echo "Program file name specified"
+		COMPDIR=.
+		PROG=$1
+		USBN=/dev/ttyUSB0
+	esac
+
+esac
+
+# Two arguments: Directory, Prog specified
+case "$#" in
+	2)
+	echo "Directory and program file name specified"
+	COMPDIR=$1
+	PROG=$2
+	USBN=/dev/ttyUSB0
+	;;
+esac	
+
+# Three arguments: Directory, Prog, Port specified
+case "$#" in
+	3)
+	echo "Directory, program file name, and port specified"
+	COMPDIR=$1
+	PROG=$2
+	USBN=$3
+	;;
+esac
+
+echo "Directory used: $COMPDIR"
+echo " Filename used: $PROG"
+echo "     Port used: $USBN "
+
+# Move the directory with the source code
+cd $COMPDIR
+echo directory: $COMPDIR
+echo ""
+
+# Let the hapless Op have a choice in going ahead with a library function
+. promptYESNO
+
+promptYESNO "Skip compiling?" "n"
+if [ "$YESNO" = "n" ] ; then
+	# compile all
+	./mm	
+fi
+echo "Skip compiling $PROG"
+echo ""
+
+# Setup permissions if necessary for serial port
+RESULT="$(ls -l $USBN | grep $USER)"
+if [ -z "$RESULT" ] ; then
+	echo "Changing permission for serial port"
+	sudo chown $USER: $USBN
+fi
+
+# List some instructions
+echo ""
+echo "Before proceeding, do the following--"
+echo "1 Plug in the big BOX"
+echo "2 Plug the USB<->serial port to the computer"
+echo "3 Plug in the small box"
+echo "4 Set BOOT0 toggle switch to ON"
+echo "5 Press RESET pushbutton (after BOOT0 switch ON, and do so several times to be safe)"
+echo ""
+
+# Let the hapless Op have a choice in going ahead with a library function
+. promptYESNO
+
+promptYESNO "Are you ready to load?" "y"
+if [ "$YESNO" = "y" ] ; then
+	echo loading: $PROG
+	stm32flash -w $PROG -v $USBN
+
+elif [ "$YESNO" != "y" ] ; then
+	echo "Skip loading $PROG"
+	echo ""
+fi
+
+echo "To resume normal operation--"
+echo "1 Turn BOOT0 toggle switch OFF"
+echo "2 Press RESET pushbutton"
+echo ""
+exit
+
+

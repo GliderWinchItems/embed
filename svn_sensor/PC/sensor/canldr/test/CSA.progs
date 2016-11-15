@@ -1,0 +1,10 @@
+# CSA sensor program list
+# 09/21/2013
+# At each path there should be a <name>.bin and <name>.srec file
+#        PATH            PROGRAM NAME
+../../../../sensor/se1/trunk/se1
+../../../../sensor/se2/trunk/se2
+../../../../sensor/se3/trunk/se3
+../../../../sensor/se4/trunk/se4
+../../../../sensor/co1_Olimex/trunk/co1
+

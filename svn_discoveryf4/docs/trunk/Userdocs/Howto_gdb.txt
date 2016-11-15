@@ -1,0 +1,369 @@
+Howto_gdb.txt
+03/03/2012
+09/30/2013
+
+
+'stlink-texane' has two linux programs that loads flash with the binary file produced
+by the compiler and also connects to the gdb debugger.
+
+1.  Install 'git'
+
+deh@dehmain:~$ sudo apt-get install git
+[sudo] password for deh: 
+Reading package lists... Done
+Building dependency tree       
+...
+
+2.  Build st-link
+
+[Download]
+
+deh@P4-1:git clone git://github.com/texane/stlink.git stlink_texane
+Initialized empty Git repository in /home/deh/stlink/stlink_texane/.git/
+remote: Counting objects: 3651, done.
+remote: Compressing objects: 100% (1316/1316), done.
+remote: Total 3651 (delta 2322), reused 3559 (delta 2241)
+Receiving objects: 100% (3651/3651), 12.66 MiB | 1614 KiB/s, done.
+Resolving deltas: 100% (2322/2322), done.
+
+[Navigate to directory of download]
+deh@dehmain:~$ cd stlink_texane
+deh@dehmain:~/stlink_texane$ ls
+49-stlinkv1.rules  ACKNOWLEDGMENTS  autogen.sh  configure.ac  doc    flashloaders  gui      Makefile.am  NEWS    src                     stlink_v1.modprobe.conf  toremove
+49-stlinkv2.rules  AUTHORS          ChangeLog   COPYING       flash  gdbserver     LICENSE  mingw        README  stlinkv1_macosx_driver  TODO
+
+[Generate config/make]
+deh@dehmain:~/stlink_texane$ ./autogen.sh
+autoreconf: Entering directory `.'
+...
+gui/Makefile.am: installing `./depcomp'
+Makefile.am: installing `./INSTALL'
+autoreconf: Leaving directory `.'
+
+[Configure]
+deh@dehmain:~/stlink_texane$ ./configure
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+...
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: executing depfiles commands
+deh@dehmain:~/stlink_texane$ 
+
+[Make (compile)]
+deh@dehmain:~/stlink_texane$ make
+Making all in .
+make[1]: Entering directory `/home/deh/stlink_texane'
+gcc -DPACKAGE_NAME=\"stlink\" -DPACKAGE_TARNAME=\"stlink\" -DPACKAGE_VERSION=\"0.5.6\" -DPACKAGE_STRING=\"stlink\ 0.5.6\" -DPACKAGE_BUGREPORT=\"davem@devkitpro.org\" -DPACKAGE_URL=\"\" -DPACKAGE=\"stlink\" -DVERSION=\"0.5.6\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_SYS_MMAN_H=1 -DHAVE_SYS_POLL_H=1 -DHAVE_MMAP=1 -I.  -std=gnu99 -Wall -Wextra -O2   -g -O2 -I/usr/include/libusb-1.0   -MT src/libstlink_a-stlink-common.o -MD -MP -MF src/.deps/libstlink_a-stlink-common.Tpo 
+src/st-info.c
+...
+mv -f src/.deps/st_info-st-info.Tpo src/.deps/st_info-st-info.Po
+gcc  -g -O2 -I/usr/include/libusb-1.0     -o st-info src/st_info-st-info.o libstlink.a -lusb-1.0  
+make[1]: Leaving directory `/home/deh/stlink_texane'
+deh@dehmain:~/stlink_texane$ 
+
+
+
+3.  Move st-flash (in directory flash) and st-util (in gdbserver) to /usr/local/bin
+
+deh@dehmain:~/stlink_texane$ mv st-flash /usr/local/bin
+mv: cannot move `st-flash' to `/usr/local/bin/st-flash': Permission denied
+deh@dehmain:~/stlink_texane$ sudo mv st-flash /usr/local/bin
+[sudo] password for deh: 
+deh@dehmain:~/stlink_texane$ sudo mv st-util /usr/local/bin
+
+
+4.  Connecting
+
+Before connecting it requires setting usb permissions.  To do this--
+  Display usb devices
+
+deh@dehmain:~/stlink_texane$ lsusb
+Bus 001 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 003 Device 002: ID 05e3:0606 Genesys Logic, Inc. USB 2.0 Hub / D-Link DUB-H4 USB 2.0 Hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 003: ID 8087:07da Intel Corp. 
+Bus 001 Device 004: ID 04f2:b33e Chicony Electronics Co., Ltd 
+Bus 003 Device 003: ID 045e:078c Microsoft Corp. 
+Bus 003 Device 004: ID 05e3:070e Genesys Logic, Inc. USB 2.0 Card Reader
+Bus 003 Device 005: ID 05e3:0606 Genesys Logic, Inc. USB 2.0 Hub / D-Link DUB-H4 USB 2.0 Hub
+Bus 003 Device 006: ID 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
+Bus 003 Device 007: ID 04e8:6865 Samsung Electronics Co., Ltd 
+Bus 003 Device 008: ID 093a:2510 Pixart Imaging, Inc. Optical Mouse
+Bus 003 Device 009: ID 1a40:0101 Terminus Technology Inc. 4-Port HUB
+Bus 003 Device 010: ID 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
+Bus 003 Device 011: ID 067b:2303 Prolific Technology, Inc. PL2303 Serial Port
+Bus 003 Device 015: ID 0483:3748 SGS Thomson Microelectronics ST-LINK/V2
+Bus 003 Device 013: ID 138e:9000 Jungo LTD Raisonance S.A. STM32 ARM evaluation board
+
+Next, find the line with "ST-LINK".  In the above example the F4 USB debugging port shows up 
+on Bus 003 Device 015
+
+Set the permissions--
+
+The easiest is to assume everybody is OK with "user" level permissions and do the the 
+following (which shows the permissions ('ls -l') before and after the change owner--
+deh@dehmain:~/stlink_texane$ ls -l /dev/bus/usb/003/*
+crw-rw-r--  1 root root    189, 256 Sep 30 08:14 /dev/bus/usb/003/001
+crw-rw-r--  1 root root    189, 257 Sep 30 08:14 /dev/bus/usb/003/002
+crw-rw-r--  1 root root    189, 258 Sep 30 08:14 /dev/bus/usb/003/003
+crw-rw-r--  1 root root    189, 259 Sep 30 08:14 /dev/bus/usb/003/004
+crw-rw-r--  1 root root    189, 260 Sep 30 08:14 /dev/bus/usb/003/005
+crw-rw-r--  1 root root    189, 261 Sep 30 08:14 /dev/bus/usb/003/006
+crw-rw-r--+ 1 root plugdev 189, 262 Sep 30 08:14 /dev/bus/usb/003/007
+crw-rw-r--  1 root root    189, 263 Sep 30 08:14 /dev/bus/usb/003/008
+crw-rw-r--  1 root root    189, 264 Sep 30 08:14 /dev/bus/usb/003/009
+crw-rw-r--  1 root root    189, 265 Sep 30 08:14 /dev/bus/usb/003/010
+crw-rw-r--  1 root root    189, 266 Sep 30 08:14 /dev/bus/usb/003/011
+crw-rw-r--  1 root root    189, 268 Sep 30 08:14 /dev/bus/usb/003/013
+crw-rw-r--  1 root root    189, 270 Sep 30 13:18 /dev/bus/usb/003/015
+deh@dehmain:~/stlink_texane$ sudo chown deh:users /dev/bus/usb/003/*
+deh@dehmain:~/stlink_texane$ ls -l /dev/bus/usb/003/*
+crw-rw-r--  1 deh users 189, 256 Sep 30 08:14 /dev/bus/usb/003/001
+crw-rw-r--  1 deh users 189, 257 Sep 30 08:14 /dev/bus/usb/003/002
+crw-rw-r--  1 deh users 189, 258 Sep 30 08:14 /dev/bus/usb/003/003
+crw-rw-r--  1 deh users 189, 259 Sep 30 08:14 /dev/bus/usb/003/004
+crw-rw-r--  1 deh users 189, 260 Sep 30 08:14 /dev/bus/usb/003/005
+crw-rw-r--  1 deh users 189, 261 Sep 30 08:14 /dev/bus/usb/003/006
+crw-rw-r--+ 1 deh users 189, 262 Sep 30 08:14 /dev/bus/usb/003/007
+crw-rw-r--  1 deh users 189, 263 Sep 30 08:14 /dev/bus/usb/003/008
+crw-rw-r--  1 deh users 189, 264 Sep 30 08:14 /dev/bus/usb/003/009
+crw-rw-r--  1 deh users 189, 265 Sep 30 08:14 /dev/bus/usb/003/010
+crw-rw-r--  1 deh users 189, 266 Sep 30 08:14 /dev/bus/usb/003/011
+crw-rw-r--  1 deh users 189, 268 Sep 30 08:14 /dev/bus/usb/003/013
+crw-rw-r--  1 deh users 189, 270 Sep 30 13:18 /dev/bus/usb/003/015
+
+Permissions via a script--
+Execut a script that will find "ST-LINK" and set the permissions:
+./<path>/stlinkpermissions
+[Better if 'stlinkpermissions' is located in a directory that is in $PATH.]
+
+The following shows successful change of permissions using the script--
+deh@dehmain:~/svn_discoveryf4/common_all/trunk$ ./stlinkpermissions
+/dev/bus/usb/003/020
+
+This response is unsuccessful--
+/dev/bus/usb//
+
+
+3.  Build and flash a program
+
+Navigate to directory with directory of interest, e.g.
+cd ~/svn_discoveryf4/sw_f4/trunk/gpiotest
+		
+Build and flash the program.  The following shows a successful compile, link,
+and flash.  The program in the F4 begins execution immediately after the flash
+write completes.  ('gpiotest' flashes the four colored LEDs in sequence.)
+deh@dehmain:~/stlink_texane$ cd ~/svn_discoveryf4/sw_f4/trunk/gpiotest
+deh@dehmain:~/svn_discoveryf4/sw_f4/trunk/gpiotest$ ./m
+==================================================================================================================================
+  CLEAN   DISCpinconfig.o 
+...
+...
+/lib -Iinclude -fno-common -mcpu=cortex-m4 -mthumb -Wstrict-prototypes -mfix-cortex-m3-ldrd -msoft-float  -c -o gpiotest.o gpiotest.c
+  LD      gpiotest 
+  OBJCOPY gpiotest.bin
+  OBJCOPY gpiotest.hex
+  OBJCOPY gpiotest.srec
+  OBJDUMP gpiotest.list
+  FLASHING   gpiotest
+st-flash write gpiotest.bin 0x08000000
+2013-09-30T22:52:44 INFO src/stlink-common.c: Loading device parameters....
+2013-09-30T22:52:44 INFO src/stlink-common.c: Device connected is: F4 device, id 0x20006411
+2013-09-30T22:52:44 INFO src/stlink-common.c: SRAM size: 0x30000 bytes (192 KiB), Flash: 0x100000 bytes (1024 KiB) in pages of 16384 bytes
+2013-09-30T22:52:44 INFO src/stlink-common.c: Attempting to write 36720 (0x8f70) bytes to stm32 address: 134217728 (0x8000000)
+EraseFlash - Sector:0x0 Size:0x4000
+Flash page at addr: 0x08000000 erasedEraseFlash - Sector:0x1 Size:0x4000
+Flash page at addr: 0x08004000 erasedEraseFlash - Sector:0x2 Size:0x4000
+Flash page at addr: 0x08008000 erased
+2013-09-30T22:52:45 INFO src/stlink-common.c: Finished erasing 3 pages of 16384 (0x4000) bytes
+2013-09-30T22:52:45 INFO src/stlink-common.c: Starting Flash write for F2/F4
+2013-09-30T22:52:45 INFO src/stlink-common.c: Successfully loaded flash loader in sram
+size: 32768
+size: 3952
+2013-09-30T22:52:46 INFO src/stlink-common.c: Starting verification of write complete
+2013-09-30T22:52:47 INFO src/stlink-common.c: Flash written and verified! jolly good!
+deh@dehmain:~/svn_discoveryf4/sw_f4/trunk/gpiotest$ 
+			
+
+
+~/CodeSourcery/*te/bin/arm-none-eabi-gdb
+
+4.  Setup gdb (debugger) for a session
+
+Debugging is done via two programs.  'st-util' is a "server" that works with the ST-LINK
+in the F4.  'gdb' is the debugger that "listens" on a local port to work with 'st-util'.
+
+Note: The 'gdb' that needs to be executed is the one in CodeSourcery for the arm.  Just
+typing in 'gdb' will start the one for PC programs.
+
+First start the st-util server.
+
+Second start gdb
+
+Start gdb--
+
+deh@dehmain:~/svn_discoveryf4/sw_f4/trunk/gpiotest$ ~/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-eabi-gdb
+GNU gdb (Sourcery G++ Lite 2011.03-42) 7.2.50.20100908-cvs
+Copyright (C) 2010 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "--host=i686-pc-linux-gnu --target=arm-none-eabi".
+For bug reporting instructions, please see:
+<https://support.codesourcery.com/GNUToolchain/>.
+(gdb) 
+
+Tell gdb this is remote debugging--	
+
+(gdb) target extended-remote :4242  [Enter this command, and get the following]
+Remote debugging using :4242
+0x080003dc in ?? ()
+(gdb) 
+
+	Load symbol table for gdb--
+(gdb) file gpiotest
+A program is being debugged already.
+Are you sure you want to change the file? (y or n) y
+Reading symbols from /home/deh/svn_discoveryf4/sw_f4/trunk/gpiotest/gpiotest...done.
+
+	Disassembly should work, e.g.--
+(gdb) disassemble main
+Dump of assembler code for function main:
+   0x080001b8 <+0>:	push	{r3, lr}
+   0x080001ba <+2>:	ldr	r0, [pc, #24]	; (0x80001d4 <main+28>)
+   0x080001bc <+4>:	bl	0x8000260 <clockspecifysetup>
+	...
+	[runs until the end of the "function"]
+
+4.  Debugging tips
+
+	Display memory--
+
+(gdb) x 0x080001b8	[Default is display one word]
+0x80001b8 <main>:	0x4806b508
+(gdb) x/4 0x080001b8	[Specify four words]
+0x80001b8 <main>:	0x4806b508	0xf850f000	0xf836f000	0xf44f4b04
+(gdb) 
+
+	Change memory location using "print" command--
+
+(gdb) x 0x20000000	[Enter this command to display location]
+0x20000000 <pmul1>:	0x00000000
+(gdb) print *0x20000000=0x1234abcd [Enter this command to set location]
+$1 = 305441741
+(gdb) x 0x20000000	[Enter this command to display location]
+0x20000000 <pmul1>:	0x1234abcd
+(gdb) 
+	Or, using "set variable" command--
+(gdb) set variable *0x20000000=0x87654321 [Enter command to set location]
+(gdb) x 0x20000000	[Enter command to display location]
+0x20000000 <pmul1>:	0x87654321
+
+5.  USB<->PC test
+
+Compile--
+
+deh@dehmain:~$ cd ~/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC
+deh@dehmain:~/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC$ ./m
+make -C lib FLOAT_TYPE=soft
+make[1]: Entering directory `/home/deh/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC/lib'
+make -C StdPeriph FLOAT_TYPE=soft
+...
+~/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-eabi-objcopy -O ihex build/stm32f4_usb_cdc.elf build/stm32f4_usb_cdc.hex
+~/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-eabi-objcopy -O binary build/stm32f4_usb_cdc.elf build/stm32f4_usb_cdc.bin
+~/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-eabi-size build/stm32f4_usb_cdc.elf
+   text	   data	    bss	    dec	    hex	filename
+  47484	   1736	   5064	  54284	   d40c	build/stm32f4_usb_cdc.elf
+total 420
+-rwxrwxr-x 1 deh deh  49220 Oct  7 22:14 stm32f4_usb_cdc.bin
+-rwxrwxr-x 1 deh deh 279105 Oct  7 22:14 stm32f4_usb_cdc.elf
+-rw-rw-r-- 1 deh deh 138505 Oct  7 22:14 stm32f4_usb_cdc.hex
+deh@dehmain:~/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC$ 
+
+Load into flash--
+Navigate to directory with .bin file:
+deh@dehmain:~/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC$ cd build
+deh@dehmain:~/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC/build$ st-flash write stm32f4_usb_cdc.bin 0x08000000
+2013-10-07T22:19:49 INFO src/stlink-common.c: Loading device parameters....
+2013-10-07T22:19:49 INFO src/stlink-common.c: Device connected is: F4 device, id 0x20006411
+2013-10-07T22:19:49 INFO src/stlink-common.c: SRAM size: 0x30000 bytes (192 KiB), Flash: 0x100000 bytes (1024 KiB) in pages of 16384 bytes
+2013-10-07T22:19:49 INFO src/stlink-common.c: Attempting to write 49220 (0xc044) bytes to stm32 address: 134217728 (0x8000000)
+EraseFlash - Sector:0x0 Size:0x4000
+Flash page at addr: 0x08000000 erasedEraseFlash - Sector:0x1 Size:0x4000
+Flash page at addr: 0x08004000 erasedEraseFlash - Sector:0x2 Size:0x4000
+Flash page at addr: 0x08008000 erasedEraseFlash - Sector:0x3 Size:0x4000
+Flash page at addr: 0x0800c000 erased
+2013-10-07T22:19:49 INFO src/stlink-common.c: Finished erasing 4 pages of 16384 (0x4000) bytes
+2013-10-07T22:19:49 INFO src/stlink-common.c: Starting Flash write for F2/F4
+2013-10-07T22:19:49 INFO src/stlink-common.c: Successfully loaded flash loader in sram
+size: 32768
+size: 16452
+2013-10-07T22:19:51 INFO src/stlink-common.c: Starting verification of write complete
+2013-10-07T22:19:52 INFO src/stlink-common.c: Flash written and verified! jolly good!
+deh@dehmain:~/svn_discoveryf4/sw_discoveryf4/trunk/STM32F4_USB_CDC/build$ 
+
+Plug in the usb-micro cable to the other port on the F4-Discovery
+
+Setup minicom for the usb port--
+sudo minicom -s
+ctlA Z, then O for serial port setup.
+Set serial port to: /dev/ttyACM0, no flow control.
+Save settings, e.g. 'dfusb'
+Exit minicom
+Test
+sudo minicom dfusb
+
+Welcome to minicom 2.5
+
+OPTIONS: I18n 
+Compiled on May  2 2011, 10:05:24.
+Port /dev/ttyACM0
+
+Press CTRL-A Z for help on special keys                                                                                
+                                                                                                                       
+Time:  5682 ms                                                                                                         
+Pass:  1                                                                                                               
+Value: 99880632.00000                                                                                                  
+exp(pi) - pi == 19.99909997918947368589
+                                           
+[This repeats]
+
+
+Things that go wrong--
+
+1.  minicom hangs with initializing the modem
+
+Don't force closure of the minicom window as 
+./dev/ttyACM0 will be "locked" for which the quick
+mindless way out is to shutdown and reboot.  
+
+Press reset on the Discovery board--Black pushbutton
+
+2.  Flashing program
+
+a.  Execlute stlinkpermissions
+
+~/svn_discoveryf4/common_all/trunk/stlinkpermissions
+
+b.  Flash times out
+
+Pull usb cable (st-link end).  Then re-execute permissions 
+since the USB device number will have changed.
+
+
+Debugging--
+
+1. gdb commands
+
+A summary:
+http://www.yolinux.com/TUTORIALS/GDB-Commands.html
+
+2.
+
+http://www.yolinux.com/TUTORIALS/GDB-Commands.html

@@ -1,0 +1,233 @@
+../svn_sensor/docs/trunk/proposal/packet_compression_scheme.txt
+12/22/2012 deh
+
+Purpose: Reduce bandwidth requirements for 1) transfer time of the 
+logged readout to the PC, 2) readout of the SD card.
+
+The winch instrumentation can be expected to produce 8x the volume
+of raw, uncompressed data compared to the POD.  Using "all-day" 
+readout where the data for an entire day/afternoon of winching is
+logged and transferred to the PC the time for readout is an 
+important operational issue.  
+
+Using a removal SD card in the "CO" (winch logger) was ruled out due 
+to the unreliability of the connectors and the environment.  Wired
+transfer is therefor restricted to RS-232, CAN, and USB.  USB offers
+greater bandwidth than CAN, plus CAN requires a PC<->CAN unit to 
+enable access to the CO CAN.  RS-232 and USB offer may allow code
+reuse of POD readout routines, since the USB implementation would
+be a virtual com port.  
+
+Regarding speed, the RS-232 the baud rate is the limitation.  
+
+With USB the data rate can be upwards of 100K bytes/sec.  The readout
+rate of the SD is approximately 150K bytes/sec, however there will be
+some wsated space in the SD card packet space.  Net--with USB the
+the SD can become the bottleneck for readout.
+
+
+Packet delta compression scheme--
+
+Packet header--
+byte [0]        packet type ID
+byte [1:5]      offset linux time (1/64 secs)
+byte [6]        Number of entries in packet
+
+(The first 6 bytes are identical to the current packet types, i.e.
+ id byte followed by time)
+
+Entries within packet--
+N bytes follow where (N + id + time size) less or equal to 250.  The max size
+for the SD logging routine (SDLOG_WRITE_MAX) is 250.  Sizes larger will 
+result in only one packet per SD card block.
+
+Each "entry" (variable format bit field)--
+Format 0:
+bit[0] = 0  No repetition count (3)
+  bit [1:5]         5 bit "delta" field width 'z' (5)
+  bit [6:(7+z)]     delta = (new reading - last value) (6)
+    where 'z' is the number of significant bits (0-31)
+
+Format 1:
+bit[0] = 1  Repetition count used (3)
+  bit[1:4]          4 bit repetition count (4)
+  bit [6:10]         5 bit "delta" field width 'z' (5)
+  bit [11:(11+z)]     delta = (new reading - last value) (6)
+
+(1) Time ending time computed from a packet plus one tick should match 
+    match the beginning time of the next packet.  This time should also
+    the beginning time of the previous packet plus the number of entries
+    plus a sum of the repeat counts plus one.
+
+    If there is a gap a packet is missing which could be caused by the 
+    system being powered down, then back up.  If there is overlap, whine
+    and complain to the manufacturer (but don't expect satisfaction).
+
+(2) The first entry is the new reading compared to zero, without a bit[0],
+    only a field width count and delta field.
+
+    The second entry is always the "delta" (the field size and value) compared 
+    to the preceding packet ending value, except for startup where the preceding 
+    delta is zero.  As with the first entry, bit[0] is skipped.
+
+    The entry counter is set to one after the second entry is started, i.e. the
+    delta field has been stored, but the repetition count will not be complete
+    until the next entry is required.
+
+    Error check:  When unpacking packets, the "current value" at the end of
+    a packet, when adjusted with the beginning delta of the new packet, should
+    match the first value of the new packet.  If not, throw oneself to the 
+    ground and thrash and scream.
+
+(3) The repetition bit determines if a repetion count is being used.  When the
+    winch is idle and a shaft encoder is stationary, the shaft count and
+    speed will be constant.  A repetition count saves bytes.
+
+    When the readings are changing the repetition bit being off avoids the
+    overhead of a reptition count that would be zero.
+
+    When the repetition count is not zero and a new entry is required, bit[0]
+    is set and the count in the control block decremented by 1.  The repetition
+    bit field is 0 - 15 (if 4 bits) representing 1 - 16 repetitions.  When
+    the repetition count is zero, then bit[0] is 0 and no repetition count is
+    stored.
+
+(4) Repetition count is the number of repeats of the reading at the point
+    where the delta just stored occurred.
+
+    When the repetition count reaches the max for the size of the bit field
+    a new entry is made, and if the new reading is still the same the number 
+    of significant bits will be zero.  
+
+    Each shaft sensor produces a shaft count and speed 64 times a second.  With
+    three such sensors there are six streams of data which will benefit from using
+    a reptition count.
+
+(5) Field width of delta field
+
+    The field width (bits) of the delta is the number of significant bits plus a bit indicating
+    if the field was a complimented number.
+
+    Significant bit count
+
+    5 bits handles 32b words.
+    Count Leading Zero (CLZ) instruction is based on a 32b register.
+
+    "The Definitive Guide..." p 378--
+    CLZ (count leading zeros) instruction.  Counts the number of leading zeros
+    in the value in Rm and returns the result in Rd.  The result value is 32 if
+    no bits are set in the source register and 0 if bit[31] is set.
+
+    If bit[31] is on, (negative 2's complement number), the one's compliment of the
+    number is taken (which makes bit[31] a zero.  The number of leading zeros is then
+    counted.  The result will always be one or higher.  
+    The 'z' is (32 - leading zero count).
+
+    If bit[31] is off, (a positive number) the number of leading zeros is counted.  It
+    will always be one or higher.
+	
+    Examples--
+         "n"      "z" width * field
+     0 0x00000000  0  00001 0 -
+    -1 0xffffffff  0  00001 1 -
+    +1 0x00000001  1  00010 0 1
+    -2 0xfffffffe  1  00010 1 1
+    +2 0x00000010  2  00011 0 10
+    -3 0xfffffffd  2  00011 1 10
+    +4 0x00000004  3  00100 0 100
+    -5 0xfffffffc  3  00100 1 100
+     ...
+  +max 0x7fffffff 31  11111 0 <31 one bits>
+  -max 0x80000000 31  11111 1 <31 one bits>
+
+* 1 = one's complimented bit
+
+
+
+
+Expectation--
+
+Idle winch: 
+- shaft counters and shaft speeds 
+  same value, i.e. delta = 0.
+
+- engine RPM and manifold pressure varying, 
+  but within some small range.
+
+Some example limits--
+
+0) POD style packets for comparison
+packet ID + linux time = 6 bytes.
+entry = 8 bytes (32b)
+entries per packet = 16
+time covered by packet = 0.25 sec
+total size = 16 * 6 + 8 = 104
+bytes to xmit (hex) = 208
+bytes per realtime secs = 832
+
+1) Winch idle, shaft count and speed constant:
+
+packet ID + linux time + number entries = 7 bytes
+remaining bytes for entries = 125 - 7  = 118 
+numbers bits for entries = 118 * 8 = 944
+repetition count + number bits count = 11 bits
+bits per entry = 11
+entries per packet = 85
+each entry covers 16 (1/64th sec) readings
+readings per packet = 16 * 85 = 1360
+packet covers 21.25 secs
+bytes to transmit (hex) = 124 * 2 = 248
+bytes per realtime secs = 11.67
+compression advantage (compared to POD style) = 71x
+
+2) Winch full-out, i.e. very large change between readings
+
+packet ID + linux time + number entries = 7 bytes
+remaining bytes for entries = 125 - 7  = 118 
+numbers bits for entries = 118 * 8 = 944
+repetition count  = 1
+assume each delta requires 12 bits
+bits per entry = 18
+entries per packet = 52
+each entry covers 1 (1/64th sec) reading
+readings per packet 52
+packet covers 0.8125 secs
+bytes to transmit (hex) = 124 * 2 = 248
+bytes per realtime secs = 305.2
+compression advantage (compared to POD style) = 3.56x
+
+
+
+Shutdown issue--
+
+case: Orderly shutdown
+
+  Write all incomplete packets.  
+  Write a table entry of the packet position ID to the table.
+  Requires operator input of some sort, e.g. pushbutton sw.
+
+case: Power unceremoniously cut
+
+- Periodic update
+
+  To cover this we could periodically write all incomplete packets and 
+ update the position ID table, so that we are never behind more than X 
+ minutes...
+
+- Big capacitor, or battery 
+
+  Sense input power down and have enough cap storage to complete the
+  SD card write.  How big of a cap? 8v -> 4v at 40 ma for 25 ms (8 packets
+  to be closed out at 3 ms per) requires 250u.  1000u @ 25v is a very
+  reasonable size.
+
+  A battery means charger, etc.  avoid if possible.
+
+ Conclusion--Large capacitor is the way to go.
+
+Oops--All gizmos on the CAN bus (which distributes the power) should not
+  have any caps on the bus-side of a polarity protection diode, otherwise 
+  it would slow the bus voltage drop requiring the sensing voltage for 
+  power lost to be close to the nominal.  
+
+

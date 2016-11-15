@@ -1,0 +1,6 @@
+#!/bin/bash
+rsync -av -e 'ssh -p 41574' ubuntu@$FITIP:/winch/download/* ~/winch/download/
+sudo cp ~/winch/download/* /cdrom/winch/download
+exit
+
+

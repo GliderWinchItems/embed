@@ -1,0 +1,20 @@
+#!/bin/bash
+# 12/12/2012
+# Separate out files from an all-day download, by tension detection
+#
+# ./sepgo 50000 1000 ~/winch/download/121208/121208.174500R
+# Where arg #1 = Tension threshold (grams), increasing threshold, detect launch in progress
+# Where arg #2 = Tension threshold (grams), decreasing threshold, detect launch ending
+# STDIN = reformatted & sorted input file to be separated
+
+# Get rid of old files
+SEPFILES=$HOME/svn_pod/sw_PC/trunk/helper
+
+rm $SEPFILES/sep.???R 
+
+# 
+./separator_tension $1 $2 50 < $3
+
+#
+ls -l $SEPFILES/*R
+

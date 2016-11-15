@@ -1,0 +1,23 @@
+10-24-2010
+
+Notes-
+
+Olimex stm32 P103 board--
+
+Flying leads from outboard RS-232 converter--
+
+For USART3 --
+		      Header
+Red (thin, signal) 	PB11	USART3 Rx
+White (thin,signal)	PB10	USART3 Tx
+Red (Fat, power)	3.3v
+Black(Fat, power)	gnd
+
+For USART1 --
+
+UEXT connector
+Red (thin, signal)	UEXT 3	USART1 Rx (PA10)
+White (thin, signal)	UEXT 4	USART1 Tx (PA9)
+
+
+

@@ -1,0 +1,65 @@
+04/21/2014
+../svn_sensor/hw/trunk/eagle/f103R/logger_mods/SD_wiring
+Sensor Board with Flashgenie SD card socket/module
+GPS for timing
+
+SD Card wire colors (used on POD boards)
+pin|pod color|descrition|port-pin|signal|pad number
+1 blu CD/DAT3/CS PB12	NSS	P6
+2 wht CMD/DI	PB15	MOSI	LED(GRN) FET gate
+3 blk GND
+4 red Vdd
+5 grn SCK	PB13	SCK	P7
+6 blk GND1
+7 blu DO	PB14	MISO	P3
+8 yel DAT1/RES - 10K to 3.3v	R29 (jumper for 3.3v)
+
+9 grn DAT2/RES - 10K to 3.3v	R32 (jumper for 3.3v)
+
+Wiring across the top of the POD board,
+top view, 
+left to right
+grn (left)
+blu
+wht
+blk
+red
+brn
+blk
+blu
+yel (right)
+
+flashbgenie connector--
+Left column, top-nottom, top view, 
+ 0 LED	grn  PB12_LED_A_SERVO pad PC4	RED
+ 1 DET	yel  10K to +5v	PC9 (Engine rpm input)
+ 2 PRO	wht  10K to +5v PC10
+ 3 SDA
+ 4 SCL
+ 5 CS	blu  PB12	P6	
+ 6 CLK	grn  PB13	P7
+ 7 MOSI yel(wht)  PB15	LED(GRN) FET gate
+ 8 MISO	blu  PB14	P3
+ 9 GND1	blk/blk  GND
+10 5V1	red +5V
+ 
+GPS (Olimex usage)
+GPS 1PPS	PB6 	TIM4_CH1	
+TX		UEXT-3	USART1_TX (via 74HC14)	
+RX		UEXT-4	USART1_RX (via 74HC14)
+
+Sensor board - Garmin
+IC1 inverters on the following three--
+GPS 1PPS	PC8	TIM8_CH4
+TX		PC10	UART4_TX
+RX		PC11	UART4_RX
+Note-cut Vcc to IC1 invertors and run to +5
+
+Sensor board - ublox
+NOTE: some connectors to ublox have colors reverse order (red is gnd)
+1PPS blu	PB8	via TIM8_CH3 (use via to U$7 enable not used)
+VCC  grn	3.3v
+RX   yel	PB10	P1 USART3_TX
+TX   blk	PB11	P2 USART3_RX
+GND  red	GND
+

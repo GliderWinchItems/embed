@@ -1,0 +1,17 @@
+cd ..
+#
+echo "# Updating svn_pod"
+cd ../svn_pod
+svn update
+#
+echo "# Updating svn_discoveryf4"
+cd ../svn_discoveryf4
+svn update
+
+echo "# Updating svn_sensor"
+cd ../svn_sensor
+svn update
+
+echo "# Updating svn_et"
+cd ../svn_et
+svn update

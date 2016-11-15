@@ -1,0 +1,26 @@
+README
+
+03-17-2012
+
+
+xbloopbk_w
+
+General scheme:
+
+Sends a line received from the winch end unit back to the winch 
+end with the RSSI appended.
+
+USART1 outputs the incoming message along with the RSSI this end measured.
+
+Companion to ~/svn_pod/sw_XB_pod/trunk/xbloopbk_w.
+
+
+xboneway_p 03-24-2012
+
+Xmits, one-way to winch end.  Uses API mode for XBee.
+
+
+xbrange_p 04-09-2012
+
+Receives packet from winch-end and sends it back with the received 
+RSSI added to the payload.  Hack of xboneway_p.

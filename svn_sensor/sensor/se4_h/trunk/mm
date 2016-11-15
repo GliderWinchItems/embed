@@ -1,0 +1,33 @@
+#!/bin/bash
+echo ==================================================================================================================================================================
+cd ../../../../svn_pod/sw_stm32/trunk/devices
+#make clean
+make
+echo 
+cd ../lib/libmi*
+#make clean
+make
+echo 
+cd ../libu*
+#make clean
+make
+echo 
+cd ../libsu*
+#make clean
+make
+echo ======================== libdevicestm32 ================ 
+cd ../../../../../svn_sensor/sw_f103/trunk/lib/libdev*
+make clean
+make
+echo ======================== libsensormisc ================
+cd ../libsensormisc
+make clean
+make 
+echo ======================== make common libs =============
+cd ../../../../../svn_common/trunk
+make clean
+make
+echo ======================== main app =====================
+cd ../../svn_sensor/sensor/se4_h/trunk
+make clean
+make

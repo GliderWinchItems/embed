@@ -1,0 +1,81 @@
+svn_ultrasonic.txt
+09/02/2012
+
+Notes--
+
+1.  Checkout a copy of svn_ultrasonic
+
+If the Ubuntu USB drive does not have a copy, then one out.
+
+cd ~ 
+svn co svn+sshtunnelFIT://$FITIP/svn_ultrasonic
+
+This will create a directory
+~/svn_ultrasonic
+with the latest revision.
+
+2. svn_pod must also be present.
+
+svn_pod must be at ~/svn_pod, since some of the stm32 
+libraries are used by svn_ultrasonic routines.
+
+3. Saving changes
+
+cd ~/svn_ultrsonic
+svn commit -m 'some comment'
+
+4. Adding files & directories
+
+A new file doesn't automatically go into the svn.  It
+must be added.  That way you can have many files that
+are not intended for the svn to be the same directory, 
+e.g. it is not customary to put compiled files in the
+the svn such as .map, .list, .srec, etc., since that
+can be generated from the source code.
+
+To add a file
+svn add <file name>
+
+Wild card name permitted, e.g. *.c
+
+To add an existing directory
+svn add <directory name>
+This will add *all* the files in the directory and 
+directories below.
+
+To create a directory directly
+svn mkdir <directory name>
+
+5. Deleting files
+
+svn rm <name>
+
+6.  Tips
+
+Adding/deleting does not change the svn on the server until a "commit".
+
+Once a "commit" is done it is forever there.  One can go back and reload
+earlier revisions.  The svn saves *changes*.
+
+Adding, then deleting before a commit is done gives an error.  Suppose you
+did svn add and then wanted to remove the file before doing the commit--
+svn rm <file name> --force
+The commit will show and "A" followed by a "D" (delete).
+
+"commit" only does the commit for the directory you are in.  To be sure that
+the changes in all the other directories are committed, 
+cd ~/svn_ultrsonic
+svn commit -m '<comment>'
+
+The official documentation for svn--
+http://www.google.com/url?sa=t&rct=j&q=svn+documentation&source=web&cd=2&cad=rja&ved=0CCkQFjAB&url=http%3A%2F%2Fsvnbook.red-bean.com%2F&ei=GqFDUNajGIWe8QTwyYHQCA&usg=AFQjCNE_sdrUnnHEu7cewd1oZwSjHjWJmg
+
+7. Update before starting a session
+
+Someone may have done a commit so do "svn update" before starting.
+cd ~/svn_ultrasonic
+svn update
+
+
+
+

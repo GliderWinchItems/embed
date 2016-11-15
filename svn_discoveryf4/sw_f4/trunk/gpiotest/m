@@ -1,0 +1,11 @@
+echo ==================================================================================================================================
+cd ../../../sw_discoveryf4/trunk/lib/libdisc*
+make clean
+make
+cd ../libmisc*
+make clean
+make
+cd ../../../../sw_f4/trunk/gpiotest
+make clean
+make && make flash
+

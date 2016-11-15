@@ -1,0 +1,56 @@
+#!/bin/bash
+# 08/30/2012
+# usbimagecopy1step
+# One step copy of compressed image on FIT PC server to uncompressed image on local flash drive
+# 
+# usbimagecopy1step <compressed input file name> <output device>
+# Example--
+# usbimagecopy1step ubuntu_12.04LTS_live_image.120825.2137.gz /dev/sdc
+#
+# Setup the command that gets executed on the FIT PC via ssh
+FILEGET=\'"dd if=/usbdriveimage/$1"\'
+# echo for debugging purposes
+echo ssh forwarded command $FILEGET
+echo "The download will take a long time and there won't be any progress status output"
+date
+# 'dd' the file via ssh and pipe to gunzip which pipes to write the USB destination drive
+ssh -p 41574 $USER@$FITIP \'$FILEGET\' | gunzip -c | sudo dd of=$2 conv=sync,noerror
+date
+
+# Download md5sum from FIT PC server
+echo
+echo "block count of the original follows:"
+scp -P 41574 $USER@$FITIP:/usbdriveimage/$1.blockcount.uncompressed $1.blockcount.uncompressed
+cat $1.blockcount.uncompressed
+
+# Download blockcount from FIT PC server
+echo
+echo "Get md5sum from FIT:"
+scp -P 41574 $USER@$FITIP:/usbdriveimage/$1.md5sum.uncompressed $1.md5sum.uncompressed.remote
+cat $1.md5sum.uncompressed.remote
+
+# Compute md5sum of USB destination stick
+echo 
+# Remove old file JIC
+if [ -d "$1.md5sum.uncompressed.local" ] ; then
+	rm $1.md5sum.uncompressed.local
+fi
+
+echo "Compare the just-written USB drive md5sum with the original"
+echo "Computing the local md5sum will take some time"
+date
+sudo dd if=$2 count=$(cat $1.blockcount.uncompressed) | md5sum | tee $1.md5sum.uncompressed.local
+date
+cat $1.md5sum.uncompressed.remote 
+cat $1.md5sum.uncompressed.local
+
+if  ( cmp -n 33 -b $1.md5sum.uncompressed.remote  $1.md5sum.uncompressed.local ) ; then
+	echo "SUCCESS! md5sums are identical"
+else 
+	echo "FAILED MISERABLY: md5sums are different (or something else wrong)"
+fi
+
+
+exit
+
+

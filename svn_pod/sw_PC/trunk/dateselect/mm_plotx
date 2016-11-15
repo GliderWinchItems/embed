@@ -1,0 +1,66 @@
+#!/bin/bash
+# Convert and plot data from the raw unformatted data file inside the .gz file
+# 05-19-2012 deh
+# 09-17-2012 deh "x" suffix denotes skipping un'taring a .gz file.  This is useful when
+#            a long .gz file is cut up into sections around the launch data.
+# 11-06-2012 deh Add file naming so that computed results go into a different file from the downloaded data.
+#            Note, the 'R raw file reformatted gets saved in the same directory as the input data.     
+
+
+# Do some editing of the command line arguments
+if [ $# -eq 0 ] ; then
+	echo "Requires 1 or 2 arguments for example,"
+	echo "  mm_plotx 121104.234957, file name only, or"
+	echo "  mm_plotx 121104 121104.234957 subdirectory and file name"
+	exit
+fi
+
+if [ $# -gt 2 ] ; then
+	echo " Too many arguments"
+	exit
+fi
+
+
+# Set up path/file for single argument case
+if [ $# -eq 1 ] ; then
+	# path/file for computed results
+	COMPDIR=/home/$USER/winch/computed/$1
+	COMPDIR_RS=/home/$USER/winch/computed/$1RS
+	COMPDIR_RM=/home/$USER/winch/computed/$1RM
+	COMPDIR_FT=/home/$USER/winch/computed/$1FT
+	# path/file for source data
+	SAVEDIR=/home/$USER/winch/download/$1
+fi
+
+# Set up path/file for the two argument case
+if [ $# -eq 2 ] ; then
+	# path/file for computed results	
+	COMPDIR=/home/$USER/winch/computed/$1/$2
+	COMPDIR_RS=/home/$USER/winch/computed/$1/$2RS
+	COMPDIR_RM=/home/$USER/winch/computed/$1/$2RM
+	COMPDIR_FT=/home/$USER/winch/computed/$1/$2FT
+	# path/file for source data
+	SAVEDIR=/home/$USER/winch/download/$1/$2
+	
+	# Make sure we have the directory for computed results
+	if ! [ -d "/home/$USER/winch/computed/$1" ]
+	then
+		mkdir /home/$USER/winch/computed/$1
+	fi
+fi
+
+# This script might be located in ~/bin, so navigate to where the action starts. 
+# The 'reformat...' routines are in the directory relative to dateselect.
+DATESELDIR=/home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'reformat2' outputs stdout with 'RM' appended (ReformattedMerged)
+cd $DATESELDIR
+../read*/reformat $SAVEDIR | sort -k 1 | tee $COMPDIR_RS | ../read*/reformat2 | tee $COMPDIR_RM | ./float_time | tee $COMPDIR_FT
+
+# Plot the file and save plot image as a png file
+./podplot $COMPDIR_FT
+
+exit
+

@@ -1,0 +1,10 @@
+README.notes
+10/05/2012
+
+These two convert routines are for assistance in making a vector.c, and nivc_f3.h files
+for the F3.  The source is taken from the ST library for nvic.h and modifying the fields
+to the libopenstm32 format.  
+
+The output is piped to a file, e.g. "x", and that file used with the editor to makeup
+the final file.
+

@@ -1,0 +1,63 @@
+README.cangate
+12-01-2013
+
+'cangate' is PC program that is paired with a STM32 gateway program
+'gatef' ('f' for ftdi version, as opposed to a usb version).  The 
+communication between the PC and STM32 is ascii.
+
+The default speed is 115,200 baud, though 230,400, 460,800, and 921,600
+are possible (of course both programs must be changed to accommodate a
+change of speed).
+
+General flow for 'cangate'--
+
+The "device", e.g. '/dev/ttyUSB0', is designated on the command line.
+
+The serial port is configured with 'termnios' and opened.  (It is somewhat
+of a "mess" as it was hacked from a number of hacks of prior code.)
+
+A loop is entered which can be broken by Ctl C from the keyboard.
+
+The loop uses 'select' to wait for some activity on the keyboard, serial
+port, or timeout.  When select exits the loop uses 'if' statements to
+find the device causing the interrupt.
+
+For the serial port input, the incoming bytes are converted to binary
+along with checking for max/min length and a checksum.  If passing the
+tests a routine 'do_canbus_msg' is called and the message passed on to
+a program that handles (very) rudimentary keyboard commands (some of which
+are not implemented in this version)--
+
+a - load program 
+d - list raw msgs
+l - list time/date from time CAN sync msgs
+n - list msg id's and msg ct during 1 sec
+m - list msgs for id entered 'm xxxx'
+p - select unit to program load from list, or enter path/name, and open .bin & .srec files
+r - send high priority RESET
+x - cancel command
+Control C to quit program
+
+The 'n' command is useful for monitoring the bus activity by showing a count of the
+messages for each different CAN id during a 1 sec interval.  In this 'cangate' version
+the 1 sec timing is done via calls to the linux 'time()' routine (versus using a time
+sync message coming from the CAN bus).
+
+'n' cmd format--
+1st col: Number of different id's in table
+cols separated by '|'-- id and count during 1 sec interval
+Last col: Total number of messages during the 1 sec interval
+
+Note: When the 'n' cmd starts the table is empty.  New id's are added to the table as they
+are encountered and accumulate.  They are not removed until the cmd is stopped and restarted.
+
+
+The 'm' command will give a running display of messages from just one id.  The id to
+monitor can be selected by noting it from the 'n' command.  It is 8 chars long and must
+conform exactly to the message id, except for the low order two bits.
+
+The 'd' command lists all the incoming messages in a "semi-formatted" form.  The id is arranged
+in 32b word order (i.e. the endiness issue).  The next column is the payload byte count, followed
+by the payload bytes.  The sequence number and checksum are not shown.
+
+

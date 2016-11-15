@@ -1,0 +1,330 @@
+/******************** (C) COPYRIGHT 2010 **************************************
+* File Name          : Utest2.c.usart2.rxinttxint
+* Hackor             : deh
+* Date First Issued  : 10/17/2010
+* Description        : Test program for tx int, rx int 
+* Description        : Tx & Rx, char-by-char interrupt into/from line buffers
+*******************************************************************************/
+/* NOTE: Some provisions in this routine not in the other usart test routines--
+-	This program focuses on USART2, but also outputs to USART3 (since I would
+	plug the usb<->serial into the USART2 conector, forget it, and wondered why
+        a USART2 wasn't working!).
+
+-	It also has some code for testing the SYSTICK routines.
+*/
+
+/* 
+Open minicom on the PC with 115200 baud and 8N1 and this routine
+will (should!) echo back chars sent by minicom when "Enter" is typed.
+
+This is setup for the Olimex stm32 board.  If a different board is used
+then here are some of the changes that might be required.
+- LED port and pin
+- USART port
+
+*/
+#include <math.h>
+#include <string.h>
+
+#include "libopenstm32/rcc.h"
+#include "libopenstm32/gpio.h"
+#include "libopenstm32/usart.h"
+
+#include "libopenstm32/systick.h"
+
+
+#include "libusartstm32/usartallproto.h"
+#include "libmiscstm32/systick1.h"
+
+
+
+#include "libmiscstm32/printf.h"
+#include "libmiscstm32/clocksetup.h"
+
+
+/* The following is for checking that static variables are properly intialized */
+char cC[15]={0x0a,0x0d,'M','y','x','w','v','u','t','s','r','q',0x0a,0x0d,0};
+
+/* Some things to check floating point */
+//pi            3.1415926535897932384626433832795028841971 (41)
+double pi = 3.14159265358979323846; // (21 digits)
+double dF = 6.0;
+int nScale = 1000000000;
+
+/* This if for test sprintf */
+char vv[180];	// sprintf buffer
+
+/* These are for testing SYSTICK routines */
+u32 systick0;	// Save SYSTICK counter reading
+u32 systick1;	// Save SYSTICK counter reading
+u32 systick2;	// Save SYSTICK counter reading
+u32 systick3;	// Save SYSTICK counter reading
+u32 systick4;	// Save SYSTICK counter reading
+u32 systickdur0;	// Duration result
+unsigned long long ullsystick0;	// Very big number
+unsigned long long ullsystick1;	// Very big number, also
+
+/* This is for the tiny printf */
+// Note: the compiler will give a warning about conflicting types
+// for the built in function 'putc'.
+void putc ( void* p, char c)
+	{
+		p=p;	// Get rid of the unused variable compiler warning
+		USART2_txint_putc(c);
+	}
+/* Setup the gpio for the LED on the Olimex stm32 P103 board */
+void gpio_setup(void)
+{
+	/* Setup GPIO pin for LED (PC12) (See Ref manual, page 157) */
+	// 'CRH is high register for bits 8 - 15; bit 12 is therefore the 4th CNF/MODE position (hence 4*4)
+	GPIO_CRH(GPIOC) &= ~((0x000f ) << (4*4));	// Clear CNF reset bit 01 = Floating input (reset state)
+	GPIO_CRH(GPIOC) |=  (( (GPIO_CNF_OUTPUT_PUSHPULL<<2) | (GPIO_MODE_OUTPUT_2_MHZ) ) << (4*4));
+	
+}
+/* Stupid routine for toggling the gpio pin for the LED */
+#define LEDBIT	12
+void toggle_led (void)
+{
+	if ((GPIO_ODR(GPIOC) & (1<<LEDBIT)) == 0)
+	{
+		GPIO_BSRR(GPIOC) = (1<<LEDBIT);	// Set bit
+	}
+	else
+	{
+		GPIO_BRR(GPIOC) = (1<<LEDBIT);	// Reset bit
+	}
+}
+/* And now for the main routine */
+int main(void)
+{
+	u16 temp;
+	int i = 0; 		// Timing loop variable
+	int j;			// Another (fixed pt FORTRAN!) variable
+	double dS;		// Some floating point mischief
+	int n1,n2;		// Float-to-fix for printing floating pt
+	char* p;		// Temp getlne pointer
+	u32 alt = 0;		// Step between types of getline and getcount
+	struct USARTLB lb;	// Holds the return from 'getlineboth' of char count & pointer
+	double	dT;		// Experimenting with systick
+ 
+/* ---------- Initializations ------------------------------------------------------ */
+	clocksetup();		// Get the system clock and bus clocks running
+	gpio_setup();		// Need this to make the LED work
+	init_printf(0,putc);	// This one-time initialization is needed by the tiny printf routine
+	SYSTICK_init(0);		// Set SYSTICK for interrupting and to max count (24 bit coutner)
+
+	/* Initialize usart 
+	USARTx_rxinttxint_init(...,...,...,...);
+	Receive:  rxint	rx into line buffers
+	Transmit: txint	tx with line buffers
+	ARGS: 
+		baud rate, e.g. 9600, 38400, 57600, 115200, 230400, 460800, 921600
+		rx line buffer size, (long enough for the longest line)
+		number of rx line buffers, (must be > 1)
+		tx line buffer size, (long enough for the longest line)
+		number of tx line buffers, (must be > 1)
+	*/
+	// Initialize USART and setup control blocks and pointer
+	if ( (temp = USART2_rxinttxint_init(115200,32,2,48,4)) != 0 )
+	{ // Here, something failed 
+		return temp;
+	}
+
+
+	/* JIC the bozo has the serial port to the PC on USART3 */
+	USART3_txmin_init(115200);
+
+/* ---------- End Initializations -------------------------------------------------- */
+
+	/* Annouce to USART3 jic */
+	USART3_txmin_puts("\n\rThis USART3 and the program is for USART2!\r\n");
+
+	/* Announce who we are */
+	USART2_txint_puts("\n\rUtest2 USART2 txint rxint 10-17-2010..........1234567890..........12345Z\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	/* Check that printf works  */
+	printf ("\n\rThis is printf - the number is %u\n\r",314159265);
+	USART2_txint_send();	// Start the line buffer sending
+
+	/* Use SYSTICK tp measure times for some routines to test SYSTICK routines */
+	systick0 = STK_VAL;			// Get & save current SYSTICK reading
+
+	/* sprintf might be useful in some circumstances where one wants to send the same line
+	   to different USARTs */
+	sprintf (vv,"\n\rTest sprintf ");	// Setup buffer in the usual manner
+	systick1 = STK_VAL;			// Get  & save current SYSTICK reading
+	USART2_txint_puts(vv);			// Load to USART2 buffer
+	systick2 = STK_VAL;			// Get  & save current SYSTICK reading
+	USART2_txint_puts("with USART2\n\r");	// Add some stuff
+	systickdur0 = SYSTICK_systickduration(systick2); // Get duration since 'systick2' time
+	USART2_txint_send();			// Start the line buffer sending
+	systick3 = STK_VAL;			// Get  & save current SYSTICK reading
+	USART3_txmin_puts(vv);			// Send to USART3
+	USART3_txmin_puts(" with USART3 \n\r");	// Send some stuff
+	systick4 = STK_VAL;			// Get  & save current SYSTICK reading
+	
+	/* Output the SYSTICK durations */
+	printf ("\n\r%10u SYSTICKs for sprintf duration\n\r",         SYSTICK_24bitdiff(systick1, systick0));	USART2_txint_send();
+	printf ("%10u SYSTICKs for sprintf duration\n\r",             SYSTICK_24bitdiff(systick2, systick1));	USART2_txint_send();
+	printf ("%10u SYSTICKs for txputs, systickduration()\n\r",                      systickdur0        );	USART2_txint_send();
+	printf ("%10u SYSTICKs for USART3 puts\n\r",                  SYSTICK_24bitdiff(systick4, systick3));	USART2_txint_send();
+
+
+	/* Test that busy works and doesn't overrun the output line buffers.
+	If the busy doesn't work, then either it hangs, or doesn't prevent 'send'
+        from stepping ahead into line buffers that have not as yet been sent.
+	*/
+	USART2_txint_puts("1 The quick brown fox jumped over a lazy dog's back\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	USART2_txint_puts("2 The quick brown fox jumped over a lazy dog's back\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	USART2_txint_puts("3 The quick brown fox jumped over a lazy dog's back\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+ 
+	USART2_txint_puts("4 The quick brown fox jumped over a lazy dog's back\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	USART2_txint_puts("5 The quick brown fox jumped over a lazy dog's back\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	USART2_txint_puts("6 The quick brown fox jumped over a lazy dog's back\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	/* Check that 'putc doesn't lose chars */
+	printf ("\n\rX The quick brown fox jumped over a lazy dog's back %10u\n\r",314159265);
+	USART2_txint_send();	// Start the line buffer sending
+	
+	/* Testing that static variables got initialized OK in 'startup_deh' */
+	USART2_txint_puts(cC);
+	USART2_txint_send();	// Start the line buffer sending
+	
+	/* A little experimenting with floating point */
+	systick0 = STK_VAL;			// Get & save current SYSTICK reading	
+	dS = sin(pi/dF);			// standard library sine computation
+	systickdur0 = SYSTICK_systickduration(systick0); // Get how long it took
+	printf ("\n\rFloating point timing\n\r%10u SYSTICKs for sine computation (with arg divide) \n\r",systickdur0);	USART2_txint_send();
+	
+	n1 = ( dS + (0.5/nScale) ) * nScale; // Round and scale 
+	n2 = ((pi/dF) + (0.5/nScale) )*nScale;
+
+	printf ("sine of %u is %u, scaled upwards by %u\n\r", n2, n1, nScale);
+	USART2_txint_send();	// Start the line buffer sending
+
+	printf ("\n\n\rEnter something and hit ENTER\n\r");
+	USART2_txint_send();	// Start the line buffer sending
+
+	systick0 = SYSTICK_getcount32();	// Get 32 bit start time for showing elapsed time
+
+	systick3 = SYSTICK_getcountdiv256();	// Get 64 bit >> 8 time for showing elapsed time
+
+union USYS
+{
+	unsigned long long T;
+	u32 temp[2];
+} usys0,usys;
+	usys0.T = SYSTICK_getcount64();
+	
+	
+	/* Blink the LED on the board so that we can see it is alive */
+	while (1==1) 
+	{
+		/*LED blink rate timing */
+		if ( i++ > 100000)
+		{
+			toggle_led();
+			i = 0;
+		}
+
+		/* Echo incoming chars back to the sender */
+		switch (alt)	// Demonstrate different methods of using 'rxint' 
+		/* Note that with case 0 the LED blinks slower demonstrating that it is less efficient */
+		{
+		case 0:
+			if ((p=USART2_rxint_getline()) != 0)	// Check if we have a completed line
+			{ // Here, pointer points to line buffer with a zero terminated line
+
+		/* Display hi and lo order counters separately (did I get that backwards endian correct?) [Like driving on the left side of the road] */		
+		usys.T = usys0.T - SYSTICK_getcount64();
+		printf ("\n\r#### Elapsed time %10u (.994 min ticks) plus %6u (millisec ticks)\n\r",usys.temp[1],usys.temp[0]/72000);USART2_txint_send();		
+
+
+				systick1 = SYSTICK_getcount32(); // Get 32 bit time now
+				printf ("%10u milliseconds\n\r",(systick0-systick1)/72000);USART2_txint_send();		
+
+
+				printf ("Case %u  Enter something and hit ENTER\n\r", alt);	
+				USART2_txint_send();	// Start the line buffer sending
+				printf ("Char ct = %u ", strlen(p)); // 'strlen()' for demo only; don't do this
+				USART2_txint_send();	// Start the line buffer sending
+				USART2_txint_puts(p);		// Echo back the line just received
+				USART2_txint_puts ("\n");	// Add line feed to make things look nice
+				USART2_txint_send();	// Start the line buffer sending
+				alt = 1;			// Do it differently next time
+				systick0 = SYSTICK_getcount32();	// Get 32 bit time of exit of this case
+			}
+			break;
+		case 1:
+			lb = USART2_rxint_getlineboth();	// Get both char count and pointer
+			/* Check if a line is ready.  Either 'if' could be used */
+//			if (lb.ct > 0)				// Check if we have a completed line
+			if (lb.p > (char*)0)			// Check if we have a completed line
+			{ // Here we have a pointer to the line and a char count
+
+		/* Time some floating pt operations and to check _getcountdiv256 for sanity */
+		systick4 = systick3 - SYSTICK_getcountdiv256();	// Get 64 bit time shifted right 8
+		dT = systick4;			// Convert to float
+		systick1 = STK_VAL; 		// Get current SYSTICK reading
+		systick4 = (dT* 2560/73E6) ;	// Convert to 1/10th secs then back to fixed
+		systick2 = systick1 - STK_VAL;	// Get time for floating multiply
+   printf ("\n\r#### Elapsed time %10u  (0.1 sec ticks) %10u (millisec ticks) %u fp mul\n\r",systick4,usys.temp[0]/72000, systick2);USART2_txint_send();		
+
+				printf ("Case %u  Enter something and hit ENTER\n\r", alt);
+				USART2_txint_send();		// Start the line buffer sending
+				printf ("Char ct = %u ", lb.ct);
+				USART2_txint_send();		// Start the line buffer sending
+				USART2_txint_puts(lb.p);	// Echo back the line just received
+				USART2_txint_puts ("\n");	// Add line feed to make things look nice
+				USART2_txint_send();		// Start the line buffer sending
+				alt = 2;			// Do it differently next time
+				systick0 = SYSTICK_getcount32();	// Get 32 bit time for the first case below
+				ullsystick0 = SYSTICK_getcount64();	// For long elapsed time (down to the very last tick)
+			}
+			break;
+		case 2:
+			lb = USART2_rxint_getlineboth();	// Get both char count and pointer
+			/* Check if a line is ready.  Either 'if' could be used */
+			if (lb.ct > 0)				// Check if we have a completed line
+//			if (lb.p > (char*)0)			// Check if we have a completed line
+			{ // Here we have a pointer to the line and a char count
+
+		/* Time for the case 2 with fixed pt */
+		systick4 = systick3 - SYSTICK_getcountdiv256();	// Get 64 bit time elapsed time
+		ullsystick0 = (ullsystick0 * 256) ;	// Convert to 1/10th secs
+//		ullsystick0 = (ullsystick0 / 3) ;	// Convert to 1/10th secs
+		systick4 = systick4 / 28125;		// Convert to 1/10th secs
+   printf ("\n\r#### Elapsed time %10u  (0.1 sec ticks) %10u (millisec ticks) %u fix mul\n\r",systick4,usys.temp[0]/72000, systick2);USART2_txint_send();		
+
+				systick1 = SYSTICK_getcount32(); // Get 32 bit time now
+				printf ("%10u milliseconds\n\r",(systick0-systick1)/72000);USART2_txint_send();		
+
+				printf ("Case %u. Enter something and hit ENTER\n\r", alt);USART2_txint_send();	// Start the line buffer sending
+				printf ("Char ct = %u \n\r", lb.ct);	USART2_txint_send();	// Start the line buffer sending
+
+				/* Do something without using the line as a zero terminated string */
+				for (j = 0; j < lb.ct; j++)
+					USART2_txint_putc(*lb.p++);	// Echo back the line just received
+				USART2_txint_puts ("\n");		// Add line feed to make things look nice
+				USART2_txint_send();			// Start the line buffer sending
+				alt = 0;				// Do it differently next time
+				systick0 = SYSTICK_getcount32();	// Get 32 bit time of exit of this case
+			}
+			break;
+		}
+	}
+	return 0;
+
+}
+

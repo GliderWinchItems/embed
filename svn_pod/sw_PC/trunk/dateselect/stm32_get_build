@@ -1,0 +1,21 @@
+#! /bin/bash
+# 11-07-2012
+# stm32_get_build
+# Get and build serial port stm32flash loader
+#
+
+# Download source
+svn checkout http://stm32flash.googlecode.com/svn/trunk/ $HOME/stm32flash
+
+# Let the hapless Op have a choice in going ahead
+. promptYESNO
+
+promptYESNO "Did it download OK, and are you ready to compile?"
+if [ "$YESNO" = "y" ] ; then
+	cd $HOME/stm32flash
+	sudo make install
+	exit
+fi
+echo "Skip compile"
+exit
+

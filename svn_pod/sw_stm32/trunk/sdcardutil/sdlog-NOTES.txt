@@ -1,0 +1,146 @@
+/******************************************************************************/
+/* File: sdlog-NOTES.txt -- Implelentation notes for sdlog.c.
+ */
+
+STRUCTURE
+=========
+
+Sdlog_write(...) stores a packet in the write buffer.  Packets can be from 1
+to 250 bytes in length.  Small lengths (say, below 10 byte ling) are discouraged
+for efficiency reasons, but do work just fine.  When the write buffer is full,
+it is queued for writing to the SD-card.  The last packet of a SD-card block
+may need to be broken into two parts with the second part being stored in the
+next block.
+
+All SD-card blocks are 512 bytes in length.  Bytes 0 to 7 are the 64-bit packet
+sequence ID.  That 64-bit integer is in Cortex-M3-native endian.  The packet
+sequence ID is the packet number of the first packet in the block, multiplied
+by 2 + the 2nd-half flag.  If the 1st packet of a block is the 2nd half of a
+packet split across the end of the previous block, then that bit is a 1, else
+0.
+
+The remaining 504 bytes of the SD-card block is packet data.
+
+A block is defined as follows:
+
+	unsigned long long packet_id;
+	unsigned char the_rest[504];
+
+A packet is defined as follows:
+
+	unsigned char size_f;
+	unsigned char data[N];
+	unsigned char size_b;
+
+where (size_f == size_b == N) and (1 <= N <= 250).  Note that (N == 0) is a
+no-data fill character for end-of-block fill, (N == 255) is the part-1-of-2
+flag.  (N == 254) is a part-2-of-2 flag.  (N == 254) is a power down flag.
+(251 <= N <= 252) are reserved values.
+
+Note that N reflectes the size_b specified in the call to sdlog_write(...).
+
+Note that size_f supports read forward and size_b supports read backwards.
+
+A "part-1" packet is a part1-of-2 flag (255) followed by a packet with N
+less than 250.  A "part-2" packet is a packet with N less than 250 followed
+by a part2-of-2 flag.
+
+ALGORITHMS -- Manufacturing
+===========================
+
+Initially, the SD-card shall have all blocks cleared to all 0s.  Technically
+only the first 8 bytes of each block need to be cleared; but since our read/
+write interface currently only supports writing full blocks, there is no 
+reason to not clear the whole block.
+
+ALGORITHMS -- Power Up
+======================
+
+The SD-card is a large, linear file of blocks with blocks numbered from 0
+to some maximum.  If a 1GB card contained 1,984,000 blocks (e.g., SanDisk),
+then then the blocks are numbered from 0 to 1,983,999.  This file of blocks
+is used as a circular queue of data blocks.  The main issue for power up
+processing is to find the rear of the queue.
+
+Note that the packet number of the first packet written after Manufacturing
+is 1.  So, the packet ID of the first data block written will be packet ID 
+2 in block 0.
+
+On power up, the software uses a binary search algorithm to find the rear of
+the queue.  The rear of the queue is detected when two consecutive blocks
+contain packet IDs such that the packet ID of the first block is greater than
+the packet ID of the second block.  If the packet ID of the second block is
+greater than 0, then that block is the head of the queue.  If the packet ID
+of the second block is 0, then the head of the queue is block #0.
+
+Once found, the latest partial block for write will be read into memory.
+
+ALGORITHMS -- Data Queueing
+===========================
+
+Data shall be queued for both read and write.  To support data queueing, there
+is a sdlog_keepalive(...) entry.  See the header for when this should be called.
+
+READ -- Data queueing is handled by an anticipitory buffering algorithm.  The
+idea is to get a few blocks ahead so that all packet reads will be resolved
+without waiting on the actual block read.  The caller should throttle the rate
+at which large chunks of packets are read.  Not doing this will certainly 
+exhaust however many anticipitory buffers are available and cause read calls 
+to stall.
+
+WRITE -- Data queueing on write is handled by a simple queue mechanism.  Since
+the rate data is written is limited by the rate of the data source, not much 
+write queueing should be required.
+
+ALGORITHMS -- Write
+===================
+
+If the size in the write call is less than 1 or greater then 250, then error.
+
+If the remaining free bytes in the most recent write buffer is greater than 
+or equal to the size in the write call plus 2, then create a packet at the 
+end of the data in the most recent write buffer, copy the caller's data into
+that packet and return.
+
+If the remaining free bytes in the most recent write buffer is less than or
+equal to 4, then fill the remaining bytes with 0 and queue the block for
+writing.  Create a packet as above in the next write buffer and return.
+
+If control has gotten here, then we need to split the packet into 2 parts.  Use
+the remaining free bytes to create a "part 1".  A "part 1" packet is a byte of 
+255 followed by a packet that just fills the rest of the buffer and consumes the
+1st part of the caller's data.  A new buffer is prepared and the first packet
+of that buffer is a "part-2" packet containing the 2nd part of the caller's
+data.
+
+As each new SD-card write block buffer is prepared, the first 8 bytes get the 
+packet number of the first packet of that block times 2 plus the "part-2" flag.
+
+ALGORITHMS -- Read (forward)
+============================
+
+{ I'm thinking of getting rid of forward reads. }
+
+ALGORTIHMS -- Read Backwards
+============================
+
+Read backwards reads 1 packet at a time working from the rear of the queue
+towards the front of the queue.  If the size of the caller's buffer is smaller
+than the next packet to be read, then the read backwards call truncates the 
+packet to fit the caller's buffer and returns an error code.
+
+Before that first call to sdlog_read_backwards(...), the starting point for 
+read follows the rear of the queue.  The first call to sdlog_read_backwards(...)
+will fix the start of the read stream as the last packet written.  Packets
+written after the first call to sd_log_backwards(...) do not participate in
+the read stream.
+
+EOF is returned when the read call catches up with the head of the queue.
+
+ALGORTIHMS -- Power Down
+========================
+
+On power down, all data collection will be terminated, a power down flag byte
+will be stored in the next available byte of the current output buffer, and
+the latest partial block will be written to the SD-card device.
+

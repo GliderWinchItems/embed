@@ -1,0 +1,17 @@
+echo ==================================================================================================================================================================
+cd ../devices
+make clean
+make
+cd ../lib/libmi*
+make clean
+make
+cd ../libu*
+#make clean
+make
+cd ../libsu*
+make clean
+make
+cd ../../gpstest2
+make clean
+make
+

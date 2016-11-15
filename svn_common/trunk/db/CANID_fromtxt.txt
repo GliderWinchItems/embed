@@ -1,0 +1,65 @@
+  1  634 CANID_CABLEANGLE_1',		'05D00000', 'LAUNCH', ' CableAngle1: Cable angle AD7799 #2 drum #1
+  2  638 CANID_CABLEANGLE_CMD',		'05D0000C', 'LAUNCH', ' CableAngle1: [0] command code, [1]-[8] depends on code
+  3  906 CANID_CABLE_ANGLE_1',		'3A000000', 'LAUNCH', ' Cable angle for drum #1
+  4  912 CANID_CABLE_ANGLE_ALARM',	'2A000000', 'LAUNCH', ' Cable angle unreliable for drum #1
+  5  378 CANID_ENG_RPMMANIFOLD',	'40600000', 'LAUNCH', 'Engine: rpm:manifold pressure
+  6  381 CANID_ENG_TEMP',		'70600000', 'LAUNCH', ' Eng: thermistor converted to temp
+  7  385 CANID_ENG_THERMTHROTL',	'60600000', 'LAUNCH', ' Eng: thermistor:throttle pot
+  8  383 CANID_ENG_THROTTLE',		'50600000', 'LAUNCH', ' Eng: throttle
+  9  711 CANID_FIX_HT_TYP_NSAT',	'B1C00000', 'LAUNCH', 'GPS winch fix: heigth:type fix:number sats
+ 10  708 CANID_FIX_LATLON',		'A1C00000', 'LAUNCH', 'GPS winch fix: lattitude:longitude
+ 11  716 CANID_LG_ER1',			'D1C00004', 'LAUNCH', ' 1st code  CANID_UNITID_CO_OLI GPS checksum error
+ 12  717 CANID_LG_ER2',			'D1C00014', 'LAUNCH', ' 2nd code  CANID_UNITID_CO_OLI GPS Fix error
+ 13  718 CANID_LG_ER3',			'D1C00024', 'LAUNCH', ' 3rd code  CANID_UNITID_CO_OLI GPS Time out of step
+ 14  752 CANID_MC_DRUM_SELECT',		'D0800814', 'LAUNCH', ' Drum selection
+ 15  747 CANID_MC_MOTOR_KEEPALIVE',	'A0800000', 'LAUNCH', 'Curtis Controller keepalive
+ 16  755 CANID_MC_REQUEST_PARAM',	'D0800824', 'LAUNCH', ' Request parameters from HC
+ 17  724 CANID_MC_STATE',		'FFFFFFF4', 'LAUNCH', ' CANID: Send msgs during launch
+ 18  447 CANID_SE2H_ADC2_HistogramA',	'D0800044', 'LAUNCH', ' SE2: ADC2 HistogramA tx: request count, switch buffers; rx send count
+ 19  448 CANID_SE2H_ADC2_HistogramB',	'D0800054', 'LAUNCH', ' SE2: ADC2 HistogramB tx: bin number, rx: send bin count
+ 20  449 CANID_SE2H_ADC3_ADC2_READOUT',	'D0800064', 'LAUNCH', ' SE2: ADC3 ADC2 readings readout
+ 21  445 CANID_SE2H_ADC3_HistogramA',	'D0800024', 'LAUNCH', ' SE2: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+ 22  446 CANID_SE2H_ADC3_HistogramB',	'D0800034', 'LAUNCH', ' SE2: ADC3 HistogramB tx: bin number, rx: send bin count
+ 23  437 CANID_SE2H_COUNTERnSPEED',	'30800000', 'LAUNCH', ' SE2: (Lower sheave) Count and speed
+ 24  444 CANID_SE2H_ERROR1',		'D0800014', 'LAUNCH', ' SE2: error1
+ 25  443 CANID_SE2H_ERROR2',		'D0800004', 'LAUNCH', ' SE2: error2
+ 26  508 CANID_SE3H_ADC2_HistogramA',	'D0A00044', 'LAUNCH', ' SE3: ADC2 HistogramA tx: request count, switch buffers; rx send count
+ 27  509 CANID_SE3H_ADC2_HistogramB',	'D0A00054', 'LAUNCH', ' SE3: ADC2 HistogramB tx: bin number, rx: send bin count
+ 28  510 CANID_SE3H_ADC3_ADC2_READOUT',	'D0A00064', 'LAUNCH', ' SE3: ADC3 ADC2 readings readout
+ 29  506 CANID_SE3H_ADC3_HistogramA',	'D0A00024', 'LAUNCH', ' SE3: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+ 30  507 CANID_SE3H_ADC3_HistogramB',	'D0A00034', 'LAUNCH', ' SE3: ADC3 HistogramB tx: bin number, rx: send bin count
+ 31  503 CANID_SE3H_COUNTERnSPEED',	'30A00000', 'LAUNCH', ' SE3: (upper sheave) Count and Speed
+ 32  505 CANID_SE3H_ERROR1',		'D0A00014', 'LAUNCH', ' SE3: error1
+ 33  504 CANID_SE3H_ERROR2',		'D0A00004', 'LAUNCH', ' SE3: error2
+ 34  302 CANID_SE4H_ADC2_HistogramA',	'D0400044', 'LAUNCH', ' SE4: ADC2 HistogramA tx: request count, switch buffers; rx send count
+ 35  303 CANID_SE4H_ADC2_HistogramB',	'D0400054', 'LAUNCH', ' SE4: ADC2 HistogramB tx: bin number, rx: send bin count
+ 36  304 CANID_SE4H_ADC3_ADC2_READOUT',	'D0400064', 'LAUNCH', ' SE4: ADC3 ADC2 readings readout
+ 37  300 CANID_SE4H_ADC3_HistogramA',	'D0400024', 'LAUNCH', ' SE4: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+ 38  301 CANID_SE4H_ADC3_HistogramB',	'D0400034', 'LAUNCH', ' SE4: ADC3 HistogramB tx: bin number, rx: send bin count
+ 39  305 CANID_SE4H_CMD',		'D0400074', 'LAUNCH', ' SE4: Command CAN: send commands to subsystem
+ 40  287 CANID_SE4H_COUNTERnSPEED',	'30400000', 'LAUNCH', ' SE4: (drive shaft) count and speed
+ 41  297 CANID_SE4H_ERROR1',		'D0400014', 'LAUNCH', ' SE4: [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+ 42  294 CANID_SE4H_ERROR2',		'D0400004', 'LAUNCH', ' SE4: [0]encode_state er ct [1]adctick_diff<2000 ct
+ 43  577 CANID_TENSION_1',		'05C00000', 'LAUNCH', ' TEN11: Tension AD7799 #1 drum #1
+ 44  581 CANID_TENSION_CMD_1',		'05C0000C', 'LAUNCH', ' TEN11: Tension_1: Command code: [0] command code, [1]-[8] depends on code
+ 45  792 CANID_TILT_ALARM',		'02800000', 'LAUNCH', ' Tilt: alarm: Vector angle exceeds limit
+ 46  806 CANID_TILT_ANGLE',		'42E00000', 'LAUNCH', ' Tilt: Calibrated angles (X & Y)
+ 47  798 CANID_TILT_XYZ',		'42800000', 'LAUNCH', ' Calibrated to angle: x,y,z tilt readings
+ 48  726 CANID_TILT_XYZ_CAL',		'FFFFFFCC', 'LAUNCH', ' CANID: Raw tilt ADC readings
+ 49  783 CANID_TILT_XYZ_RAW',		'4280000C', 'LAUNCH', ' Raw tilt ADC readings
+ 50  703 CANID_TIMESYNC',		'00200000', 'LAUNCH', ' GPS time sync distribution msg
+ 51  725 CANID_TIME_MSG',		'FFFFFFE4', 'LAUNCH', ' CANID: Time msg
+ 52  743 CANID_UNIT_19',		'0280000C', 'LAUNCH', 'Sensor unit: Lower sheave shaft encoder
+ 53  284 CANID_UNIT_2',			'00400000', 'LAUNCH', 'Sensor unit: Drive shaft encoder
+ 54  373 CANID_UNIT_3',			'00600000', 'LAUNCH', 'Sensor unit: Engine 
+ 55  434 CANID_UNIT_4',			'0080000C', 'LAUNCH', 'Sensor unit: Lower sheave shaft encoder
+ 56  501 CANID_UNIT_5',			'00A0000C', 'LAUNCH', 'Sensor unit: Upper sheave shaft encoder
+ 57  561 CANID_UNIT_8',			'0100000C', 'LAUNCH', 'Sensor unit: Level wind
+ 58  563 CANID_UNIT_9',			'0120000C', 'LAUNCH', 'Sensor unit: XBee receiver #1
+ 59  722 CANID_UNIT_99',		'FFFFFFFC', 'LAUNCH', 'Dummy for missing CAN IDs
+ 60  565 CANID_UNIT_A',			'0140000C', 'LAUNCH', 'Sensor unit: XBee receiver #2
+ 61  567 CANID_UNIT_B',			'0160000C', 'LAUNCH', 'Display driver/console
+ 62  569 CANID_UNIT_C',			'0180000C', 'LAUNCH', 'CAW's Olimex board
+ 63  571 CANID_UNIT_D',			'01A0000C', 'LAUNCH', 'POD board sensor prototype ("6" marked on board)
+ 64  702 CANID_UNIT_E',			'01C0000C', 'LAUNCH', 'Logger: sensor board w ublox gps & SD card
+

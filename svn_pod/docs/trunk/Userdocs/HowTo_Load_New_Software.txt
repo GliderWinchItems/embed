@@ -1,0 +1,146 @@
+﻿HowTo_Load_New_Software
+
+======= WINDOWS =====================================================
+11/16/2011
+
+Purpose:
+
+Steps needed to load new software into the POD using the 
+serial port and a Windows PC.
+
+This assumes that the PC has been set up for 'PuTTY' and 'psftp'.
+
+1. Installation of 'STM32FlashLoader' program.
+
+a. Start 'psftp' for downloading the 'Flash_...Setup.exe'
+
+This program can be downloaded from the FIT server.  Start 'psftp'
+and at the prompt: 
+psftp>open FITSSH 
+Where FITSSH is the name you used to setup 'PuTTY' to access the FIT server.
+
+The FIT server then returns a prompt after a couple of startup lines.
+
+b. Navigate to the file on the FIT--
+psftp>cd /Cortex/stm32/FLASH_LOADER_DEMO_um0462
+
+c. Set a path where the files will go--
+
+psftp>lpwd [Shows the current directory which 'psftp' calls "local"]
+psftp>lcd C:\Users\Public [Example]
+
+d. Download the files--
+
+psftp>get -r FLASH_LOADER_DEMO_um0462
+[This takes a while.  It copies the directory from the FIT to 
+your PC at the path specified in c. above.
+
+e. Install the loader program--
+
+Computer, C:, Users, Public, FLASH_LOADER_DEMO_um0462,
+Flash_Loader_Demonstrator_v2.2.0_Setup.exe
+
+Follow the usual prompts for installing a program
+
+2. Run program and load the POD
+
+a. Start up the loader program
+
+The program should have a folder 'STMicroelectronics' and a
+subfolder, 'Flash Loader Demonstrator'.  Clicking on the
+application, 'Flash Loader Demo' should bring up a window
+titled "STMicroelectronics, and boxes to set up the serial
+port.
+
+If the USB/Serial port cable is plugged in, you should see the 
+serial port number amongst the ones in the list.  This port
+will be the same number as that found in the PuTTY setup, 
+e.g. COM6.
+
+The other boxes are OK with the defaults.
+
+b. Put the POD in boot mode--
+
+With the "small" box plugged in (i.e. the 4 pin RJ connector)
+set the BOOT0 toggle switch to ON.  Then press the "RESET" 
+pushbutton a couple times to be sure.
+
+c. Check target is readable
+
+Click "Next" on the PC.  The next window should show a stop light
+with Green.  Flash size should show 512 KB.
+
+Sometimes this step fails.  One error is that the POD was not reset
+when the program tries to get a response.  Make sure the toggle sw is
+in the ON position and press the pushbutton smartly a few times.
+
+Another error is a red message saying the targe is write protected.
+Again, go "Back," reset, and try again.
+
+Sometimes setting the UART speed a little slower might be needed.  I've
+tried it on my laptop all the way up to 256000.  Getting past this
+step, however, might be more reliable at a slower speed.  At 9600 baud the
+program load takes about 45 secs.  Since there is a readback-verify once the
+program is loaded going as fast as possible doesn't hurt the reliability.
+
+If the green on the stop light is on, click Next.
+
+d. "select device from target list"
+
+No changes should be needed on this window.
+
+"Target" should show STM32_High-density_512K"
+
+The window below should be filled with "Page" lines.
+
+Sometimes it takes a few seconds before it fills in the data.
+
+If it is filled with data, click Next
+
+e. Setup file to be loaded
+
+Click "Download to device"
+Click "Globabl Erase"
+Select file by click on button just above and to the right
+of "Global Erase".  This gives brings up a "browse" window
+to find the file.
+
+The file to loaded has an extension of "hex," e.g. 'pod_v1.hex'.
+Double click to open it, which brings you back to setup window.
+
+f.  Load the flash in the POD
+
+Click on "Next"
+A progress bar shows the loading, follwed by a readback and verify.
+It should end with the bar green and "Download operation finished
+successfully."
+
+g.  Start POD
+
+Turn toggle switch on "small box" back to OFF.  Press RESET
+
+Close FLash_Loader... program on PC.
+
+Launch 'PuTTY'
+Click on "POD" in the "Saved Sessions" window, then click on
+Load.
+Click "Open"
+Press Pushbutton on BOX (large box).  This is needed because when the
+'pod_v1' routine comes out of RESET flashing a new program it appears 
+to the startup program to have been in a deepsleep state, so it updates
+the time and goes back into deepsleep.  Pressing the Pushbutton on the 
+(large) BOX wakes it up (which is different than pressing RESET on the
+small box).
+
+Typing in a command, e.g. 'm' to see the load-cell should show that the
+POD is running.
+
+
+
+
+
+
+If nothing is showing, type "a<ret> to see current accelerometer data,
+or "b<ret> to see battery/temperature data.  'x<ret> goes back to the
+menu, etc.
+

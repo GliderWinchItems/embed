@@ -1,0 +1,4 @@
+echo '# Cleaning "*.log" files'
+rm -f *.log *.tmp
+cd ../../..
+./z_clean

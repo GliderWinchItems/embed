@@ -1,0 +1,7 @@
+echo "# Making \"hub-server\""
+rm  -f hub-server
+gcc -o hub-server hub-server.c hub-server-sock.c hub-server-util.c -pthread
+
+echo "# Making \"hub-server-test\""
+rm  -f hub-server-test
+gcc -o hub-server-test z_test/hub-server-test.c

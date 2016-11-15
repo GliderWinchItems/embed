@@ -1,0 +1,10 @@
+#!/bin/bash
+# sepdurgo - run separator_durations
+# Separate out launches and measure the duration of the launches
+
+
+#gcc separator_durations.c -o separator_durations && sort ~/winch/download/121208/121208.174500R | 
+#./separator_durations 100000 1000 50 
+
+# Use this one where x is pre-sorted (to save time when tinkering)
+gcc separator_durations.c -o separator_durations && ./separator_durations 100000 1000 50 < x

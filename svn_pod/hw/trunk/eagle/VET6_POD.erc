@@ -1,0 +1,40 @@
+EAGLE Version 4.13 Copyright (c) 1988-2004 CadSoft
+
+Electrical Rule Check for /MD0/home/deh/eagle/STM32F103VxT6_pod_mm/VET6_POD.sch at  5/14/2011 12:09:53 
+
+WARNING: Sheet 1/1: unconnected Pin: RA2G$2 2
+WARNING: Sheet 1/1: unconnected Pin: RA2G$2 1
+WARNING: Sheet 1/1: unconnected Pin: RA2G$3 2
+WARNING: Sheet 1/1: unconnected Pin: RA2G$3 1
+WARNING: Sheet 1/1: unconnected Pin: U$3G$4 2
+WARNING: Sheet 1/1: unconnected Pin: U$3G$4 1
+WARNING: Sheet 1/1: SUPPLY Pin +5V/4 overwritten with +3.3V/XB
+WARNING: Sheet 1/1: SUPPLY Pin -15V overwritten with 3.3V_SD_CARD|GPS
+WARNING: Sheet 1/1: POWER Pin IC2P VCC connected to MAX3232_VCC
+WARNING: Sheet 1/1: POWER Pin IC5POWER VDD_1 connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC5POWER VDD_2 connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC5POWER VDD_3 connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC5POWER VSS_1 connected to GND
+WARNING: Sheet 1/1: POWER Pin IC5POWER VSS_2 connected to GND
+WARNING: Sheet 1/1: POWER Pin IC5POWER VSS_3 connected to GND
+WARNING: Sheet 1/1: POWER Pin IC5POWER VDD_4 connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC5POWER VSS_4 connected to GND
+WARNING: Sheet 1/1: POWER Pin IC5POWER VDD_5 connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC5POWER VSS_5 connected to GND
+WARNING: Sheet 1/1: POWER Pin IC5BAT_AN VBAT connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC5BAT_AN VSSA connected to GND
+WARNING: Sheet 1/1: POWER Pin IC5BAT_AN VDDA connected to VCC
+WARNING: Sheet 1/1: POWER Pin IC7 AVDD connected to +5V/2
+WARNING: Sheet 1/1: POWER Pin IC7 DVDD connected to VCC_AD7799_SW
+WARNING: Sheet 1/1: POWER Pin IC101 VCC connected to +3.3V/XB
+WARNING: Sheet 1/1: POWER Pin X100 VCC connected to 3.3V_TXCO+SUPPLY
+WARNING: Sheet 1/1: POWER Pin IC104 AVDD connected to +5V/2
+WARNING: Sheet 1/1: POWER Pin IC104 DVDD connected to VCC_AD7799_SW
+WARNING: Sheet 1/1: POWER Pin IC103 VSS connected to GND
+WARNING: Sheet 1/1: POWER Pin IC100P VCC connected to 3.3V_SD_CARD|GPS
+WARNING: Sheet 1/1: POWER Pin IC9 V- connected to GND
+
+Board and schematic are consistent
+
+    0 errors
+   31 warnings

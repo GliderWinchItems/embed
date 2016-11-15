@@ -1,0 +1,41 @@
+README.notes
+08/22/2013
+
+Notes on CAN
+
+1. CANOpen compability
+
+  #define CANOPEN in 'common_cab.h' selects the a unit id and data type scheme that
+  is designed to be compatible with the CANOpen scheme.  Commenting out this #define
+  selects the original unitid and data type scheme.  As things were added the original
+  scheme was not thoroughly tested, as the focus became be CANOpen compatible so that
+  motor controllers and chargers using CANOpen would not need a separate CAN bus.
+
+2. CAN_RESETALL | CAN_DATAID_MASTERRESET
+
+  This is a FIFO1 (high priority) CAN msg and interrupt priority that executes
+  a software forced system RESET.  The CAN_DATAID_MASTERRESET is added to the 
+  msg since all zeros (highest possible CAN priority) is resevered for CANOpen
+  NMT uses.
+
+  All units respond to his msg so all units will RESET, reboot, and enter the loader routine.
+  (In the loader routine, if no loading msgs are received within a timeout period the
+  loader jumps to the application.)
+
+3. CAN_RESETALL | CAN_DATAID_WAITDELAYRESET
+
+  This is a FIFO1 level msg that must carry a 8 byte payload.  The first word of the
+  payload sets the number of 1/2048th sec ticks that CAN msgs are not buffered (and therefore sent).
+  The main purpose is to quiet the CAN bus when program loading is in progress.
+
+  The 2nd word of the payload carries the "don't care" mask in the high order 16 bits
+  and unit id in the low order 16bits.  This so the 
+  CAN_RESETALL msg skips the unit, or units falling within the mask, that we want to 
+  communicate with.
+
+  Each reception of the msg sets the counter with the new value.  Sending a count
+  of zero will remove a suspension that has not timed out.
+
+  
+
+

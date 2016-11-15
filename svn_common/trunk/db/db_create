@@ -1,0 +1,12 @@
+#!/bin/bash
+# db_create
+# 09/05/2016
+# Generate 'ij' script and execute
+rm x
+echo "connect 'jdbc:derby://localhost:1527/$HOME/gitrepo/svn_common/trunk/db/pcc;create = true';" > x
+echo
+echo "NOTE: patience--THIS WILL TAKE A WHILE!"
+echo
+ij x
+
+exit

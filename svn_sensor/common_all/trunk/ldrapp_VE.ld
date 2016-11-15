@@ -1,0 +1,184 @@
+OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm",
+	      "elf32-littlearm")
+OUTPUT_ARCH(arm)
+/* Linker script for STM32F103VET6, 512K flash, 64K RAM */
+
+ENTRY (Reset_Handler);
+
+/* Define memory regions. */
+MEMORY
+
+{
+	RAM      (RWX) : ORIGIN = 0x20000000, LENGTH = 64K
+
+	/* Flash for program (.text) */
+	FLASH    (RX)  : ORIGIN = 0x08005000, LENGTH = 512K - 0x5000 - 0x0800 - 0x0800 - 0x0800 - 0x0800 - 0x0800 - 0x0800
+
+        /* Short tables, e.g. command CAN ids for functions, app program crc check */
+	FLASHP0a  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0200, LENGTH = 0x0200 /* Command CAN ID table */
+	FLASHP0b  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0400, LENGTH = 0x0200 /* App crc table */
+	FLASHP0c  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0600, LENGTH = 0x0200 /* Reserved */
+	FLASHP0d  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0800, LENGTH = 0x0200 /* Reserved */
+
+	/* Areas for parameters associated with functions implemented by the app. */
+	FLASHP1  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0800 - 0x0800, LENGTH = 0x0800
+	FLASHP2  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0800 - 0x0800 - 0x0800, LENGTH = 0x0800
+	FLASHP3  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0800 - 0x0800 - 0x0800 - 0x0800, LENGTH = 0x0800
+	FLASHP4  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0800 - 0x0800 - 0x0800 - 0x0800 - 0x0800, LENGTH = 0x0800
+	FLASHP5  (RX)  : ORIGIN = 0x08000000 + 512K - 0x0800 - 0x0800 - 0x0800 - 0x0800 - 0x0800 - 0x800, LENGTH = 0x0800
+}
+
+/* Let programs know what they have to work with. */
+__sizeof_flash0a  = 0x0200;
+__sizeof_flash0b  = 0x0200;
+__sizeof_flash0c  = 0x0200;
+__sizeof_flash0d  = 0x0200;
+
+__sizeof_flashp1 = 0x0800;
+__sizeof_flashp2 = 0x0800;
+__sizeof_flashp3 = 0x0800;
+__sizeof_flashp4 = 0x0800;
+
+/* Address of application jump address */
+__appjump    = 0x08005000;
+__appoffset  = 0x08005000;
+
+_MYHEAP_SIZE = 1024;
+__MSP = 0x20000000 + 64K - 2048;
+
+SECTIONS
+{
+	.flash	:
+	{
+		*(.vectors)
+                *(.text .text.* .gnu.linkonce.t.*)
+                *(.plt)
+                *(.gnu.warning)
+                *(.glue_7t) 
+                *(.glue_7) 
+                *(.vfp11_veneer)
+                *(.ARM.extab* .gnu.linkonce.armextab.*)
+                *(.gcc_except_table)
+		*(.v4_bx )
+		*(.rodata.str1.*)
+		*(.rodata)
+		. = ALIGN(4);
+
+	} 	>FLASH
+
+/* Flash area for storing short tables. */
+	.flashh0a :
+	{
+		__paramflash0a = .;
+		*(.appparam0a)
+		. = ALIGN(4);
+	} 	>FLASHP0a
+	.flashh0b :
+	{
+		__paramflash0b = .;
+		*(.appparam0b)
+		. = ALIGN(4);
+	} 	>FLASHP0b
+	.flashh0c :
+	{
+		__paramflash0c = .;
+		*(.appparam0c)
+		. = ALIGN(4);
+	} 	>FLASHP0c
+	.flashh0d :
+	{
+		__paramflash0d = .;
+		*(.appparam0d)
+		. = ALIGN(4);
+	} 	>FLASHP0d
+
+
+/* A flash area for storing parameters. */
+	.flashp1 :
+	{
+		__paramflash1 = .;
+		*(.appparam1)
+	} 	>FLASHP1
+	
+	.flashp2 :
+	{
+		__paramflash2 = .;
+		*(.appparam2)
+		. = ALIGN(4);
+	} 	>FLASHP2
+	
+	.flashp3 :
+	{
+		__paramflash3 = .;
+		*(.appparam3)
+		. = ALIGN(4);
+	} 	>FLASHP3
+	
+	.flashp4 :
+	{
+		__paramflash4 = .;
+		*(.appparam4)
+		. = ALIGN(4);
+	} 	>FLASHP4
+
+	.flashp5 :
+	{
+		__paramflash5 = .;
+		*(.appparam4)
+		. = ALIGN(4);
+	} 	>FLASHP5
+	
+.ARM.extab :
+	{
+		*(.ARM.extab* .gnu.linkonce.armextab.*)
+	} > FLASH
+
+   /* .ARM.exidx is sorted, so has to go in its own output section.*/
+   .ARM.exidx : {
+        __exidx_start = .;
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+        __exidx_end = .;
+		__data_image = .;
+	  	PROVIDE( __data_image = . );
+    } >FLASH
+
+	.data	: ALIGN (4)
+	{
+		__data_section_start = .;
+                _sdata = .;        /* global needed for startup_stm3210x_md_vl.S */
+		PROVIDE ( __data_section_start = .); 
+                *(.cs3.region-head.ram)
+                KEEP(*(.jcr))
+                *(.got.plt) *(.got)
+                *(.shdata)
+                *(.data .data.* .gnu.linkonce.d.*)
+                _edata = .;        /* global needed for startup_stm3210x_md_vl.S */
+		__data_image_end = .;
+	  	PROVIDE( __data_image_end = . );
+		_end_data = .;
+	. = ALIGN(4);
+	} >RAM AT>FLASH
+
+	.ram	:
+  	{
+    		PROVIDE (_start_of_bss = .);
+                _sbss = .;         /* global needed for startup_stm3210x_md_vl.S */
+		__bss_start__ = .;
+    		*(.bss)    
+		*(.bss*)
+                *(.shbss)
+                *(.bss .bss.* .gnu.linkonce.b.*)
+                *(COMMON)
+                . = ALIGN(4);
+                *(.ram.b .bss.ram)
+                . = ALIGN (4);
+                 _ebss = .;        /* global needed for startup_stm3210x_md_vl.S */
+    		_end_of_bss = .;
+		__bss_end__ = .;
+ 	        _end = .;
+                __end = .;
+		PROVIDE (_end_of_bss = .);
+
+  	}  >RAM 
+}
+

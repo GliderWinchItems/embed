@@ -1,0 +1,24 @@
+#!/bin/bash
+# 05/12/2016
+# Compile and load database parameter tables
+# ./mm <table selection name first function> <...second function>
+# ./mm TENSION_1a TENSION_1b
+# 
+# Specify which flash size
+export LDRAPPLD=ldrapp_VC.ld
+
+echo
+echo "########## First table ("_a") $1"
+make -f Makefile clean
+make -f Makefile TSELECT=-D$1 && make -f Makefile TSELECT=-D$1 flash
+
+echo
+echo "########## Second table ("_b") $2"
+make -f Makefile_b clean
+make -f Makefile_b TSELECT=-D$2 && make -f Makefile_b TSELECT=-D$2 flash
+
+echo
+echo "########## Table with function command CAN ids $3"
+make -f Makefile_unit clean
+make -f Makefile_unit TSELECT=-D$3 && make -f Makefile_unit TSELECT=-D$3 flash
+

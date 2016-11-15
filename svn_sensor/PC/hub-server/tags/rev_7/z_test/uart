@@ -1,0 +1,1 @@
+socat TCP4:localhost:32123 /dev/ttyACM0,raw,echo=0,crnl

@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+static FILE *in;
+
+static long unix_time;
+static long tension;
+static float x_acc, y_acc, z_acc, total_acc;
+static char human_time[30];
+static long tick;
+
+main(int argc, char *argv[])
+{
+	if(argc != 2)
+		exit(EXIT_FAILURE);
+
+	in = fopen(argv[1], "r");
+	if(!in)
+		exit(EXIT_FAILURE);
+		
+	while(1==1)
+	{
+		int ch = fgetc(in);				/* Peek at 1st char of line */
+		
+		if(ch == EOF) break;
+
+		if(ch != '1')					/* Skip non-data lines */
+		{
+			while(ch != '\n')
+			{
+				ch = fgetc(in);
+				if(ch == EOF) break;
+			}
+			continue;
+		}
+
+		ungetc(ch, in);					/* Put the 1st char back */
+
+		fscanf(in, "%ld %ld %f %f %f %f\n",
+				&unix_time, &tension, &x_acc, &y_acc, &z_acc, &total_acc);
+if(1==0)				
+		printf("%ld %ld %f %f %f %f\n",
+				unix_time, tension, x_acc, y_acc, z_acc, total_acc);
+	}
+	
+	fclose(in);
+	exit(EXIT_SUCCESS);
+}

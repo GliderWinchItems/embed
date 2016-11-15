@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+#
+export HUB_SERVER_PROXY_HS_HOST=localhost
+export HUB_SERVER_PROXY_HS_PORT=32123
+export HUB_SERVER_PROXY_TT_HOST=localhost
+export HUB_SERVER_PROXY_TT_PORT=32124
+export HUB_SERVER_PROXY_BINARY=N
+$HOME/svn_sensor/PC/hub-server/tags/rev_1/hub-server-proxy
+

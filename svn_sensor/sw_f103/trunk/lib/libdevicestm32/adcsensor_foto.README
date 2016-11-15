@@ -1,0 +1,78 @@
+adcsensor_foto.README
+
+07/17/2013
+
+Summary 
+
+In 'canwinch_pod_common_systick2048.c' 'SYSTICK_IRQHandler' phases in to the time sync messages
+coming from the "co" which in turn sync's to the GPS 1 PPS pulses.  These time sync messages
+arrive at 64 per second.  The 'SYSTICK_IRQHandler' synchronizes 2048 interrupts per second to 
+the incoming 64 per second, thus increasing the rate 32x.  A counter is sync'd so that the lower
+5 bits transition from 31 to 0 on the 1/64th second boundary.
+
+When a systick interrupt occurs a call to a subroutine will be made if a pointer is non-null.
+systickHIpriority_ptr = &savereadings;
+'adcsensor_foto' sets the pointer duringi intialization.  This first call is made under high
+priority interrupt and as such is expected to be short.  'adcsensor_foto' stores copies of
+the shaft encoding counter, time of the transition of the counter, and time of the systick
+interrupt.  These times originate by storing the DWT_CYCNT counter, a 32 bit counter in the 
+DWT debug module.  (Note: tracing with a debugger might cause problems...maybe not.)
+
+Before exiting, 'SYSTICK_IRQHandler' triggers an interrupt NVICISPR(NVIC_I2C2_EV_IRQ), which
+is set to a low level priority for further processing of the just-stored variables.  This
+interrupt handler calls a subroutine if a pointer is non-null.
+systickLOpriority_ptr = &compute_doit;
+'compute_doit' is being called 2048 times per second, or 32x during a 1/64th second measurement
+frame.  One out of 8 times it does the computation and the other 7 simply returns.  This gives
+a computation rate of 256 per sec.  
+
+The stategy is to compute the rpm four times during a 1/64th sec interval and run these values
+through a cic3 filter to smooth out the jitter.  The output is at 64 per second, and a CAN
+message with absolute encoder count and the filtered rpm count in the data payload.
+
+'adcsensor_foto' implements quadrature shaft encoding via two reflective photodetectors.  This is
+accomplished by using the adc "watchdog" facility and two adcs.  The ADCs run full speed in 
+a scan mode.  Th input resistance from the photodetectors is 470 ohms allowing the minimum sample
+time to be used.  No interrupts or DMA for the conversion data are required, howeever when an adc 
+conversion result exceeds the watchdog register setting an interrupt is triggered.  The interrupt 
+routine then manipulates the register settings so that there is hysterisis of the ON and OFF states.  
+Logic and a table lookup is used to maintain a counter of transitions, which is signed, and shows net 
+positive and negative count, plus independent counts of photodetector A and B.  Illegal transisitions
+are detected and counted for the monitoring of errors.
+
+The adc watchdog interrupt is set to a priority that is higher than the systick interrupt.  This is
+important since the systick interrupt handling will be storing the latest set of variables from
+the adc watchdog interrupt handling.  This storing is done with the adc watchdog interrupt disabled.
+If the systick interrupt would be higher than the adc watchdog interrupt then the possiblity exists
+that systick interrupt would interrupt the adc watchdog handling mid-point and some of the variables
+being stored would not belong to the same set.  This results in a rare, but obvious glitch in the
+rpm computation.  A bug in libopenstm32 with the definitions of the priority registers that include
+the systick function resulted in the priority not being set and therefore defaulting to the highest
+priority.  (Yes, one of those nasty bugs that was vexing to find.)
+
+The rpm speed computation is straightforward for speeds where the number of encoder counts in an interval
+is one or greater.  Each 1/256th second the difference of the encoder count from the previous one is
+gives the number of counts.  The difference in the times gives the time elapsed.  From a process 
+in 'canwinch_pod_common_systick2048.c' the average number of ticks per second of the system clock has
+been measured, which provides a way to correct the elapsed time due to the system clock not being
+exact.  The system clock is nominally 64,000,000 per second, however even with a crystal it may be,
+e.g. 64000158.  If it is running on the internal oscillator it may be as much as +/- 1.5% off.  By 
+measuring the number of ticks per second to a reference that in turn synchronized to the GPS, the
+error is virtually eliminated.  The rpm computation therefore consists of the number of encoder
+ticks (distance) divided by the elapsed time, adjusted by the system clock error.  This is done
+with integers and scaling of course is required. 
+
+One scaling not included in the rpm computation is the number of "bars" on the encoder wheel.  A 
+black and white pair of bars gives four encoder counts.  So, 5 black bars on a white background 
+gives 10 bars total and 20 encoder counts per revolution.  The computation result therefore
+must be divided by an additional factor of 20 to yield rev per sec.  Multiplying by 60 and dividing 
+by 20 for secs-in-a-minute gives rpm.  If the computation is scaledl up by 10x, then the result
+of course is scaled up.  This scaling may be changed in code updates.  In 'adcsensor_foto.c'
+check--
+'static s32 speed_arith(u32 numerator, s32 denominator)' 
+
+
+
+
+
+

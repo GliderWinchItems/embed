@@ -1,0 +1,21 @@
+10-15-2011
+Sample output--
+
+32KHztest 07-02-2011 r1
+RTC reg before   : PRL 0x00008000, CNT 0xd2b293ba, ALR 0xffffffff
+debug2: 0x00000002  cFlag: 02
+RCC_CSR: 0x14000000
+RTC reg after init: PRL 0x00008000, CNT 0xd2b293cd, ALR 0xffffffff
+Backup domain was good
+Elapsed seconds:   1728342
+RTC reg after lod:PRL 0x00008000, CNT 0xd2b29422, ALR 0xd2b29800
+TEST:BKP_DR3 DR4 reads as 12345678 and should be 0x12345678
+  1 RTC reg: CNT 3534920635, ALR 0xd2b2a3ba, DR1 0xf46d
+  2 RTC reg: CNT 3534922683, ALR 0xd2b2abba, DR1 0xf46d
+  3 RTC reg: CNT 3534924731, ALR 0xd2b2b3ba, DR1 0xf46d
+  4 RTC reg: CNT 3534926779, ALR 0xd2b2bbba, DR1 0xf46d
+  5 RTC reg: CNT 3534928827, ALR 0xd2b2c3ba, DR1 0xf46d
+  6 RTC reg: CNT 3534930875, ALR 0xd2b2cbba, DR1 0xf46d
+  7 RTC reg: CNT 3534932923, ALR 0xd2b2d3ba, DR1 0xf46d
+  8 RTC reg: CNT 3534934971, ALR 0xd2b2dbba, DR1 0xf46d
+

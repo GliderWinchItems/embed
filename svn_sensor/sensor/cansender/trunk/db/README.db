@@ -1,0 +1,78 @@
+README.db
+05/16/2015
+
+Notes on the db strategy
+
+
+1.  CAN unit layout
+
+Low flash (0x08000000 - 0z08005000): Loader program (ldr.c)
+
+Mid flash (0x08005000 - ...) Application program
+
+High flash sections--
+  The .ld file defines the locations, i.e. addresses, as
+  a label "__appparam.."
+  Short tables
+  a.  Top table
+     __appparm0a
+      CAN unit (ldr) CAN ID
+      Command CAN ID table for Application program
+  b.  CRC table for app
+     __appparm0b
+  c.  Reserved
+     __appparm0c
+  d.  Reserved
+     __appparm0d
+  Parameter for functions
+  1  First function table
+  2  Second function table
+  ...
+
+Example for 256K|20K flash|ram, size 0x0800--
+RAM              0x20000000         0x00005000         xrw
+FLASH            0x08005000         0x00038000         xr
+FLASHP0a         0x0803fe00         0x00000200         xr
+FLASHP0b         0x0803fc00         0x00000200         xr
+FLASHP0c         0x0803fa00         0x00000200         xr
+FLASHP0d         0x0803f800         0x00000200         xr
+FLASHP1          0x0803f000         0x00000800         xr
+FLASHP2          0x0803e800         0x00000800         xr
+FLASHP3          0x0803e000         0x00000800         xr
+FLASHP4          0x0803d800         0x00000800         xr
+FLASHP5          0x0803d000         0x00000800         xr
+
+2.  Loading scheme
+
+  Loader--
+  This is a "permanent" program that has a CAN ID embedded that
+acts somewhat like a serial number.  The CAN ID associates with 
+that particular piece of hardware.
+
+  The loader is capable of loading flash over the CAN bus.  The loading
+host, i.e. PC,  uses the unit's CAN ID for sending/receiving.
+
+  When the board powers up the loader program waits for a short period
+(green LED flashing on the POD board) for the PC to initiate a loading.
+If it times out it forces watchdog timeout which resets the processor, but
+upon power up the prior condition is noted and the program directly jumps
+to the app program in a state of having come out of reset.
+
+  The app program needs CAN IDs, so for loading the app the process is 
+for the loader to also load the top flash table with the command CAN ID's that
+the app will require to subsequently load the parameter tables for each
+function.
+
+  App--
+
+  The app handles the loading and updating of a flash table for each of 
+the functions, e.g. tension drum #1, drum #2, cable+_angle.  The db provides
+the table for each function.  
+
+Initial--
+
+  The loader program (ldr.c) must be given the CAN
+
+
+
+

@@ -1,0 +1,3 @@
+reset halt
+flash write_image erase sdcardutil.srec
+reset run

@@ -1,0 +1,18 @@
+
+
+
+libmiscstm32
+ library with generally system-level routines, such as SYSTICK
+and startup code.
+
+libopenstm32
+ .h files with definitions of registers and register bits for
+the stm32.
+
+libusartstm32
+ library with USART routines.
+
+libxbeestm32
+ library with XBee specific routines
+
+

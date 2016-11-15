@@ -1,0 +1,32 @@
+Circuit: * C:\Users\gsmoore\Documents\SVN\TestSVN\svn_et\LTspice\model\trunk\ETdcdcGM.asc
+
+Csegflm5: Increased Cpar to 2.4e-011
+Csegflm4: Increased Cpar to 2.4e-011
+Csegflm3: Increased Cpar to 2.4e-011
+Csegflm2: Increased Cpar to 2.4e-011
+Csegflm1: Increased Cpar to 2.4e-011
+Cdcel: Increased Cpar to 2e-010
+WARNING: Node NC_01 is floating.
+
+WARNING: Less than two connections to node NC_01.  This node is used by CSEGFLM5.
+Direct Newton iteration for .op point succeeded.
+
+Date: Tue Sep 17 19:40:09 2013
+Total elapsed time: 7.394 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 229471
+traniter = 229423
+tranpoints = 112942
+accept = 89740
+rejected = 23202
+matrix size = 80
+fillins = 123
+solver = Alternate
+Thread vector: 14.1/11.8[2] 28.6/10.7[2] 1.3/1.4[1] 1.3/81.2[1]  2592/500
+Matrix Compiler1: 12.5 KB object code size  4.2/2.7/[2.1]
+Matrix Compiler2: 9.26 KB object code size  7.0/3.1/[1.1]
+
+

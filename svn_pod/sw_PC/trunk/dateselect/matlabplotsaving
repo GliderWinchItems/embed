@@ -1,0 +1,38 @@
+#!/bin/bash
+# 
+# 11-28-2012 deh
+# See 'HowToMatlabPlots.txt'
+#
+# matlabplotsaving 121117 /media/LEXAR
+#
+
+if [ $# -ne 2 ] ; then
+	echo "Wrong number of arguments."
+	echo "  1st = subdirectory in ~/winch/download'"
+	echo "  2nd = path of flash drive (source)"
+	echo "  Example:"
+	echo "matlabplotsaving 121117 /media/LEXAR"
+	exit
+fi
+
+# Directory where computed data is saved on local machine
+COMPDIR=$HOME/winch/computed/$1
+
+# Directory where computed data is saved on FIT server
+FITDIR=/winch/computed
+
+# Copy thumb'ed plots to winch/computed directory
+cp $2/*launch?fig?.jpg $COMPDIR/
+
+# Remove "executable"
+chmod -x $COMPDIR/launch?fig?.jpg
+
+# Compress jpg files--
+tar -cvf $COMPDIR/matlabpdf.gz launch?fig?.jpg
+
+# Copy to FIT server
+rsync -av -e 'ssh -p 41574' $COMPDIR/matlabpdf deh@10.1.1.100:$FITDIR/
+
+
+exit
+

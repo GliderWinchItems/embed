@@ -1,0 +1,102 @@
+README.launchtime
+
+10/31/2012
+
+Hack of dateselect.c adds ability to
+ kk - display launch times buffer in POD
+ km - display "more" launch times
+ ks - select launchtime number for download
+ (e.g. "ks 2-5" would do three downloads: 2,3,5)
+ kd - start the downloads selected by ks
+ k<space> - raw manual 'k' command to POD
+
+All the features of 'dateselect.c' are retained (which
+makes the code a bit messy).
+
+The logic of this mess--
+
+Endless 'do' loop is broken by ctl C (as before)
+
+This loop waits with a "select()", waiting for--
+ keyboard char
+ serial port char
+ timeout timer (addition 'select')
+
+Chars are assembled into lines, and the first
+char, or two, determines what is done with the line.
+
+Download of hex data has the first char on a line hex--0-9, A-F.
+
+Non-hex first chars have other meanings.  Lower case letters are
+"info" lines from the POD, such as the menu, debugging, etc.
+
+"<" from the POD signifies end of a download detected.  This can
+be either stop time reached, or in the case of 'k' commands the
+start-of-launch reached (since readout is in descending time).
+
+The POD only recognizes the new command, 'k n yyyy', where 'n' is 1 or 2, 
+and 'yyyy' is the launch time entry number.  '1' returns the entry
+number from the buffer, conveying the linux time.  '2' starts
+the download, beginning with the launch time entry and continuing
+until either a max time duration (of data packets) has transpired or
+the beginning-of-launch was detected.
+
+This program, "launchselect.c", uses the 'k.' commands to start a
+sequency of edited 'k' commands that are sent to the POD.  For example,
+'kk' sends 'k 1 0000', displays results, then sends 'k 1 0001', etc.,
+until 20 lines dislayed.  'km' then displays the next 20, etc.
+
+To do these sequences for the 'k' commands--
+
+The keyboard input "if" sees the 'k' first char and then does a 'switch'
+on the 2nd char.  The command is edited and a state for a 'switch' set
+so that the subsequent lines that come back from the pod (which are serial
+port chars, not keyboard chars), are displayed differently.  For example,
+the POD returns extraneous lines, with regard to what the 'kk' command wants, so
+only those lines starting with '^' are displayed.  Lines such as " GO" and
+debugging lines don't display.
+
+In the main loop, a sequence such as the one for 'kk' starts under the keyboard
+input "if", but continues under the serial port input "if".
+
+For downloads the timeout timer is also needed.  At the end of the main loop 
+a poll of "kd_next()" is made.  This is used at the end of a download to check
+that the ready-for-next-command was received from the POD.
+
+Downloads are stored in directories for the month/day, and by date.time.
+For example, entries selected were Oct 28 and Nov 1, 2012.  If the 
+directory does not exist it is created for that yymmdd.  Entries with the
+same yymmdd are added to that directory.
+
+deh@P4-1:~/winch/download/121101> cd ../121028
+deh@P4-1:~/winch/download/121028> ls -l
+total 128
+-rw-r--r-- 1 deh users 12365 2012-10-31 21:00 121028.001954
+-rw-r--r-- 1 deh users 15716 2012-10-31 21:00 121028.002000
+-rw-r--r-- 1 deh users 12435 2012-10-31 21:21 121028.002025
+-rw-r--r-- 1 deh users 12718 2012-10-31 21:21 121028.002030
+-rw-r--r-- 1 deh users 12494 2012-10-31 21:21 121028.002036
+-rw-r--r-- 1 deh users 12352 2012-10-31 21:21 121028.002042
+-rw-r--r-- 1 deh users 31070 2012-10-31 21:21 121028.005203
+deh@P4-1:~/winch/download/121028> cd ../121101
+deh@P4-1:~/winch/download/121101> ls -l
+total 76
+-rw-r--r-- 1 deh users  9416 2012-10-31 21:21 121101.010237
+-rw-r--r-- 1 deh users 12372 2012-10-31 21:21 121101.010241
+-rw-r--r-- 1 deh users 12964 2012-10-31 21:21 121101.010248
+-rw-r--r-- 1 deh users 12861 2012-10-31 21:21 121101.010431
+-rw-r--r-- 1 deh users 12606 2012-10-31 21:21 121101.011924
+
+
+Workhouse routines--
+void consolewriteedit(void)
+void kd_next(void)
+
+
+Little glitches--
+
+If 'kd' is executed and the POD hasn't sent a "> Ready for command" the readout might be 
+too short.
+
+
+

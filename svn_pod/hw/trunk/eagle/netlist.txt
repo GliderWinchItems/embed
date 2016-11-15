@@ -1,0 +1,986 @@
+Netlist
+
+Exported from VET6_POD.sch at  5/17/2011 20:13:54 
+
+EAGLE Version 4.13 Copyright (c) 1988-2004 CadSoft
+
+Net      Part     Pad      Pin        Sheet
+
+Change Class 0;
++3.3V/XB C101     1        1          1
+         IC101    P$1      VCC        1
+         IC102    5        VO         1
+         R103     2        2          1
+
+Change Class 0;
++5V/2    C114     1        1          1
+         C116     1        1          1
+         C16      +        +          1
+         IC104    13       AVDD       1
+         IC104    9        REFIN+     1
+         IC6      5        VO         1
+         IC7      13       AVDD       1
+         IC7      9        REFIN+     1
+         R117     E        E          1
+         R118     E        E          1
+         R21      2        2          1
+         R23      2        2          1
+         RED1     MP       MP         1
+         RED2     MP       MP         1
+
+Change Class 0;
++5V/3    C8       +        +          1
+         IC3      5        VO         1
+         JP5      4        4          1
+         JP6      4        4          1
+
+Change Class 0;
++7V      C10      1        1          1
+         C9       1        1          1
+         IC1      1        VI         1
+         IC102    1        VI         1
+         IC3      1        VI         1
+         IC4      P$3      VI         1
+         IC8      1        VI         1
+         JP3      2        2          1
+         P10      MP       MP         1
+         P11      MP       MP         1
+         P9       MP       MP         1
+         QQ2      P$2      S2         1
+         R10      1        1          1
+         R113     2        2          1
+         R12      2        2          1
+
+Change Class 0;
++7V_VIA_RESISTOR C13      +        +          1
+         IC6      1        VI         1
+         R12      1        1          1
+
+Change Class 0;
+3.3V_SD_CARD|GPS C1       1        1          1
+         C2       +        +          1
+         IC1      5        VO         1
+         IC100    1        VCC        1
+         IC103    3        PWR        1
+         JP1      1        1          1
+         U$2      P$4      VDD        1
+         U$3      P$1      1          1
+         U$3      P$2      1          1
+         U$3      P$3      1          1
+
+Change Class 0;
+3.3V_TXCO+SUPPLY C100     1        1          1
+         Q101     3        D          1
+         X100     4        VCC        1
+
+Change Class 0;
+AD7799_1_AIN1+ IC7      5        AIN1+      1
+         R29      2        2          1
+
+Change Class 0;
+AD7799_1_AIN1- IC7      6        AIN1-      1
+         R25      2        2          1
+
+Change Class 0;
+AD7799_1_AIN3+ IC7      3        AIN3+      1
+         R19      2        2          1
+         R21      1        1          1
+         R29      1        1          1
+
+Change Class 0;
+AD7799_1|PAD IC7      11       PSW        1
+         P18      MP       MP         1
+
+Change Class 0;
+AD7799_2_AIN1+ IC104    5        AIN1+      1
+         RA100    P$7      2          1
+
+Change Class 0;
+AD7799_2_AIN1- IC104    6        AIN1-      1
+         RA100    P$8      2          1
+
+Change Class 0;
+AD7799_2_AIN3+ IC104    3        AIN3+      1
+         RA100    P$5      1          1
+
+Change Class 0;
+AD7799_2_AIN3- IC104    4        AIN3-      1
+         RA100    P$6      2          1
+
+Change Class 0;
+AD7799_2|PAD IC104    11       PSW        1
+         P19      MP       MP         1
+
+Change Class 0;
+ADC_IN13|OP_AMP_OUT_FILTERED C120     2        2          1
+         IC5      18       PC3        1
+         R110     2        2          1
+
+Change Class 0;
+ADS7799_1_AIN3- IC7      4        AIN3-      1
+         R23      1        1          1
+         R25      1        1          1
+         THRM     1        1          1
+
+Change Class 0;
+BOOT0    IC5      94       BOOT0      1
+         JP4      1        1          1
+         QQ100    P$1      G1         1
+         RA1      P$4      2          1
+         TO_RJ-1  4        4          1
+
+Change Class 0;
+BOT_CELL_N-DRAIN_P-GATE QQ1      P$3      G2         1
+         QQ1      P$6      D1         1
+         R9       2        2          1
+
+Change Class 0;
+BRDIGE1_YELLOW_AIN1- C17      1        1          1
+         C19      1        1          1
+         IC7      8        AIN2-      1
+         R22      2        2          1
+
+Change Class 0;
+BRDIGE2_YELLOW_AIN1+ C123     1        1          1
+         C125     1        1          1
+         IC104    7        AIN2+      1
+         R115     2        2          1
+         RA100    P$2      1          1
+         RA100    P$4      2          1
+
+Change Class 0;
+BRIDGE1_FILTER+_1 C21      2        2          1
+         R28      1        1          1
+         R33      2        2          1
+
+Change Class 0;
+BRIDGE1_FILTER+_2 C20      2        2          1
+         R24      1        1          1
+         R28      2        2          1
+
+Change Class 0;
+BRIDGE1_FILTER-_1 C21      1        1          1
+         R26      1        1          1
+         R31      2        2          1
+
+Change Class 0;
+BRIDGE1_FILTER-_2 C20      1        1          1
+         R22      1        1          1
+         R26      2        2          1
+
+Change Class 0;
+BRIDGE1_WHITE_AIN2+ C18      1        1          1
+         C19      2        2          1
+         IC7      7        AIN2+      1
+         R24      2        2          1
+
+Change Class 0;
+BRIDGE1_WHITE_SIG+ R125     1        1          1
+         R33      1        1          1
+         WHT2     MP       MP         1
+
+Change Class 0;
+BRIDGE1_YELLOW_SIG- R31      1        1          1
+         YEL2     MP       MP         1
+
+Change Class 0;
+BRIDGE2_FILTER+_1 C124     2        2          1
+         R114     2        2          1
+         R122     1        1          1
+
+Change Class 0;
+BRIDGE2_FILTER+_2 C128     2        2          1
+         R116     1        1          1
+         R122     2        2          1
+
+Change Class 0;
+BRIDGE2_FILTER-_1 C124     1        1          1
+         R121     1        1          1
+         R124     2        2          1
+
+Change Class 0;
+BRIDGE2_FILTER-_2 C128     1        1          1
+         R115     1        1          1
+         R121     2        2          1
+
+Change Class 0;
+BRIDGE2_WHITE_AIN1- C121     1        1          1
+         C125     2        2          1
+         IC104    8        AIN2-      1
+         R116     2        2          1
+         RA100    P$1      1          1
+         RA100    P$3      1          1
+
+Change Class 0;
+BRIDGE2_WHITE_SIG+ R114     1        1          1
+         WHT1     MP       MP         1
+
+Change Class 0;
+BRIDGE2_YELLOW_SIG- R123     2        2          1
+         R124     1        1          1
+         YEL3     MP       MP         1
+
+Change Class 0;
+BRIDGE_WHITE C126     2        2          1
+         IC9      2        -IN        1
+         R120     2        2          1
+         WHT3     MP       MP         1
+
+Change Class 0;
+BRIDGE_YELLOW C126     1        1          1
+         IC9      3        +IN        1
+         YEL1     MP       MP         1
+
+Change Class 0;
+C1+      C5       1        1          1
+         IC2      1        C1+        1
+
+Change Class 0;
+C1-      C5       2        2          1
+         IC2      3        C1-        1
+
+Change Class 0;
+C2+      C6       1        1          1
+         IC2      4        C2+        1
+
+Change Class 0;
+C2-      C6       2        2          1
+         IC2      5        C2-        1
+
+Change Class 0;
+GND      BLK1     MP       MP         1
+         BLK2     MP       MP         1
+         BLK3     MP       MP         1
+         C1       2        2          1
+         C10      2        2          1
+         C100     2        2          1
+         C101     2        2          1
+         C102     2        2          1
+         C103     2        2          1
+         C104     2        2          1
+         C105     2        2          1
+         C106     2        2          1
+         C107     2        2          1
+         C108     2        2          1
+         C109     2        2          1
+         C11      1        1          1
+         C110     2        2          1
+         C111     2        2          1
+         C112     2        2          1
+         C113     2        2          1
+         C114     2        2          1
+         C115     2        2          1
+         C116     2        2          1
+         C117     2        2          1
+         C118     2        2          1
+         C119     2        2          1
+         C12      2        2          1
+         C120     1        1          1
+         C121     2        2          1
+         C122     2        2          1
+         C123     2        2          1
+         C127     2        2          1
+         C13      -        -          1
+         C14      2        2          1
+         C15      1        1          1
+         C16      -        -          1
+         C17      2        2          1
+         C18      2        2          1
+         C2       -        -          1
+         C22      2        2          1
+         C3       2        2          1
+         C4       2        2          1
+         C7       2        2          1
+         C8       -        -          1
+         C9       2        2          1
+         IC1      2        GND        1
+         IC100    4        GND        1
+         IC101    P$10     GND        1
+         IC101    P$14     VREF       1
+         IC102    2        GND        1
+         IC103    2        VSS        1
+         IC104    10       REFIN-     1
+         IC104    12       GND        1
+         IC2      15       GND        1
+         IC3      2        GND        1
+         IC4      P$1      GND        1
+         IC5      10       VSS_5      1
+         IC5      19       VSSA       1
+         IC5      20       VREF-      1
+         IC5      27       VSS_4      1
+         IC5      49       VSS_1      1
+         IC5      74       VSS_2      1
+         IC5      99       VSS_3      1
+         IC6      2        GND        1
+         IC7      10       REFIN-     1
+         IC7      12       GND        1
+         IC8      2        GND        1
+         IC9      4        V-         1
+         JP1      5        5          1
+         JP2      1        1          1
+         JP5      1        1          1
+         JP6      1        1          1
+         JP7      5        5          1
+         JTAG     10       10         1
+         JTAG     12       12         1
+         JTAG     14       14         1
+         JTAG     16       16         1
+         JTAG     18       18         1
+         JTAG     20       20         1
+         JTAG     4        4          1
+         JTAG     6        6          1
+         JTAG     8        8          1
+         P2       MP       MP         1
+         P3       MP       MP         1
+         P30      MP       MP         1
+         P4       MP       MP         1
+         Q1       2        S          1
+         Q102     2        S          1
+         QQ1      P$5      S1         1
+         QQ100    P$5      S1         1
+         QQ2      P$5      S1         1
+         R103     1        1          1
+         R104     2        2          1
+         R105     2        2          1
+         R109     2        2          1
+         R11      2        2          1
+         R111     1        1          1
+         R117     A        A          1
+         R118     A        A          1
+         R119     A        A          1
+         R14      1        1          1
+         R16      2        2          1
+         R17      2        2          1
+         R19      1        1          1
+         R2       2        2          1
+         R30      2        2          1
+         R32      1        1          1
+         R4       2        2          1
+         R5       1        1          1
+         R6       1        1          1
+         R7       1        1          1
+         RA1      P$5      1          1
+         RA1      P$6      2          1
+         RA1      P$7      2          1
+         RA2      P$4      2          1
+         SHD1     MP       MP         1
+         SHD2     MP       MP         1
+         SW100    P$3      P$3        1
+         THRM     2        2          1
+         THRM100  2        2          1
+         TO_RJ-1  2        2          1
+         U$1      4        4          1
+         U$2      P$3      GND        1
+         U$2      P$6      GND1       1
+         X100     2        GND        1
+
+Change Class 0;
+IC6_BYP  C108     1        1          1
+         IC6      4        BYP        1
+
+Change Class 0;
+IC8_BYP  C115     1        1          1
+         IC8      4        BYP        1
+
+Change Class 0;
+JTAG_R-TO-GND-11 JTAG     11       11         1
+         RA2      P$5      1          1
+
+Change Class 0;
+JTAG_R-TO-GND-17 JTAG     17       17         1
+         RA1      P$2      1          1
+
+Change Class 0;
+JTAG_R-TO-GND-19 JTAG     19       19         1
+         RA1      P$3      1          1
+
+Change Class 0;
+JTCK     IC5      76       PA14       1
+         JTAG     9        9          1
+         RA3      P$8      2          1
+
+Change Class 0;
+JTDI     IC5      77       PA15       1
+         JTAG     5        5          1
+         RA3      P$6      2          1
+
+Change Class 0;
+JTDO     IC5      89       PB3        1
+         JTAG     13       13         1
+         RA2      P$8      2          1
+
+Change Class 0;
+JTIMS    IC5      72       PA13       1
+         JTAG     7        7          1
+         RA3      P$7      2          1
+
+Change Class 0;
+JTRST    IC5      90       PB4        1
+         JTAG     3        3          1
+         RA3      P$5      1          1
+
+Change Class 0;
+MAX3232_DUAL_FET QQ100    P$3      G2         1
+         QQ100    P$6      D1         1
+         R8       2        2          1
+
+Change Class 0;
+MAX3232_VCC C7       1        1          1
+         IC2      16       VCC        1
+         Q100     3        D          1
+         QQ100    P$4      D2         1
+
+Change Class 0;
+NRST     IC5      14       NRST       1
+         JTAG     15       15         1
+         RA1      P$1      1          1
+         SW100    P$2      P$2        1
+         TO_RJ-1  3        3          1
+
+Change Class 0;
+OP-AMP_ADJ R119     S        S          1
+         R120     1        1          1
+
+Change Class 0;
+OP_AMP_FB_1 IC9      1        R1A        1
+         R27      1        1          1
+
+Change Class 0;
+OP_AMP_FB_8 IC9      8        R1B        1
+         R27      2        2          1
+
+Change Class 0;
+OP_AMP_GAIN C22      1        1          1
+         IC9      5        R2         1
+         R32      2        2          1
+
+Change Class 0;
+OP_AMP_OUT IC9      6        OUT        1
+         R112     2        2          1
+
+Change Class 0;
+OP_AMP_OUT_1ST_RC C122     1        1          1
+         R110     1        1          1
+         R112     1        1          1
+
+Change Class 0;
+OSC_IN   C11      2        2          1
+         IC5      12       OSC_IN     1
+         P17      MP       MP         1
+         R13      1        1          1
+         X1       2        2          1
+
+Change Class 0;
+OSC_OUT  IC5      13       OSC_OUT    1
+         R15      1        1          1
+
+Change Class 0;
+OSC_OUT_XTAL C15      2        2          1
+         R13      2        2          1
+         R15      2        2          1
+         X1       1        1          1
+
+Change Class 0;
+P1_RS485_Y IC100    5        Y          1
+         P1       MP       MP         1
+
+Change Class 0;
+P5-RS485_Z IC100    6        Z          1
+         P5       MP       MP         1
+
+Change Class 0;
+P6_RS485_B IC100    7        B          1
+         P6       MP       MP         1
+         R100     1        1          1
+
+Change Class 0;
+P7_RS485_A IC100    8        A          1
+         P7       MP       MP         1
+         R100     2        2          1
+
+Change Class 0;
+P13_CANL IC103    6        CANL       1
+         P13      MP       MP         1
+
+Change Class 0;
+P14_CANH IC103    7        CANH       1
+         P14      MP       MP         1
+
+Change Class 0;
+P15_FET_DRAIN P15      MP       MP         1
+         Q102     3        D          1
+
+Change Class 0;
+P28_+7V_VIA_R C127     1        1          1
+         P28      MP       MP         1
+         R113     1        1          1
+
+Change Class 0;
+P29_BEEP_FET_DRAIN P29      MP       MP         1
+         Q1       3        D          1
+
+Change Class 0;
+PA0_WKUP IC5      23       PA0        1
+         R17      1        1          1
+         R18      2        2          1
+
+Change Class 0;
+PA0_WKUP|RJ-45 R18      1        1          1
+         U$1      6        6          1
+
+Change Class 0;
+PA1_SPARE IC5      24       PA1        1
+         R109     1        1          1
+         R20      2        2          1
+
+Change Class 0;
+PA1|RJ-45_SPARE R20      1        1          1
+         U$1      3        3          1
+
+Change Class 0;
+PA2_TIM2_CH2|BEEP_FET IC5      25       PA2        1
+         Q1       1        G          1
+         R30      1        1          1
+
+Change Class 0;
+PA3_ADC123_IN3|THERMISTOR_32KHZ C107     1        1          1
+         IC5      26       PA3        1
+         R106     2        2          1
+         THRM100  1        1          1
+
+Change Class 0;
+PA5_SPI1_SCK_AD7799_SCK IC104    1        SCLK       1
+         IC5      30       PA5        1
+         IC7      1        SCLK       1
+
+Change Class 0;
+PA6_SPI1_MISO_AD7799_DOUT/RDY IC104    15       DOUT/RDY   1
+         IC5      31       PA6        1
+         IC7      15       DOUT/RDY   1
+
+Change Class 0;
+PA7_SPI1_MOSI_AD7799_DIN IC104    16       DIN        1
+         IC5      32       PA7        1
+         IC7      16       DIN        1
+
+Change Class 0;
+PA8_GPIO|SD_CARD_REG_ENABLE IC1      4        CE         1
+         IC5      67       PA8        1
+         R5       2        2          1
+
+Change Class 0;
+PA9_USART1_TX IC2      11       T1IN       1
+         IC5      68       PA9        1
+
+Change Class 0;
+PA10_USART1_RX IC2      12       R1OUT      1
+         IC5      69       PA10       1
+
+Change Class 0;
+PA11_CAN_RX|CAN_RXD IC103    4        RXD        1
+         IC5      70       PA11       1
+
+Change Class 0;
+PA12_CAN_TX|CAN_TXD IC103    1        TXD        1
+         IC5      71       PA12       1
+
+Change Class 0;
+PB0_ADC_IN8|BOTTOM_CELL C119     1        1          1
+         IC5      35       PB0        1
+         R3       2        2          1
+         R4       1        1          1
+
+Change Class 0;
+PB1_ADC8|BOTTOM_CELL JP2      2        2          1
+         QQ1      P$2      S2         1
+         R9       1        1          1
+         U$1      8        8          1
+
+Change Class 0;
+PB1_ADC_IN9|TOP_CELL C118     1        1          1
+         IC5      36       PB1        1
+         R1       2        2          1
+         R2       1        1          1
+
+Change Class 0;
+PB2_BOOT1 BOOT1    MP       MP         1
+         IC5      37       PB2        1
+         R111     2        2          1
+
+Change Class 0;
+PB5_GPIO|XBEE_REG_CE IC102    3        CE         1
+         IC5      91       PB5        1
+         R104     1        1          1
+
+Change Class 0;
+PB6      IC5      92       PB6        1
+         P35      MP       MP         1
+
+Change Class 0;
+PB7      IC5      93       PB7        1
+         P34      MP       MP         1
+
+Change Class 0;
+PB8_GPIO|XB_DTR/SLEEP_RQ IC101    P$9      /DTR/SLEEP_RQ 1
+         IC5      95       PB8        1
+
+Change Class 0;
+PB9_GPIO|XB_/RESET IC101    P$5      /RESET     1
+         IC5      96       PB9        1
+
+Change Class 0;
+PB10_GPIO|AD7799_1/CS IC5      47       PB10       1
+         IC7      2        /CS        1
+
+Change Class 0;
+PB11_PAD IC5      48       PB11       1
+         P20      MP       MP         1
+
+Change Class 0;
+PB12_SPI2_NSS|SD_CD IC5      51       PB12       1
+         U$2      P$1      CD/DAT3/CS 1
+
+Change Class 0;
+PB13_SPI2_SCK|SD_SCK IC5      52       PB13       1
+         U$2      P$5      SCK        1
+
+Change Class 0;
+PB14_SPI2_MISO|SD_DO IC5      53       PB14       1
+         U$2      P$7      DAT0/DO    1
+         U$3      P$7      2          1
+
+Change Class 0;
+PB15_SPI2_MOSI|SD_CMD_DI IC5      54       PB15       1
+         U$2      P$2      CMD/DI     1
+
+Change Class 0;
+PC0_ADC12_IN11|X-AXIS IC5      15       PC0        1
+         JP7      4        4          1
+
+Change Class 0;
+PC1_ADC12_IN11|Y-AXIS IC5      16       PC1        1
+         JP7      3        3          1
+
+Change Class 0;
+PC2_ADC12_IN12|Z-AXIS IC5      17       PC2        1
+         JP7      2        2          1
+
+Change Class 0;
+PC4_GPIO|TOP_CELL_ENABLE IC5      33       PC4        1
+         QQ2      P$1      G1         1
+         R7       2        2          1
+
+Change Class 0;
+PC5_GPIO|BOTTOM_CELL_ENABLE IC5      34       PC5        1
+         QQ1      P$1      G1         1
+         R6       2        2          1
+
+Change Class 0;
+PC6_TIM3_CH1*|ENCODER_2_B IC5      63       PC6        1
+         JP6      2        2          1
+
+Change Class 0;
+PC7_TIM3_CH2*|ENCODER_2_A IC5      64       PC7        1
+         JP6      3        3          1
+
+Change Class 0;
+PC8      IC5      65       PC8        1
+         P16      MP       MP         1
+
+Change Class 0;
+PC9_TIM8_CH4|GPS_1PPS IC5      66       PC9        1
+         JP1      4        4          1
+
+Change Class 0;
+PC10_UART4_TX IC2      10       T2IN       1
+         IC5      78       PC10       1
+
+Change Class 0;
+PC11_UART4_RX IC2      9        R2OUT      1
+         IC5      79       PC11       1
+
+Change Class 0;
+PC12_USART5_TX|GPS_RX IC100    3        DI         1
+         IC5      80       PC12       1
+         JP1      3        3          1
+
+Change Class 0;
+PC14_OSC32IN|XTAL C103     1        1          1
+         IC5      8        PC14       1
+         X101     P$1      1          1
+
+Change Class 0;
+PC15_OSC32_OUT|DRIVE IC5      9        PC15       1
+         R107     1        1          1
+
+Change Class 0;
+PD0_OSC_IN|10MHZ_OSC IC5      81       PD0        1
+         P12      MP       MP         1
+         X100     3        OUT        1
+
+Change Class 0;
+PD1_GPIO|TXCO_REG_EN IC5      82       PD1        1
+         Q101     1        G          1
+         R102     2        2          1
+
+Change Class 0;
+PD2_UART5_RX|GPS_TX IC100    2        RO         1
+         IC5      83       PD2        1
+         JP1      2        2          1
+
+Change Class 0;
+PD3_USART2_CTS*|XB_/CTS IC101    P$12     /CTS/DIO7  1
+         IC5      84       PD3        1
+
+Change Class 0;
+PD4_USART2_RTS*|XB_/RTS IC101    P$16     /RTS/AD6/DIO6 1
+         IC5      85       PD4        1
+
+Change Class 0;
+PD5_USART2_TX*|XB_DIN IC101    P$3      DIN/CFG    1
+         IC5      86       PD5        1
+
+Change Class 0;
+PD6_USART2_RX*|XB_DOUT IC101    P$2      DOUT       1
+         IC5      87       PD6        1
+
+Change Class 0;
+PD7_GPIO|MAX3232_VCC IC5      88       PD7        1
+         Q100     1        G          1
+         R101     2        2          1
+
+Change Class 0;
+PD9_USART3_RX*|P31 IC5      56       PD9        1
+         P31      MP       MP         1
+
+Change Class 0;
+PD9_USART3_TX*|P32 IC5      55       PD8        1
+         P32      MP       MP         1
+
+Change Class 0;
+PD10_5V/2_ANALOG_CE IC5      57       PD10       1
+         IC6      3        EN         1
+         R14      2        2          1
+
+Change Class 0;
+PD11_GPIO|CAN_RS IC103    8        RS         1
+         IC5      58       PD11       1
+
+Change Class 0;
+PD12_TIM4_CH1*|ENCODER_B IC5      59       PD12       1
+         JP5      2        2          1
+
+Change Class 0;
+PD13_TIME4_CH2*|ENCODER_A IC5      60       PD13       1
+         JP5      3        3          1
+
+Change Class 0;
+PD14_GPIO|5V_EN_ENCODERS&GPS IC3      4        CE         1
+         IC5      61       PD14       1
+         R11      1        1          1
+
+Change Class 0;
+PD15     IC5      62       PD15       1
+         P33      MP       MP         1
+
+Change Class 0;
+PE2_GPIO|EXT_LED_FET_G IC5      1        PE2        1
+         Q102     1        G          1
+         R105     1        1          1
+
+Change Class 0;
+PE3      IC5      2        PE3        1
+         R34      1        1          1
+
+Change Class 0;
+PE3_LED1 LED1     C        C          1
+         R34      2        2          1
+
+Change Class 0;
+PE4      IC5      3        PE4        1
+         R35      1        1          1
+
+Change Class 0;
+PE4_LED2 LED1     C1       C          1
+         R35      2        2          1
+
+Change Class 0;
+PE5      IC5      4        PE5        1
+         R36      1        1          1
+
+Change Class 0;
+PE5_LED1 LED2     C        C          1
+         R36      2        2          1
+
+Change Class 0;
+PE6      IC5      5        PE6        1
+         R37      1        1          1
+
+Change Class 0;
+PE6_LED2 LED2     C1       C          1
+         R37      2        2          1
+
+Change Class 0;
+PE7__GPIO|3.3V_REG_EN_ANALOG IC5      38       PE7        1
+         IC8      3        EN         1
+         R16      1        1          1
+
+Change Class 0;
+PE8      IC5      39       PE8        1
+         P25      MP       MP         1
+
+Change Class 0;
+PE9-PC13 IC5      40       PE9        1
+         IC5      7        PC13       1
+         P26      MP       MP         1
+
+Change Class 0;
+PE10     IC5      41       PE10       1
+         P27      MP       MP         1
+
+Change Class 0;
+PE11     IC5      42       PE11       1
+         P21      MP       MP         1
+
+Change Class 0;
+PE12     IC5      43       PE12       1
+         P22      MP       MP         1
+
+Change Class 0;
+PE13     IC5      44       PE13       1
+         P24      MP       MP         1
+
+Change Class 0;
+PE14     IC5      45       PE14       1
+         P23      MP       MP         1
+
+Change Class 0;
+PE15_GPIO|AD7799_VCC_SW IC5      46       PE15       1
+         Q103     1        G          1
+         R108     2        2          1
+
+Change Class 0;
+PPC9_GPIO|AD7799_2_/CS IC104    2        /CS        1
+         IC5      29       PA4        1
+
+Change Class 0;
+PULLUP_|SD_DAT1 U$2      P$8      DAT1/RES   1
+         U$3      P$8      2          1
+
+Change Class 0;
+PULLUP_|SD_DAT2 U$2      P$9      DAT2/RES   1
+         U$3      P$6      2          1
+
+Change Class 0;
+P_FET_DRAIN_SWITCHED_BOTTOMCELL QQ1      P$4      D2         1
+         R3       1        1          1
+
+Change Class 0;
+P_FET_DRAIN_SWITCHED_TOPCELL QQ2      P$4      D2         1
+         R1       1        1          1
+
+Change Class 0;
+RJ-45|RS232_R2IN_UART4_RX IC2      8        R2IN       1
+         U$1      5        5          1
+
+Change Class 0;
+RJ-45|T2OUT_UART4_TX IC2      7        T2OUT      1
+         P8       MP       MP         1
+
+Change Class 0;
+RS232_R1IN_USART1_RX IC2      13       R1IN       1
+         U$1      2        2          1
+
+Change Class 0;
+T1OUT_USART1_TX IC2      14       T1OUT      1
+         U$1      1        1          1
+
+Change Class 0;
+TOP_CELL_N-DRAIN_P-GATE QQ2      P$3      G2         1
+         QQ2      P$6      D1         1
+         R10      2        2          1
+
+Change Class 0;
+TOP_CELL_RAW JP2      3        3          1
+         JP3      1        1          1
+         TO_RJ-1  6        6          1
+         U$1      7        7          1
+
+Change Class 0;
+V+       C111     1        1          1
+         C117     1        1          1
+         IC5      21       VREF+      1
+         IC8      5        VO         1
+         IC9      7        V+         1
+         JP7      6        6          1
+         R106     1        1          1
+         R119     E        E          1
+         RED3     MP       MP         1
+
+Change Class 0;
+VCC      C102     1        1          1
+         C104     1        1          1
+         C105     1        1          1
+         C109     1        1          1
+         C112     1        1          1
+         C113     1        1          1
+         C12      1        1          1
+         IC4      P$2      VO         1
+         IC5      100      VDD_3      1
+         IC5      11       VDD_5      1
+         IC5      22       VDDA       1
+         IC5      28       VDD_4      1
+         IC5      50       VDD_1      1
+         IC5      6        VBAT       1
+         IC5      75       VDD_2      1
+         JP4      2        2          1
+         JTAG     1        1          1
+         JTAG     2        2          1
+         LED1     A        A          1
+         LED1     A1       A          1
+         LED2     A        A          1
+         LED2     A1       A          1
+         Q100     2        S          1
+         Q101     2        S          1
+         Q103     2        S          1
+         QQ100    P$2      S2         1
+         R101     1        1          1
+         R102     1        1          1
+         R108     1        1          1
+         R8       1        1          1
+         RA1      P$8      2          1
+         RA2      P$1      1          1
+         RA3      P$1      1          1
+         RA3      P$2      1          1
+         RA3      P$3      1          1
+         RA3      P$4      2          1
+         TO_RJ-1  5        5          1
+
+Change Class 0;
+VCC_AD7799_SW C110     1        1          1
+         C14      1        1          1
+         IC104    14       DVDD       1
+         IC7      14       DVDD       1
+         Q103     3        D          1
+
+Change Class 0;
+VRS232+  C4       1        1          1
+         IC2      2        V+         1
+
+Change Class 0;
+VRS232-  C3       1        1          1
+         IC2      6        V-         1
+
+Change Class 0;
+WHT1_POT_WIPER R118     S        S          1
+         R125     2        2          1
+
+Change Class 0;
+WHT2_POT_WIPER R117     S        S          1
+         R123     1        1          1
+
+Change Class 0;
+XTAL_DRIVE C106     1        1          1
+         R107     2        2          1
+         X101     P$2      2          1
+

@@ -1,0 +1,104 @@
+11-12-2011
+Two emails for collecting  thoughts that were not sent.
+
+
+Here are couple of thoughts --
+
+Downloading--
+
+I was looking into Putty this evening on the laptop/Vista.  We might be able to use 'psftp' to send the data to the FIT server.  'psftp' is easier to use than the 'pscp'.  After downloading to the FIT server, then SSH with Putty into the server and run a linux program that puts the downloaded raw data into some more user-friendly format.  This file would then could be uploaded using 'psftp'.  This would be a way to avoid wrestling with programs to run on Windows.
+
+Time keeping--
+
+I'm torn at the moment between saying what I have is good enough and forging ahead or trying another scheme to improve the time keeping.  
+
+The temperature compensation seems a little flaky, and I'm about to the conclusion that it has to do with the lag between the thermistor temperature sensed and the actual temperature of the crystal inside its can when the temperature is changing.  I might be able to massage the data I have to prove this out.  To implement the correction then would require some modeling of the time lag.
+
+Another approach is to use the 8 MHz xtal during the time the unit is "up."  It is more than one order of magnitude better with respect to freq versus temperature.  0 - 50C I can see the peak and minimum of the cubic curve.  The difference is well over 10x smaller than the 32 KHz xtal for the same temp range.  I don't know how fast it responds to temperature changes, but even it is the same as the 32 KHz xtal the effect is 10x smaller.  The idea would be to have the 8 MHz xtal steer the 32 MHz timing if the gps isn't present.  It wouldn't help after the unit goes into deepsleep.
+
+Operationally, if the BOX is plugged into the unit before the first launch the gps will set the time.  If the temp stays within 5 deg C we will be somewhere within (roughly) +/- 20 ms at the end of a 10 hr day.   If the temp changes 20 deg C we might be upwards of 100 ms by the end of the day.  Plugging in the BOX of course could be done a number of times in the course of the day.  Probably good enough.
+
+If we really need to nail down the time, then plugging in the box before each launch would have the time within a 1 or 2 ms for that launch.  Or, we could think in terms of putting the Garmin 18X in the pod.  The antenna is so sensitive that appears that the drop out times would be so minor that we would have nearly perfect time.  The price is another 80 ma of drain.  A way around this would be to wake-up with a pushbutton press and only stay awake for a short time, e.g. 10 minutes, but maybe extend there time 2 minutes after the first big tension, etc.
+
+================================
+
+This is mostly for collecting my thoughts about the time keeping.
+
+The basic problem is that the 32 KHz osc compensation seems "funny," i.e. one would expect at the same temperature the frequency would not be much different week-to-week.
+
+There are several approaches to take for the time keeping.
+
+1) Pre-computed table, based on spec sheet data, with tweaks to the
+offset freq and turnpoint temperature.
+
+2) Direct temperature versus freq table
+
+3) Polynomial based on temperature runs.
+
+3) Use the 8 MHz xtal.
+
+Pre-computed table
+
+The pre-computed table directly converts the thermistor ADC reading to 
+ppm error due to temperature via a table lookup.  A program on the PC
+generates the file.  The POD routine to do the table lookup takes a
+turnpoint offset correction to adjust where it does the table lookup.  The fixed freq offset is added to the temperature error estimate.
+
+For the same fixed temperature the fixed offset seems to vary day-to-day
+by something on the order of 1.5-2.0 ppm.  Seems large.  I would expect 
+it to be more in the less than 0.1 ppm range.
+
+Direct temperature versus freq table & Polynomial estimation
+
+The direct temp v freq scheme would use a table based on measurement of temp v freq over a range of temperatures.  No need for turnpoint temperature or fixed freq offset.  The polynomial scheme merely uses
+a polynomial approximation derived from the temp v freq data.
+
+I've done two temperature versus freq runs that provide data for these two schemes.  The first one some time ago, and one a few days ago.  
+
+The setup was to put the board in a small freezer bag and immerse it in a plastic bowl, (rather cylindrical), filled with water, that is about 6" dia and 6" deep, keeping the top of the bag where the wires emerge above the water.  The pressure of the water presses the bag around the board.  This bowl is then placed in a much larger bowl filled with water.  The laptop then logs the data.
+
+The data is the time for 512 interrupts of the divide-by-64 output of the xtal osc (1 sec), which is captured by TIM2 as bus ticks, nominally 24E6.  TIM1 captures the bus ticks between GPS 1 pps pulses, nominally 48E6.  From these the error in ppm is computed.  This data are logged every second.
+
+The run begins with the containers filled with hot water at about 50 deg C.  The water then cools naturally and reaches room temperature over about a 10 hour period.  Ice is then added to the outside container over the next several hours.  The run then ends with the temp at about 5 deg C, though the first run I got it down to about 2 deg C.  This gives something around 40,000 data points.
+
+The plot of freq v temp looks (eye-balling) parabolic like the specs show.  
+The specs show the freq v temp to be--
+
+error = a * (T-To)^2
+
+Where
+error = ppm
+T = temp in deg C
+a = 0.034 +- 0.006
+To = turnpoint temp = 25 deg C +/- 5 
+
+On the first run the polynomial regression program blew up as the data input was too large for the precision.  I pared it down by taking every ten, or some such number.  It then gave a = .0474 and To = 25.0.  The 25 is right-on.  The 0.0474 is higher than spec.
+
+On the 2nd run I passed the data through a routine that averaged the readings with the same temperature.  This cut the data input of about 76,000 pts down to about 1576 points.  The regression gave a = 0.0305 and To 19.5 deg.  "a" is within bounds, but "To" is a bit out of spec.
+Looking at the raw data the turnpoint of 19.5 looks about right.
+
+Another interesting detail is that the plot of the error of the 2nd order polynomial versus input data, is a nice-as-you-please cubic, with
+about 1 ppm excursion in the temp range of interest.  The 3rd order
+polynomial fit is better.
+
+The more disturbing/puzzling thing is that at the same temperature on the bench the frequency was about 1.2 ppm lower than the temp v freq data at that temp and even lower than the lowest temp v freq in the data.  One could argue that the cooling of the water bath, though a somewhat constant rate, still allowed for a thermistor v xtal temperature difference which would result in the temp data being 
+cooler than the xtal throughout the run.  (Adding some means of slowly 
+heating the bowls would allow and retrace of the run which would
+then show a hysteresis in the temp v freq.)  The fact that the freq
+was lower than the lowest temp v freq run, however, rules out the
+lag in xtal temp v thermistor.
+
+I tried the third order polynomial for compensation.  Starting off with
+with gps reset at 11 PM and noting the error at about 9 AM it was 73
+ticks off.  The temperature is rather constant of this time period.
+
+Using the 8 MHz xtal
+
+If we don't try to keep accurate time during deepsleep, then the following could be done.  Wakeup requires the BOX, which means gps would be available.  So when the unit is awakened it gets the time reset with GPS time.  Until it goes into deep sleep mode, the 32 KHz xtal time is adjusted from the 8 MHz xtal.  
+
+The 8 MHz xtal is an order of magnitude better with respect to temp stability than the 32 KHz xtal.  The temperature runs I made also have the data for the 8 MHz freq versus temp.  The curve is cubic and the inflection is around room temp, so over the temp range of interest it doesn't vary much.
+
+Going to deep sleep will occur two ways.  One, it can be commanded from the PC.  Two, when the tension is above some threshold (such as 40# for 2 secs) the (2 hour) timeout resets.  That would allow the unit to stay alive for the flying day.
+
+If the POD is awakened by a pushbutton on the POD, then the time would not be so good, depending on the length it was in deep sleep.  The time could be adjusted by taking the temperature at wakeup time and applying the length of time in deepsleep.  That would help and be pretty good if the temp had not varied much during the deepsleep.
+

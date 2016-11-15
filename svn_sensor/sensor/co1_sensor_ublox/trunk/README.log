@@ -1,0 +1,43 @@
+README.log
+06/08/2014
+
+Logging buffer and interrupt detail
+
+gps_poll.c (interrupt level: main)
+  buffer: gpscanbuflog[8]
+  	checksum error ctr		(CAN_UNITID_CO_OLI | CAN_DATAID29_1_GPS_CHKSUM_ER )
+	time GPS->SYS update ctr	(CAN_UNITID_CO_OLI | CAN_DATAID29_3_GPS_FLAGCTR )
+	latitude/longitude		(CAN_UNITID_CO_OLI | (CAN_DATAID_LAT_LONG << CAN_DATAID_SHIFT)
+	height				(CAN_UNITID_CO_OLI | (CAN_DATAID_HEIGHT   << CAN_DATAID_SHIFT)
+	fix error			(CAN_UNITID_CO_OLI | CAN_DATAID29_2_GPS_NO_FIX )
+
+Add gps fix and gps error counters to buffer for logging
+
+Tim4_pod_se.c 
+	GPS 1PPS input capture|counter overflow (interrupt level: 0x20) 
+		NVICISPR(NVIC_I2C2_EV_IRQ); (interrupt level: 0xC0) (call pointer: none, direct entry)
+			compute ticks per sec, etc. used at next counter tick
+
+canwinch_pod.c 
+	FIFO0 (interrupt level: 0x70)
+		NVICISPR(NVIC_I2C1_ER_IRQ); (interrupt level: 0xA0) (call pointer: lowpriority_ptr = &can_log_buff)
+
+canwinch_pod.c 
+	FIFO1 (interrupt level: 0x30)
+		NVICISPR(NVIC_I2C1_ER_IRQ); (interrupt level: 0xA0) (call pointer: lowpriority_ptr = &can_log_buff)
+		NVICISPR(NVIC_I2C1_EV_IRQ); (interrupt level: 0x90) (call pointer: highpriority_ptr) ## COMMENTED OUT ##
+can_log.c
+	can_log_buff (entered from: (NVIC_I2C1_ER_IRQ))
+			Add msgs in various buffers to log buffer
+				Trigger (NVIC_I2C2_ER_IRQ) to start SD card writes
+				
+	can_log_can (entered from: (NVIC_I2C2_ER_IRQ))
+			write log buffer to SD card
+
+co1.c
+	mainline polling: call can_log_trigger_logging (interrupt level: main)
+		NVICISPR(NVIC_I2C2_ER_IRQ); (interrupt level: 0xE0) (call pointer: logpriority_ptr = &can_log_can)
+			
+			
+		
+

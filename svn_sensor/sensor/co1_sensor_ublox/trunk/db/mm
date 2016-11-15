@@ -1,0 +1,24 @@
+#!/bin/bash
+# 08/06/2016
+# Compile and load database parameter tables
+# ./mm <table selection name first function> <...second function>
+# ./mm TENSION_1a TENSION_1b
+# 
+# Specify which flash size VC=256 VE=512 VG=1024 (VG has a problem on the STM32F103RG)
+export LDRAPPLD=ldrapp_VE.ld
+
+echo
+echo "########## First table ("_logger") $1"
+make -f Makefile_logger clean
+make -f Makefile_logger TSELECT=-D$1 && make -f Makefile_logger TSELECT=-D$1 flash
+
+echo
+echo "########## Second table ("_gps") $2"
+make -f Makefile_gps clean
+make -f Makefile_gps TSELECT=-D$2 && make -f Makefile_gps TSELECT=-D$2 flash
+
+echo
+echo "########## Table with function command CAN ids $3"
+make -f Makefile_can_unit clean
+make -f Makefile_can_unit TSELECT=-D$3 && make -f Makefile_can_unit TSELECT=-D$3 flash
+

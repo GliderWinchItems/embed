@@ -1,0 +1,53 @@
+#!/bin/bash
+# copycompress - script to copy SD card to HD and compress
+# 07/10/2014
+# copycompress /dev/sdb 
+
+echo
+echo
+echo "SCRIPT: copycompress"
+echo "COPY SD TO HARD DRIVE, THEN COMPRESS (BZIP2), THEN SEND TO FIT (RSYNC)"
+echo
+echo
+
+# Make sure correct number of arguments
+# If no argument supplied setup a default USB port
+if [ $# -ne 1 ] ; then
+	echo "One argument required: ./copycompress /dev/sdb"
+	echo "This script saw $# arguments.  Try again."
+	echo
+	exit	
+fi
+
+OUTPATH=$HOME/winch/instrumentation
+
+cd $OUTPATH
+
+# Copy SD card to hard drive from start to last non-zero'ed block
+sudo $HOME/svn_sensor/PC/sdcopy/trunk/sdcopy $1 $OUTPATH
+# Exit here if sdcopy program exited with an error
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then 
+   echo "sdcopy exited with error code: $XA"
+   echo "Check if correct device: e.g. /dev/sdf and try again."
+   echo
+   exit
+fi
+
+
+# Compress file for sending to FIT
+CPFILE=`cat cpname`
+echo 
+echo "Compressing file: $CPFILE"
+echo "START: `date`"
+sudo tar -cjf $CPFILE.bz2 $CPFILE.RAW
+echo "END: `date`"
+echo
+echo "Compressed file path/name now: $CPFILE.bz2"
+
+# Send file to FIT
+rsync -av -e 'ssh -p 41574' $CPFILE.bz2 deh@$FITIP:/winch/instrumentation
+
+
+exit
+

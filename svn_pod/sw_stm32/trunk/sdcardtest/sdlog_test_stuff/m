@@ -1,0 +1,2 @@
+rm -f sdlog_test
+gcc -o sdlog_test -I.. -I../../devices sdlog_test.c ../sdlog.c sdcard_stubs.c

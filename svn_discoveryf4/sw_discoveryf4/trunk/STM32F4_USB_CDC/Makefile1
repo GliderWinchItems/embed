@@ -1,0 +1,92 @@
+# Sources
+LIBNAME		= libusbf4
+
+OUTPATH=build
+CURDIR = .
+VPATH	=$(CURDIR)/src
+###################################################
+# Check for valid float argument
+# NOTE that you have to run make clan after
+# changing these as hardfloat and softfloat are not
+# binary compatible
+ifneq ($(FLOAT_TYPE), hard)
+ifneq ($(FLOAT_TYPE), soft)
+override FLOAT_TYPE = soft
+endif
+endif
+
+###################################################
+
+CC=arm-none-eabi-gcc
+OBJCOPY=arm-none-eabi-objcopy
+SIZE=arm-none-eabi-size
+
+CFLAGS  = -std=gnu99 -g -Os -Wall -Tstm32_flash.ld
+CFLAGS += -mlittle-endian -mthumb -mthumb-interwork -nostartfiles -mcpu=cortex-m4
+
+ifeq ($(FLOAT_TYPE), hard)
+CFLAGS += -fsingle-precision-constant -Wdouble-promotion
+CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+else
+CFLAGS += -msoft-float
+endif
+
+###################################################
+
+
+
+ROOT=$(shell pwd)
+
+# Includes
+CFLAGS += -Iinc -Ilib/Core/cmsis -Ilib/Core/stm32
+CFLAGS += -Ilib/Conf
+
+# Library paths
+LIBPATHS = -Llib/StdPeriph -Llib/USB_Device/Core
+LIBPATHS += -Llib/USB_Device/Class/cdc -Llib/USB_OTG
+
+# Libraries to link
+LIBS = -lm -lstdperiph -lusbdevcore -lusbdevcdc -lusbcore -lusb_bsp
+
+# Extra includes
+CFLAGS += -Ilib/StdPeriph/inc
+CFLAGS += -Ilib/USB_OTG/inc
+CFLAGS += -Ilib/USB_Device/Core/inc
+CFLAGS += -Ilib/USB_Device/Class/cdc/inc
+
+
+
+OBJS = 
+OBJS	+= usb1.o
+OBJS	+= usb_bsp.o
+OBJS	+= usbd_usr.o
+OBJS	+= usbd_cdc_vcp.o
+OBJS	+= usbd_desc.o
+OBJS	+= stm32f4xx_it.o
+OBJS	+= system_stm32f4xx.o
+
+###################################################
+
+# Be silent per default, but 'make V=1' will show all compiler calls.
+ifneq ($(V),1)
+Q := @
+endif
+
+all: $(LIBNAME).a
+
+$(LIBNAME).a: $(OBJS)
+	@printf "  AR      $(subst $(shell pwd)/,,$(@))\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^
+
+%.o: %.c
+	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
+	$(Q)$(CC) $(CFLAGS) -o $@ -c $<
+
+clean:
+	@printf "  CLEAN   $(subst $(shell pwd)/,,$(OBJS))\n"
+	$(Q)rm -f *.o
+	@printf "  CLEAN   $(LIBNAME).a\n"
+	$(Q)rm -f $(LIBNAME).a
+
+.PHONY: clean
+

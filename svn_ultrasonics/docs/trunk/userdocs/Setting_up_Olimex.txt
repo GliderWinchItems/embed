@@ -1,0 +1,151 @@
+Setting_up_Olimex.txt
+09/01/2012
+
+1. USB setup
+
+The USB is utilized as follows:
+- Ubuntu
+- Raisonance JTAG-USB (program loading/debugging)
+- RS232-USB (RS-232, USART2)
+- USB - USB (5v power)
+
+I used a 4-port hub and put the last three of the above on the
+hub.  I also checked that Ubuntu will boot OK off the Ubuntu
+USB drive plugged into the hub.  
+
+There is a limitation on the current of a single port (0.5a) so the 
+things plugged into the hub have to be below this current drain
+(unless it is a powered hub).
+
+2. Permissions for Raisonance (Not needed when running on the USB Ubuntu drive)
+
+In a terminal window--
+
+lsusb 
+[Find the following line]
+Bus 001 Device 010: ID 138e:9000 Jungo LTD Raisonance S.A. STM32 ARM evaluation board
+
+[cd to the "bus" with the device, and (to be easy) change the ownership of all of them, i.e. '*']
+sudo cd /dev/bus/usb/001 chown ubuntu:ubuntu *
+
+3. Compile
+
+[Open another terminal window.  On Ubuntu 120.04, *right click* on the terminal window icon and select
+new terminal.]
+
+Navigate to the source code directory:
+cd svn_u*/sw_O*/tr*
+
+Compile everything (e.g. subroutine libraries) not already compiled
+./m
+
+Or just compile the files specified in the Makefile in the directory *that have changed*.
+make
+
+Or re-compile all the files  specified in the Makefile in the directory.
+make clean && make
+
+Success ends with something like the following--
+  LD      oli1 
+  OBJCOPY oli1.hex
+  OBJCOPY oli1.srec
+  OBJDUMP oli1.list
+
+
+4. Load flash
+
+make flash
+
+Sucess ends with something like the following--
+  OBJCOPY oli1.hex
+  OBJCOPY oli1.srec
+  OBJDUMP oli1.list
+  FLASH   oli1.srec
+
+Or, compile a change and flash
+
+make && make flash
+
+If the compile fails the flashing is not taken, i.e. '&&' stops the 'make flash' from
+executing if the compiler returns a non-zero code, which happens if there are any
+"errors", but not for "warnings".
+
+If FLASH fails it is probably because the permissions weren't done correctly.
+
+5. Output
+
+LED
+
+If the program flashes the LED, the LED flashing will stop when the flashing is taking
+place.  Upon completion of the flashing the program execution begins and the LED resumes
+flashing.
+
+RS232
+
+Open another terminal window
+
+Start a terminal program--
+sudo minicom 
+
+Pressing reset (the small rectangular pushbutton (not the big square one) causes a processor
+reset.  When the program starts the skeleton program shows a "banner", e.g.
+oli1.c: USART2 txint rxint 09-01-2012
+pclk1_freq  (MHz)        :        24
+sysclk_freq (MHz)        :        48
+
+To exit minicom: Ctl A,Z,Q Yes
+
+An alternative to minicom is to use "dateselect".  This is the program used with the pod, but 
+it will do just fine for serial port output.
+mm /dev/ttyUSB0 
+
+
+6. Debugging
+
+Open another terminal window (four now opened)
+
+Select the terminal window that was used in step 2.
+jtag [starts the debugger]
+
+You should see the following.  The last line is the important one.
+Open On-Chip Debugger 0.4.0 (2011-06-01-15:40)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.berlios.de/doc/doxygen/bugs.html
+1000 kHz
+jtag_nsrst_delay: 100
+jtag_ntrst_delay: 100
+Info : clock speed 375 kHz
+Info : JTAG tap: stm32.cpu tap/device found: 0x3ba00477 (mfg: 0x23b, part: 0xba00, ver: 0x3)
+Info : JTAG tap: stm32.bs tap/device found: 0x16410041 (mfg: 0x020, part: 0x6410, ver: 0x1)
+Info : stm32.cpu: hardware has 6 breakpoints, 4 watchpoints
+
+
+Select the just-opened window
+telnet localhost 4444 [starts the client]
+[Expect a '>' prompt]
+> halt	[Stop the processor]
+target state: halted
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08000934 msp: 0x20004fc4
+> mdw 0x08000000 2 [dump two words beginning at 0x08000000 (beginning of program flash)]
+0x08000000: 20004fff 080006a9
+
+If 'telnet' fails is can be because 'jtag' didn't start the debugger.
+NOTE: each time a program is flashed the debugger stops, so after a compile/flash the
+debugger has to be restarted, i.e. 'jtag' on one window, and 'telenet localhost 4444' on
+the other windows.  Up arrow makes this fast.
+
+"help" display a all the commands.
+
+For most work this level of debugging is not needed.  This is slow tedious stuff.  One
+must refer to the .list and .map files to get the addresses of what to look at.  
+
+Single stepping can be troublesome when there are interrupting routines as the single stepping
+will following the processor through the interrupt routine, then back to the code, but with
+timer interrupts there will be an interrupt waiting so it goes right back into the interrupt
+routine.
+
+A better debugging strategy is to put "printf" statements in the code to display things.
+
+

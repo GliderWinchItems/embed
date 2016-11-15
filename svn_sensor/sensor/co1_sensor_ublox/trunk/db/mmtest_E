@@ -1,0 +1,7 @@
+#!/bin/bash
+# Logger #1
+echo $(date)
+echo "./mm LOGGER_1 GPS_1 CAN_UNIT_E"
+./mm LOGGER_1 GPS_1 CAN_UNIT_E
+cd ..
+make flash

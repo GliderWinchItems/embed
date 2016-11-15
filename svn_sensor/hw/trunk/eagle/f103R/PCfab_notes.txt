@@ -1,0 +1,80 @@
+PCfab_notes.txt
+
+05/16/2013
+
+1.  Pressure sensor footprint
+
+The footprint is for the Freescale 482 package ($16).  The cheaper
+($10) part has a smaller footprint.
+
+2.  LED's 19 & 20--solder mask covers pads?
+
+But LED 21 is not covered.  What gives?
+
+3.  RCA jack
+
+Right-angle jack RCJ-017, CP-1466-ND
+  Holes too small.
+  Missing hole for front shield
+
+Vertical jack RCJ-024, CP-1409-ND
+  Fits, but side mounting lugs have to be 
+    flattened.  Hole needs to be bigger for
+    side mount lugs so it can "snap" into place.
+
+4. IC2 AP7333 3.3v regulator heat sink
+
+The part doesn't have a heat sink under it and the
+keepout area for the heat sink makes it a bit close to 
+the pins for soldering.
+
+5. JP2 - Boot0 pin goes to gnd instead of Vcc
+
+6.  Redundant 'via' on BOOT0
+
+7.  R9 is a little close to the via.  Move R9 up a little.
+
+8.  Make soldermask restrict around holes for electrolytic caps so that
+    SMD caps can also be used (top and bottom)
+
+9.  Remove 3.2 regulator.
+    Add ferrite bead decoupling w parallel resistor.
+
+10. R16 on underside hits enclosure boss.
+
+Move that and xtal up a little and xtal can go on bottom of board.
+
+11. Input pins 1 & 11 of HC7414 should have 1 M pull down resistors.
+
+12. EEPROM footprint is too wide--just barely makes it.
+
+13. EEPROM SI & SO reversed!  ARGH.
+
+14. DON'T FORGET THE CAN 3.3<->5.0V JUMPER SELECTION!
+
+    (Leave it out and you'll wonder why CAN doesn't work.)
+
+15. 3.5<->5.0 v jumper could have shorter pads.
+
+16. C19 looks like 0805.  Change to 0604.
+
+15.  PB9 mislabelled PB11 on signal.
+
+16.  100m electrolytic caps--change hole spacing for smaller size.
+493-6033-ND 22m @ 50v
+P833-ND 100m @ 16v
+338-1789-1-ND 220m @ 10v
+
+17.  PB9 is mis-named PB11_ENG_PULSE
+
+18.  R5, R7 are 0804, make them 0603.
+
+08/14/2014
+
+19.  Add divider/ADC for 5v, and input voltage for measurement correction.
+
+
+
+
+
+

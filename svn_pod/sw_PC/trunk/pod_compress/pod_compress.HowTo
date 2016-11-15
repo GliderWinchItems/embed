@@ -1,0 +1,47 @@
+## File: pod_compress.HowTo
+
+[/Users/wellsca/Desktop/pod_compress]$ ls -l
+total 77504
+-rwxr-xr-x  1 wellsca  wellsca  19719304 Nov 27 14:13 ht20111127.txt
+-rw-r--r--@ 1 wellsca  wellsca      1261 Nov 28 12:45 pod_compress.c
+-rwxr-xr-x@ 1 wellsca  wellsca       159 Nov 28 12:43 pod_compress_test.bash
+-rw-r--r--@ 1 wellsca  wellsca    544640 Apr 20  2010 zlib-1.2.5.tar.gz
+-rw-r--r--@ 1 wellsca  wellsca  19403004 Nov 27 14:54 zt20111127.txt
+[/Users/wellsca/Desktop/pod_compress]$ tar -xzf zlib-1.2.5.tar.gz 
+[/Users/wellsca/Desktop/pod_compress]$ cp pod_compress* zlib-1.2.5/
+[/Users/wellsca/Desktop/pod_compress]$ cd zlib-1.2.5/
+[/Users/wellsca/Desktop/pod_compress/zlib-1.2.5]$ ./configure; make
+Checking for gcc...
+Checking for shared library support...
+
+<SNIP>
+
+gcc -O3 -fPIC -DPIC -c -o objs/uncompr.o uncompr.c
+gcc -O3 -fPIC -DPIC -c -o objs/zutil.o zutil.c
+gcc -dynamiclib -install_name /usr/local/lib/libz.1.dylib -compatibility_version 1 -current_version 1.2.5 -O3 -fPIC -o libz.1.2.5.dylib adler32.lo compress.lo crc32.lo deflate.lo gzclose.lo gzlib.lo gzread.lo gzwrite.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo uncompr.lo zutil.lo  -lc -L. libz.a
+rm -f libz.dylib libz.1.dylib
+ln -s libz.1.2.5.dylib libz.dylib
+ln -s libz.1.2.5.dylib libz.1.dylib
+gcc -O3 -o examplesh example.o -L. libz.1.2.5.dylib
+gcc -O3 -o minigzipsh minigzip.o -L. libz.1.2.5.dylib
+[/Users/wellsca/Desktop/pod_compress/zlib-1.2.5]$ ./pod_compress_test.bash ../zt20111127.txt 
+# total_in is 19403004, total_out is 5333202, deflate_level is 1, ratio is 27.5%, duration is  0.370 sec.
+# total_in is 19403004, total_out is 5189878, deflate_level is 2, ratio is 26.7%, duration is  0.426 sec.
+# total_in is 19403004, total_out is 5002712, deflate_level is 3, ratio is 25.8%, duration is  0.516 sec.
+# total_in is 19403004, total_out is 4717936, deflate_level is 4, ratio is 24.3%, duration is  0.597 sec.
+# total_in is 19403004, total_out is 4370136, deflate_level is 5, ratio is 22.5%, duration is  0.839 sec.
+# total_in is 19403004, total_out is 4267818, deflate_level is 6, ratio is 22.0%, duration is  1.664 sec.
+# total_in is 19403004, total_out is 4227082, deflate_level is 7, ratio is 21.8%, duration is  2.390 sec.
+# total_in is 19403004, total_out is 4190572, deflate_level is 8, ratio is 21.6%, duration is  5.564 sec.
+# total_in is 19403004, total_out is 4191378, deflate_level is 9, ratio is 21.6%, duration is 11.111 sec.
+[/Users/wellsca/Desktop/pod_compress/zlib-1.2.5]$ ./pod_compress_test.bash ../ht20111127.txt 
+# total_in is 19719304, total_out is 5264006, deflate_level is 1, ratio is 26.7%, duration is  0.373 sec.
+# total_in is 19719304, total_out is 5124032, deflate_level is 2, ratio is 26.0%, duration is  0.425 sec.
+# total_in is 19719304, total_out is 4966238, deflate_level is 3, ratio is 25.2%, duration is  0.518 sec.
+# total_in is 19719304, total_out is 4653278, deflate_level is 4, ratio is 23.6%, duration is  0.600 sec.
+# total_in is 19719304, total_out is 4326822, deflate_level is 5, ratio is 21.9%, duration is  0.844 sec.
+# total_in is 19719304, total_out is 4194378, deflate_level is 6, ratio is 21.3%, duration is  1.680 sec.
+# total_in is 19719304, total_out is 4176184, deflate_level is 7, ratio is 21.2%, duration is  2.400 sec.
+# total_in is 19719304, total_out is 4138972, deflate_level is 8, ratio is 21.0%, duration is  5.741 sec.
+# total_in is 19719304, total_out is 4115830, deflate_level is 9, ratio is 20.9%, duration is 11.587 sec.
+[/Users/wellsca/Desktop/pod_compress/zlib-1.2.5]$ 

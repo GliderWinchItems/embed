@@ -1,0 +1,9 @@
+#!/bin/bash
+# Kill running instances of the server
+echo '# killall st-util'
+killall st-util
+
+# Start 'st-util'
+echo '# Starting st-util'
+st-util
+

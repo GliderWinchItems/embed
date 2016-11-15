@@ -1,0 +1,63 @@
+#!/bin/bash
+# Execute 'launchselect', then do the reformatting process on the POD readout data
+# 02-21-2011 deh
+# 11-05-2012 deh hack 'mm' to use 'launchselect'
+# 12-09-2012 deh cleanup after 12-08-2012 launch readout fiasco
+
+# Usage: 
+# 1) No arguments: ww
+# 2) 1 argument: ww /dev/ttyUSB0
+# 3) 3 arguments ww /dev/ttyUSB0 120211.125217 90
+
+# If no argument supplied setup a default USB port
+if [ $# -lt 1 ] ; then
+	LOCAL=/dev/ttyUSB0
+else	
+	LOCAL=$1
+fi
+
+# Two arguments not correct
+if [ $# -eq 2 ] ; then
+	echo "Error: two arguments supplied.  The following are permitted:"
+	echo "No arguments: ww (defaults to /dev/tty/USB0)"
+	echo "1 argument:   ww /dev/ttyUSB0"
+	echo "3 arguments   ww /dev/ttyUSB0 120211.125217 90"
+	echo "     Where 2nd arg: yymmdd.hhmmss (year month day hour minute second)"
+	echo "     Where 3rd arg: time duration in seconds"
+	echo
+	exit
+fi
+
+# Too many arguments
+if [ $# -gt 3 ] ; then
+	echo "Error: more than three arguments.  The following are permitted:"
+	echo "No arguments: ww (defaults to /dev/tty/USB0)"
+	echo "1 argument:   ww /dev/ttyUSB0"
+	echo "3 arguments   ww /dev/ttyUSB0 120211.125217 90"
+	echo "     Where 2nd arg: yymmdd.hhmmss (year month day hour minute second)"
+	echo "     Where 3rd arg: time duration in seconds"
+	echo
+	exit
+fi
+
+echo $LOCAL
+
+# This script might be located in ~/bin, so navigate to where the action starts
+cd /home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+
+
+# This may be needed to access the serial port without 'sudo' or 'su'--
+sudo chown $USER:users $LOCAL
+
+# Set CLOCAL (local doesn't wait for modem) here since I can't get 'dateselect' to set it
+stty clocal -F $LOCAL
+
+# Readout packets between selected times on the command line, or launch times from list
+./launchselect $LOCAL $2 $3
+
+# 'rsync' this user's '~/winch/download' to the FIT server's /winch/download (send everything not already on FIT)
+#syncwinchdownloadtoFIT
+
+exit
+

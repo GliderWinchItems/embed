@@ -1,0 +1,20 @@
+echo ==================================================================================================================================================================
+cd ../devices
+make clean
+make
+cd ../lib/libmi*
+make clean
+make
+cd ../libsu*
+#make clean
+make
+cd ../libu*
+#make clean
+make
+cd ../../sdcardtest
+make clean
+make
+cd ../../sdcardutil
+make clean
+make
+

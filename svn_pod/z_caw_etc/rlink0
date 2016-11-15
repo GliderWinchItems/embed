@@ -1,0 +1,6 @@
+export int=/usr/local/share/openocd/scripts/interface/rlink.cfg
+export boa=/usr/local/share/openocd/scripts/board/olimex_stm32_h103.cfg
+export cmd=/usr/local/bin/openocd
+
+# sudo $cmd -f $int -f $boa $* >./rlink.log 2>&1 &
+sudo $cmd -f $int -f $boa $*

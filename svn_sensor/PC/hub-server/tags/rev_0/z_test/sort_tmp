@@ -1,0 +1,1 @@
+for x in 0*.tmp; do sort <$x >$x.tmp; done

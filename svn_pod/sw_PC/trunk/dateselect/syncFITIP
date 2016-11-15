@@ -1,0 +1,29 @@
+#!/bin/bash
+# Execute example: syncFITUP 72.77.164.207
+# 12/15/2014 deh
+
+# The "open" for .profile needs to be in same directory as the program
+
+DA=$HOME/svn_pod/sw_PC/trunk/dateselect
+RR=db/revprops/0/0
+
+# Run the svn IP 'switch --relocate' script
+# Pass the directory of the svn and the file with the (checked) new ip address
+
+#cd $DA
+
+syncFITIP2 $DA /svn_common $1
+syncFITIP2 $DA /svn_pod $1
+syncFITIP2 $DA /svn_discoveryf4 $1
+syncFITIP2 $DA /svn_sensor $1
+syncFITIP2 $DA /svn_ultrasonic $1
+syncFITIP2 $DA /svn_sensor2 $1
+syncFITIP2 $DA /svn_et $1
+
+# Instructions
+echo Looks good!
+echo
+
+# Return checkIP routine's error return.
+exit 0
+

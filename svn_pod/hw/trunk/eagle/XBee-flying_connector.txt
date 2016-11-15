@@ -1,0 +1,35 @@
+Xbee wiring for flying connectors on POD board
+03-11-2012
+
+(PC board connector requires XBee to be mounted topside-toward-board
+ so wires to loose connectors is done.)
+
+
+left connector (viewed from top of XBee)
+1*$	Vcc		red
+2*$	Dout		white
+3*$	Din /config	yellow
+4
+5	Reset		blue
+6
+7
+8
+9	/DTR Sleep 	white
+10*$	Ground		black
+
+right connector
+11
+12*	/CTS Di07	white
+13	ON /sleep status
+14	Vref (gnd)	black
+15
+16*	/RTS Di06	yellow
+17
+18
+19
+20
+
+$ - min for use
+* - req'd for firmware update.
+
+

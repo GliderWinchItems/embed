@@ -1,0 +1,40 @@
+README.updateFITIP
+08/20/2012
+
+Script: updateFITIP
+
+This is the starting point for a mish-mash of scripts and c code
+that updates .profile and svn's with the new ip address.  
+Exampble to execute--
+updateFITIP 72.77.164.207
+
+'updateFITIP' calls 'checkIP.c' which checks the IP address for
+validity. 'checkIP' will issue error messages if the IP fails
+some check and exit with a return code of 1. 
+
+If the IP address passed the 'checkIP' tests.  'checkIP' then 
+tries to open .profile, .bash_profile, and .bashrc (Ubuntu, Fedora,
+Suse) and searches for the old 'export FITIP=' line
+and replaces it with the new IP address.  The output in this
+process goes to .x.tmp.  At the conclusion the .x.tmp file
+overwrites the original .profile.
+
+If the exit code from 'checkIP' is zero, then a "sucess" message
+is made.
+
+'updateFITIP' then calls 'svnrelocate' and passes the directory
+path of the svn and the new IP address to 'svnrelocate'.
+
+'svnrelocate' then 'cd's to the directory, giving an error message
+if the 'cd' bombs.  It then excutes an 'svn info'.  If that fails 
+there is an error message and the exit code is 1.  Not, failing,
+it then calls 'svnrelocateedit.c' which receives the 'svn info' output
+via a pipe.  It scans the lines and selects the "URL:" lines with
+the old URL.  This is copied and the new IP inserted to make
+old and new URL's.  These are put in a command line
+svn switch --relocate <old URL> <new URL>
+which is executed via "system".
+
+At the end of this mess a message to log out/in, or reboot, is given
+since the .profile won't be effective until this is done.
+

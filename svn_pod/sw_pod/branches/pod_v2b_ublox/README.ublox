@@ -1,0 +1,21 @@
+03/05/2013
+
+ublox <-> RS232 wiring
+
+ublox
+red - vcc (5v)
+blk - rx
+yel - tx
+grn - gnd
+
+RS232 converter
+1 BLK - pwr gnd
+2 blk - rout1
+3 wht - tin2
+4 red - rout2
+5 yel - tin1
+6 RED - pwr +5v
+
+DE9 nearest max3232 is "1"
+
+

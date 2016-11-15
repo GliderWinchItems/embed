@@ -1,0 +1,100 @@
+README.canidtable
+06/27/2014
+-------------------------------------------------------------------------------------------------------------
+Version 1
+
+A. General scheme--
+
+The flat file can be read in as CAN name versus CAN id into a C file as a header file, 
+and read in to a program that converts CAN msgs logged on the SD card to ascii fields for
+outputting as single lines with readings from multiple msgs such as used for MATLAB 
+analysis.
+
+B. Flat file (e.g. 'CAN_id_table.txt') 
+
+First char of line:
+ '/' Line is a comment (C will then ignore '//')
+ '#' Lines is data line
+
+Data line--
+#define <name>  <hex can id> // <type> <calibration field>, ... @description
+
+name - name used by C programs
+hex can id - 32b format CAN id
+type - code for the arrangement of the payload
+  0 = two 4 byte ints
+  1 = one 8 byte int
+  2 = one 4 byte int, two single bytest
+  3 = one 4 byte int
+  ...more to be added...
+
+Calibration fields--
+ 
+Zero to 8 fields
+
+',' comma separates fields
+
+Within the calibration field:
+  field number = position that the output goes on the output line
+    -1 = not to be included in the output line
+     0 - n = field position within the winch data of the output line
+    
+  fix = fixed or float type
+    0 = fixed
+    1 = double
+
+  scale
+  offset
+    calibrated value = (reading * scale) + offset;
+
+  format
+    output format, e.g. "%6.2f"
+      This is used to format the calibrated reading
+
+C. Sequence
+
+Read input lines that have POD and Winch data sorted by time stamp.
+
+For winch data lines,
+  - Convert CAN id from little endian ascii/hex to binary
+  - Look up CAN id in array of CAN ids
+  - Take 'type': for each field in the payload
+    - convert the payload little endian hex to binary
+    - apply calibration based on "fix", "scale", and "offset"
+    - convert calibrated reading to ascii string via the "format"
+    - save the ascii string in an array, where the array position is
+        is the field number in the outuput line.
+
+When a new time tick from the time stamp is encountered,
+  - Output a line of data by outputting the strings from the array,
+        separated by commas.  
+  - Intialize the array for the next time tick.
+        Set all the strings in the array of strings to "".
+
+
+-------------------------------------------------------------------------------------------------------------
+Version 2
+
+1. A payload field can be outputted multiple ways, e.g. a shaft encounder counter field has the encoder
+   counts, but these might be calibrated in to "meters/count" as well as outputted as the absolute count.
+
+2. A description of the payload field is added.  Each field as a description as well as the msg has a 
+   description.
+
+3. The notion of "type" of payload is abandoned.  Instead the byte numbers of the payload are specified,
+   e.g. 1 4, would be the first four bytes.  (All payloads are little endian.)  
+
+   Conversion can be any number of bytes, 1 - 8, and signed or unsigned.
+
+4. Add sign for payload--
+    -1 = signed
+     1 = unsigned
+     2 = special case for Linux time * 64 (':' substituted with ' ')
+
+
+
+
+
+
+
+

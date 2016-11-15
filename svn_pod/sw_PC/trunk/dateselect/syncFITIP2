@@ -1,0 +1,15 @@
+#!/bin/bash
+# Execute example: syncFITUP2 $HOME/svn_pod/sw_PC/trunk/dateselect /svn_discoveryf4 72.91.23.232
+# 08/19/2012 deh
+
+# The "open" for .profile needs to be in same directory as the program
+
+
+RR=db/revprops/0/0
+
+         chmod 644 $2/$RR
+$1/svnrelocatesync $2/$RR $3
+         chmod 444 $2/$RR
+
+exit 0
+

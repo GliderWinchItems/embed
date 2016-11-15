@@ -1,0 +1,186 @@
+HowtoPutty.txt
+01/04/2014
+
+Notes on setting up PuTTY--
+
+1.  Install if not already installed
+
+http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+
+Download and execute the installer--
+"A Windows installer for everything except PuTTYtel"
+
+2. Setting up ssh keys
+
+Windows: Start, type in Puttygen
+The search should bring it up.
+Execute it.
+
+Click: "Generate" and wiggle the mouse until it completes
+
+Click: Save private key
+Skip adding a passphrase
+Give it a name, e.g. "georgefit1"
+
+Copy the public key in the box in the puttygen window to the clipbard.
+
+Open 'notepad'
+Paste the clipboard with the public key into notepad
+Save the file, e.g. 'geogrefit1.pub'
+(Be sure not to add or change *anything* as an extraneous space or
+newline will make it not work.  The entire key is all on one long line,
+any wraparound is done locally by the displaying routine.
+
+It should look something like the following.  Note the '== rsa-key-20140104' at \
+the end.  If it doesn't have that, do it again, and again.  I don't know what is going
+on, but until I got one that ended that way the FIT wouldn't accept the keys--
+ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAgrql5CLKvgV+UiOoWKlfw6hEqBKGIj+bD+O0iKtLVxcEEdpNuU1D67IM08cV08u4V7oMXsPuPh5NIyzVOU2j4Qchcu2aezRlu3qZ6Y/c0Y27czqG55kGkbYA+xeyeSawii/VMkAIZMy9HtB2uijBrSPD9q5fjx+4YnZaqew3cve5i4tfOqlr78NXoivgNszI7xEb3YQD1RVl0cnGqhkijkX/CmaEAGBlf2aL4tEqXI0u4Ik8nTga1a0XNU34x4G4h7LohcbyYzR+fwJC8wYuPaLoeCBQHBdR4aohAkpuH0Rw99hXydJQFQaC9jQlCQQwKp3GQycNTDVz9UKWBPQpEQ== rsa-key-20140104
+
+email this public key file to dhaselwood@verizon.net
+
+This file gets added to the 'authorized_keys' file in the .ssh directory of the 
+individual account.
+
+3.  Setting up PuTTY
+
+Execute Putty
+
+In the initial window ('sessions' on the left vertical tree)--
+
+Host name (or IP address)
+george@72.64.251.177 
+
+Port
+41574
+
+Connection type:
+SSH
+
+Save work, so far--
+In Saved Sessions
+click: Default Sessions
+then: "Save"
+
+On left vertical tree:
+Expand "connections:
+Expand "SSH:
+Click "Auth"
+Under Private Key File for Authentication--
+Browse
+Select the file with the name of the private key save above.
+Private Key File for Authentication box would look like this--
+C:\Users\deh\Documents\fit6.ppk
+
+To save work:
+Click 'sessions' in left vertical tree
+In Saved Sessions
+click: Default Sessions
+then: "Save"
+
+4.  To make a connection
+
+Execute Putty (if not already in it)
+The settings of above should be come up since it automatically 
+loads the Default Sessions file.
+
+Click: Open
+
+A black DOS box should open.  If successful, something similar to this--
+
+Using username "deh".
+Authenticating with public key "rsa-key-20140104"
+Welcome to Ubuntu 13.10 (GNU/Linux 3.11.0-15-generic i686)
+
+ * Documentation:  https://help.ubuntu.com/
+
+0 packages can be updated.
+0 updates are security updates.
+
+Last login: Sat Jan  4 20:03:38 2014 from pool-72-64-251-177.tampfl.fios.verizon.net
+deh@FIT:~$
+
+At this point you have a terminal on the FIT, so commands are being run on the FIT.
+
+
+5. To run the CAN bus monitor program--
+
+In the DOS box above, at the prompt--
+cangate 127.0.0.1 32123
+
+This should bring up the menu:
+
+deh@FIT:~$ cangate 127.0.0.1 32123
+CANGATGE has started
+argc 3
+Socket opened OK.  IP: 127.0.0.1 PORT: 32123
+Control C to break & exit
+a - load program 
+d - list raw msgs
+l - list time/date from time CAN sync msgs
+n - list msg id's and msg ct during 1 sec
+m - list msgs for id entered 'm xxxx'
+p - select unit to program load from list, or enter path/name, and open .bin & .srec files
+r - send high priority RESET
+s - Toggle sending of test msg file to CAN bus on/off
+x - cancel command
+Control C to quit program
+
+'x<enter> stops a running command and returns to the menu.
+
+'l' command takes incoming msg ids 00200000 (current time sync msg)
+and converts them to local time.
+
+'n' command builds a table of id's it encounters and displays a count of msgs with
+that id during a one second interval.  (The one second is approximate since the OS 
+time resolution is not precise nor sychronized.  Even though some msgs are exactly 
+64 per sec, it will sometimes display 63, then 65.)
+
+1st col: Number of id's in the table.  Hitting 'x' and restarting 'n' restarts the
+building of the table.
+
+5th from last col: Total number of msgs during the one second interval.
+
+4rd from last col: Total number of bytes during the one second interval.
+
+3rd from last col: Percentage of bandwidth used
+
+Last two cols: Error counts.
+
+'m' command can be used to view the stream of msgs for a single id.  To start--
+m xxxxxxxx  where xxxxxxxx is the 8 hex char id, in the same order/format as 
+displayed in the 'n' summary line.
+
+  The display is the msg id, payload byte ct, payload bytes
+
+'d' command displays all msgs.
+
+Ctl C to exit the program.
+
+If the program is started with the path/filename of test messages on the command line
+the toggling of sending ON/OFF can be done with the 's' command at anytime.  The following
+is a path/filename for some test messages--
+
+cangate 127.0.0.1 32123 /home/deh/svn_discoveryf4/PC/sensor/cangate/test/testmsg1.txt
+
+
+6.  Demonstrate raw usb|uart messages via connection to a local port
+
+After PuTTY connects--
+
+nc localhost 32123
+
+The raw data from the uart is displayed.
+
+Ctl C to quit
+
+To use telnet
+telnet localhost 32123
+
+Ctl ] gets a prompt
+>telnet
+Enter quit
+
+Using 'nc' is easier.
+
+
+

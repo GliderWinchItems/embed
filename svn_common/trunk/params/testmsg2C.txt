@@ -1,0 +1,961 @@
+// testmsg2C.txt
+// CAN test msgs for 'cangate'
+// PLUS--program loading path/file
+// 11-02-2014
+// 12-06-2014 Revision, major
+// 02/26/2015 Major revision: id
+// 
+// CANGATE COMMAND 's' -- send CAN msgs
+// First rule: if chars [0]-[2] == "// " ignore entire line
+//  "//C" CAN Msg following (hex)
+//    CAN-ID  dlc payload bytes
+//
+//  "//T" Intended for pacing the sending (not implemented)
+//    Time between msgs (ms) (decimal) Time between repeat of sequence (microsec) (decimal)
+//T 16000  0
+//
+// All input is ascii/hex
+//
+// First char 'C' = CAN id for command 's' (send periodically)
+// Field 2 = CAN ID
+// Field 3 = dlc
+// Field 4 = payload
+// Field 5 = CAN ID for timing (e.g. 0x00200000 time msg)
+// Field 6 = Number of polls before sending burst
+// Field 7 = Burst ct is number of times msg repeated
+//
+// 11b id  data ct data bytes
+// C 8a200000 00000008 fedcba9876543210
+//
+// 11b id  data ct data bytes
+// C 8a400000 00000004 aabbccdd
+//
+// 11b id  data ct data bytes 
+// C 8a600000 00000000 00000000
+//
+// 29b id  data ct data bytes
+// C 8a88888c 00000008 eeccaa8866442200
+//
+// MASTER RESET
+// C A0000000 00000000 00000000
+//
+// Test msg has "//C: (not "// C")
+// C FFFF0b04  00000008  1  00200000 32 128
+// C FFFF0004  00000008  1  41a00000 32 160
+//C FFFF0004  00000008  1  00200000 32 160
+// C FFE00000  00000008  fedcba9876543210  00200000 32  96
+// C 00300000  00000008  0  00200000 32 64
+// C 00300000  00000000  0  00200000 64  128
+//
+//
+
+// For cangate command 'p'--
+
+// Each unique unit CAN ID--line starts with #define
+// Each application CAn ID--line starts with #define
+//   C program name (caps)
+//   Hex CAN ID
+//   Following "//"
+//     'P' = Unit
+//        path/filename of program to load (.srec)
+//        '*' convenient way to find next fields
+//        Skip crc: (0 = do crc check, load if different) (1 = skip crc check)
+//        Skip unit: (0 = load this unit) (1 = skip loading unit)
+//        Skip calib: (0 = no calib, skip) [application does not use calibs]
+//                    (1 = load with .txt data if crc not same) [unit == .txt]
+//                    (2 = skip loading .txt data if unit calib crc is OK) [unit != .txt]
+//        '@' The following are comments taken verbatim
+//     'U' = subsystem (follows and associates with with Unit line)
+//        "<name>" = subsystem name
+//         'n' = subsystem number
+//         '@' = description
+//         
+//     'I' = CAN msg ID (follows and associates with subsystem line)
+//        'n' = index into table of CAN ID's
+//        '@' The following are comments taken verbatim
+//
+// Each payload field--line starts with "//$"
+//   size: number of payload bytes (dlc)
+//   pay-idx: First byte of payload (1-8)
+//   pay-idx: Last byte of payload (1-8)
+//   fix: 	 (payload conversion)
+//		 0 = fixed pt output, 
+//		 1 = floating pt (double) output, 
+//		 2 = linux time convert
+//		 3 = 1/2 float
+//     		 4 = 3/4 float
+//   sign: 	 (applies to fixed pt)
+//		 1 = not signed, 
+//		-1 = signed
+//
+//   scale and offset: calibration = (reading * scale) + offset;
+//
+//   outfield = output line field position (0 - 32) (-1 = not assigned)
+//
+//   format: format for conversion to ascii, e.g. "%6.1f"
+//
+//   description: for listing purposes.
+//
+//   Calibration and parameters "//i "
+//     All are multiples of 4 bytes, i.e. an array defined in high flash as,
+//     u32 x[SIZE];, but referred to in the app program via a locally defined
+//     struct, e.g. (using data in "CANID_SHAFT1" below) --
+//     struct MYAPPCALIBRATION {
+//        u32   segments;
+//        float distance;
+//        char m[19];
+//     };
+//   To use the calibrations set a pointer to where they are stored, e.g.--
+//     struct MYAPPCALIBRATION* pmyappcal = &__hfl1;
+//     int counts_per_rev = raw_value * pmyappcal->segments;
+//     float calibrated_value = raw_value * pmyappcal->distance;
+//     printf("This unit is %s\n\r",(char*)&pmyappcal->m[0]);
+//
+//   The .txt file format for calibrations--
+//   "//i " first four chars on a lines, following the "#define ... // I" line,
+//   which applies to the unit in the preceding "define ... // P" line.
+//     1 struct index (0 - n): index into an array of byte elements (i.e. u32)
+//     2 type of number code:
+//        number type codes
+//        0 - u32 (unsigned int)
+//        1 - s32 (int)
+//        2 - u64 (unsigned long long)
+//        3 - s64 (long long)
+//        4 - float
+//        5 - double
+//        6 - string of chars (zero termination added after 1st double space, or
+//            tab.  It fills four byte "blocks".
+//            NOTE: If a the variable following the string is a double or long long (signed or unsigned)
+//              the slots taken by the string may need to be adjusted upward to get the correct "align."
+//              The 'sizeof' program that tests the matching struct will give an error since the sizeof
+//              the struct will not match, due to the compiler inserting a dead slot to get the alignment.
+//        7 - CAN ID by name (name is looked up in table made from #define <CANID> lines)
+//        8 - 1/2 float (for transport only)
+//        9 - 3/4 float (for transport only)
+//
+//    3 format used to convert ascii on line to variable
+//    4 data - the data field
+//    5 following '@' describes line (not stored in calibrations)
+//    Warning: An entry might be needed at the end of the list to make the struct size match.
+//
+//    "//c" Comments and explanatory text
+//       By classifying this with the 'c' the line can be picked off and listed, or put in an array or database
+//       where it could be looked (a sort of online help).
+//
+//    "//v" struct definitions that correspond to the foregoing fields.
+//       If these lines are sent to a file the file can serve as a common .h file for defining all structs used by subsystems
+//
+//    "//K" Payload layout for commands used to get measurement msgs (generally raw readings for computing calibrations)
+//       (First byte of payload always a command code)
+//       1 Command code (name that relates to numeric code)
+//       2 Payload size
+//       3,4 Payload index 
+//       5 Number type (see "//i" above for codes up through 9; 6 & 7 are not appropriate for payload layout)
+//       '@' starts description field
+//
+// There are three types of CAN IDs--
+// 1.  Unique hardware unit CAN ID
+//     Call these: CANID_UNIT_xxxxx (xxxx can be anything, (caps))
+//       Embedded in loader program
+//       Essentially a unit serial number
+//       Used to load/re-load application programs
+//
+// 2.  Launch associated CAN IDs
+//       E.g. tension, cable angle, launch state, time msgs
+//
+// 3.  System management: Parameter, calibration, maintenance
+//     Call these: CANID_CMD_<name> (<name> is subsystem/function name, e.g. TENSION_1)
+//       Used for: Get/Put parameters, calibrations, CAN IDs
+//       Poll special measurements, for test and calibration
+//          E.g. Raw thermistor reading, Calibrated temperature
+//
+//c  CANID_CMD specifies what "function" (e.g. tension drum #1)
+//c    Payload for this CAN msg
+//c      First byte of payload is command code
+//c      Second byte of payload depends on command code:
+//c         Identification number in parameter list
+//c         Reading to fetch
+//c         
+//c
+//c   NOTE:
+//c   1.  Payload conversion is for transport, e.g. 1/2 float is always a float
+//c       before and after the CAN msg.
+//c
+//c   2.  A GET msg with a payload of 2 bytes (i.e. no bytes for the value) means
+//c       a request.
+//c       A GET msg with a payload of greater than 2 bytes is response.
+//c
+//c   3.  A PUT msg is always "one-way," i.e. the value field is placed in the
+//c       location specified, and the number converted according to the type code.
+//c
+//c   4.  SAV means save any changes in the current parameter/calibration/CANID list 
+//c       to non-volatile storage.
+//c
+//c   5.  RVT means revert the current working list to the previous saved list.  The
+//c       current list is re-initialized from non-volatile storage.
+//c
+//c   6.  RDG means send a reading.  The reading sent is determined by id field.
+
+//c The following are used by all programs--
+//c
+//c For C programs this list is converted to
+//c "#define" statements so that the programs use the name rather than the numeric code.
+//c
+//c For java programs the list might be a database, or this file read as a text file.
+//c 
+//v /* Global command codes */
+//v /* Command code  Payload [0] */
+//v #define CMD_ERR	0	// Show response error
+//v #define CMD_GET	1	// Get a parameter at id number	
+//v #define CMD_PUT	2	// Put a parameter at id number
+//v #define CMD_SAV	3	// Save any changed parameters
+//v #define CMD_RVT	4	// Revert parameters to last saved list
+//v #define CMD_RDG	5	// Get a reading
+//
+//c Payload [1] = Location (id, index, or reading code)
+//c  For GET and PUT this number is identification in the parameter/calibration/CANID list
+//c  For RDG this number is the reading code
+//c 
+//  
+//v /* Types of payload field conversions */
+//v /* (dlc used to determine multiple values) */
+//v /* TYPE_NAME TYPE_CODE TYPE_SIZE	*/
+//v #define PY_S8	1	1-6	// (one - six)
+//v #define PY_U8	2	1-6	// (one - six)
+//v #define PY_S16	3	2,4,6	// (one - three)
+//v #define PY_U16	4	2,4,6	// (one - three)
+//v #define PY_S32	5	4
+//v #define PY_U32	6	4
+//v #define PY_S64_L	7	4	// Low order 4 bytes
+//v #define PY_S64_H	8	4	// High order 4 bytes
+//v #define PY_U64_L	9	4	// Low order 4 bytes
+//v #define PY_U64_H	10	4	// High order 4 bytes
+//v #define PY_FLT	11	4	// full float
+//v #define PY_12flt	12	2,4,6	// 1/2 float (one - three)
+//v #define PY_34flt	13	3,6	// 3/4 float (one or two)
+//v #define PY_DBL_L	14	4	// double Low order 4 bytes
+//v #define PY_DBL_H	15	4	// double High order 4 bytes
+//v #define PY_ASC	16	1-6	// ASCII char: number = (dlc - 2)
+//v
+//v Mixed combinations
+//v #define PY_U8S32	17	5	// u8 + s32 (e.g. index + reading)
+//v #define PY_24bS	18	3,6	// 24b signed (one or two)
+//v #define PY_12FFF	19	6	// 1/2flt + full flt
+//v #define PY_U16U32	20	6	// u16 + u32
+//v
+//  /* struct for app program to relate id, type, local struct */
+//v struct PARAMIDTYPE
+//v {
+//v	uint16_t id;	// Item identification
+//v	uint16_t type;	// Type of payload code
+//v };
+//v
+//v
+//v struct PARAMIDPTR	// id number versus pointer into struct
+//v {
+//v 	uint16_t id;	// Item identification
+//v 	void* p;	// Pointer to local struct
+//v };
+//v 
+
+// ################### DERBY NOTES ########################################
+// Export 
+// CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (null,'NUMBER_TYPE','NUMBER_TYPE.cvs',null,null,null)
+//
+// CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'NUMBER_TYPE','NUMBER_TYPE2.cvs',null,null,null,0)
+//
+// select CAN_UNIT_NAME, CANID_CMD_NAME, CANID_HEX
+// FROM FUNCTIONS INNER JOIN CANID
+// ON FUNCTIONS.CANID_CMD_NAME = CANID.CANID_NAME;
+
+// The following connects using the 'ij' tools:
+// ij> CONNECT 'jdbc:derby://localhost:1527/pcc';
+// Some ij commands:
+// SHOW TABLES;
+// SHOW CONNECTIONS;
+// EXIT;
+
+
+
+//  ########################## BEGINNING OF COMMAND P CANID AND CALIBRATION ################################################
+//  ========================================================================================================================
+// Shaft Encoder--Drive Shaft w histogram readout--se4_h
+//      program name     	  	   CAN ID     p  program  path/filename                                 crc unit calib      Comments
+#define CANID_UNIT_2 			0x00400000 // P /home/deh/svn_sensor/sensor/se4_h/trunk/se4_h.srec  *    0   0     1	@Sensor unit: Drive shaft encoder
+// First subsystem "SHAFTENC" (Shaft encoder) in this unit (Struct offsets begin at zero following each //U line)
+//U	"SHAFT_ENCODER1"	3			   // S FLASHP_SE4 	@ Subsystem: Shaft encoder
+#define CANID_SE4H_COUNTERnSPEED		0x30400000 // I	0 @ SE4: (drive shaft) count and speed
+//   ------------------- for converting payload to output field (winch instrumentation) ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4   0    -1   1              0     11      "%8d"	  	@Shaft counter (ticks)
+//$   8   1   4   1    -1   0.114537232    0      2      "%8.1f"	@Shaft counter (feet/count)
+//$   8   5   8   1     1   4.0            0      3      "%6.0f"	@RPM: 4 black segments
+//   ------------------- Application CAN ID's -----------------------------------------------------------------------------
+#define CANID_SE4H_ERROR2		0xD0400004 // I 1 @ SE4: [0]encode_state er ct [1]adctick_diff<2000 ct
+//$   8   1   4   0    -1   1              0     -1      "%u"	  @ encoder state error ct
+//$   8   5   8   0    -1   1              0     -1      "%u"	  @ adctick_diff<2000 ct
+#define CANID_SE4H_ERROR1		0xD0400014 // I 2 @ SE4: [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//$   8   1   4   0    -1   1              0     -1      "%u"	  @ elapsed_ticks_no_adcticks<2000 ct
+//$   8   5   8   0    -1   1              0     -1      "%u"	  @ cic not in sync
+#define CANID_SE4H_ADC3_HistogramA	0xD0400024 // I 3 @ SE4: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+#define CANID_SE4H_ADC3_HistogramB	0xD0400034 // I 4 @ SE4: ADC3 HistogramB tx: bin number, rx: send bin count
+#define CANID_SE4H_ADC2_HistogramA	0xD0400044 // I 5 @ SE4: ADC2 HistogramA tx: request count, switch buffers; rx send count
+#define CANID_SE4H_ADC2_HistogramB	0xD0400054 // I 6 @ SE4: ADC2 HistogramB tx: bin number, rx: send bin count
+#define CANID_SE4H_ADC3_ADC2_READOUT	0xD0400064 // I 7 @ SE4: ADC3 ADC2 readings readout
+#define CANID_SE4H_CMD			0xD0400074 // I 8 @ SE4: Command CAN: send commands to subsystem
+//$   8   1   1   0    -1   1              0     -1      "%u"	  	@ Command code
+//$   8   2   2   0    -1   1              0     -1      "%u"	  	@ Area
+//$   8   3   4   0    -1   1              0     -1      "%u"	  	@ Index
+//$   8   5   8   0    -1   1              0     -1      "%u"	  	@ value
+
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//   Paraameter Param Number read    value,
+//   Name        id  type  format  data		  	Description
+//M  CANPRM_CRC   0     0     "%x"    0			@ SE4: crc
+//M  CANPRM_VER   1     1     "%u"    3         		@ SE4: struct version number
+//M  CANPRM_SEG   2     0     "%u"    5			@ SE4: Number of black segments
+//M  CANPRM_SFT   3     4     "%f"  0.11453721234 	@ SE4: Shaft counter to distance conversion
+//M  CANPRM_HT3   4     0     "%u"    901			@ SE4: High threshold register setting, ADC3
+//M  CANPRM_LT3   5     0     "%u"    400			@ SE4: Low  threshold register setting, ADC3
+//M  CANPRM_HT2   6     0     "%u"   1100			@ SE4: High threshold register setting, ADC2
+//M  CANPRM_LT2   7     0     "%u"    701			@ SE4: Low  threshold register setting, ADC2
+//M  CANPRM_ASC   8     6     "%c"  "Shaft sensor DRIVE SHAFT...." @ SE4: Some ascii description about the unit's use
+//M  CANPRM_DBL   9     5     "%lf" 7.123456789012345 	@ SE4: Test double (2 slots)
+//M  CANPRM_ULL  10     2     "%llu" 1234567890123456789 	@ SE4: Test unsigned long long
+//M  CANPRM_IDX  11     0     "%d"   -256			@ SE4: Test of index 
+//c
+//c    "#define" lines only specify CAN ID's that are "owned" by a subsystem; another subsystem could respond using the same 
+//c  CAN ID and if this msg has a different payload layout its payload would be defined under the #define line in the originating 
+//c  subsystem.
+//c
+//M  CANPRM_     12     7	"CANID_SE4H_ERROR2"		@ SE4: [0]encode_state er ct [1]adctick_diff<2000 ct
+//M  CANPRM_     13     7	"CANID_SE4H_ERROR1"		@ SE4: [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//M  CANPRM_     14     7	"CANID_SE4H_ADC3_HistogramA"	@ SE4: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+//M  CANPRM_     15     7	"CANID_SE4H_ADC3_HistogramB"	@ SE4: ADC3 HistogramB tx: bin number, rx: send bin count
+//M  CANPRM_     16     7	"CANID_SE4H_ADC2_HistogramA"	@ SE4: ADC2 HistogramA tx: request count, switch buffers; rx send count
+//M  CANPRM_     17     7	"CANID_SE4H_ADC2_HistogramB"	@ SE4: ADC2 HistogramB tx: bin number, rx: send bin count
+//M  CANPRM_     18     7	"CANID_SE4H_ADC3_ADC2_READOUT"	@ SE4: ADC3 ADC2 readings readout
+//M  CANPRM_     19     7        "CANID_SE4H_COUNTERnSPEED"      @ SE4: Shaft counter and speed
+//M  CANPRM_     20     7        "CANID_SE4H_CMD"              	@ SE4: Command CAN: send commands to subsystem
+//c
+//v
+//v // -----------------------------------------------------------------------------------------------
+//v #ifndef S_FLASHP_SE4
+//v #define S_FLASHP_SE4
+//v struct FLASHP_SE4
+//v {
+//v 	unsigned int crc;		// crc-32 placed by loader
+//v	unsigned int version;		// version number
+//v 	unsigned int numblkseg;		// Number of black segments
+//v 	float ctr_to_feet;		// Shaft counts to feet conversion
+//v 	unsigned int adc3_htr_initial;	// High threshold registor setting, ADC3
+//v 	unsigned int adc3_ltr_initial;	// Low  threshold register setting, ADC3
+//v 	unsigned int adc2_htr_initial;	// High threshold registor setting, ADC2
+//v 	unsigned int adc2_ltr_initial;	// Low  threshold register setting, ADC2
+//v	char c[4*8];			// ASCII identifier
+//v 	double dtest;			// Test double
+//v 	unsigned long long ulltest;	// Test long long
+//v 	unsigned int testidx;		// Test index
+//v    unsigned int canid_error2;	// [0]encode_state er ct [1]adctick_diff<2000 ct
+//v    unsigned int canid_error1;	// [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//v    unsigned int canid_adc3_histogramA;	// ADC3 HistogramA tx: request count, switch buffers. rx: send count
+//v    unsigned int canid_adc3_histogramB;	// ADC3 HistogramB tx: bin number, rx: send bin count
+//v    unsigned int canid_adc2_histogramA;	// ADC2 HistogramA tx: request count, switch buffers; rx send count
+//v    unsigned int canid_adc2_histogramB;	// ADC2 HistogramB tx: bin number, rx: send bin count
+//v    unsigned int canid_adc3_adc2_readout;	// ADC3 ADC2 readings readout
+//v    unsigned int canid_se4h_counternspeed;	// Shaft counter and speed
+//v    unsigned int canid_se4h_cmd;		// Command CAN: send commands to subsystem
+//v };
+//v #endif
+//  ========================================================================================================================
+// Engine sensor --se1
+//      program name     	  	   CAN ID     p  program  path/filename                                crc unit calib      Comments
+#define CANID_UNIT_3			0x00600000  // P /home/deh/svn_sensor/sensor/se1/trunk/se1.srec	*       0  0  1	@Sensor unit: Engine 
+// First subsystem "ENGINE" (Engine sensor) in this unit (Struct offsets begin at zero following each //U line)
+//U	"ENGINE_SENSOR"	4	 // S ENGINE_SE1 	@ Subsystem: Engine sensor--rpm, manifold pressure, throttle setting, temperature
+//   ------------------- for converting payload to output field (winch instrumentation) ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+#define CANID_ENG_RPMMANIFOLD		0x40600000 // I 0 @Engine: rpm:manifold pressure
+//$   8   1   4   1     1   5.0            0      1      "%6.0f"      @ Eng: RPM with 5 black segments
+//$   8   5   8   1     1   9.629E-3    -0.5      12       "%5.1f"    @ Eng: Manifold pressure (inch hg)	
+#define CANID_ENG_TEMP			0x70600000 // I 1 @ Eng: thermistor converted to temp
+//$   4   1   4   1     1    0.01          0      5      "%6.1f"      @ Eng: Transmission temp (deg C)
+#define CANID_ENG_THROTTLE		0x50600000 // I 2 @ Eng: throttle
+//$   4   1   4   0     1   1              0      4      "%d"         @ Eng: Throttle setting (0-99)
+#define CANID_ENG_THERMTHROTL		0x60600000 // I 3 @ Eng: thermistor:throttle pot
+//$   8   1   4   0     1   1              0     -1      "%d"         @ Eng: Thermistor reading (ADC reading)
+//$   8   4   8   0     1   1              0     -1      "%d"         @ Eng: Throttle pot reading (ADC reading)
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  	Description
+//i   0       0     "%x"     0		@ Eng: crc
+//i   1       1     "%u"     1          @ Eng: struct version number
+//i   2       4     "%f"    -0.5	@ Eng: Manifold pressure offset
+//i   3       4     "%f"   9.629E-3	@ Eng: Manifold pressure scale (inch hg)
+//i   4       4     "%f"   0.01         @ Eng: Transmission temperature (deg C)
+//i   5       7	"CANID_ENG_RPMMANIFOLD"	@ Eng: rpm:manifold pressure
+//i   6       7	"CANID_ENG_TEMP"	@ Eng: thermistor converted to temp
+//i   7       7	"CANID_ENG_THROTTLE"	@ Eng: throttle (calibrated)
+//i   8       7	"CANID_ENG_THERMTHROTL"	@ Eng: thermistor_throttle pot
+//i   9       6     "%c"  "Shaft sensor ENGINE" @ Eng: Some ascii description about the unit's use
+//    Note: the next available index would be 14, since the above ascii takes up 4+ four byte slots.
+//i  14       4     "%f"   3380.0	@ Eng: temp_calc: Thermistor constant "B"
+//i  15       4     "%f"   10.0		@ Eng: temp_calc: Series resistor, fixed (K ohms)
+//i  16       4     "%f"   10.0		@ Eng: temp_calc: Thermistor room temp resistance (K ohms)
+//i  17       4     "%f"   298.0        @ Eng: temp_calc: Reference temp for thermistor
+//c 
+//v // -----------------------------------------------------------------------------------------------
+//v #ifndef STRUCTSUB4 // Prevent multiple defines
+//v #define STRUCTSUB4
+//v
+//v // Subsystem 4 - struct definitions: Engine unit
+//v
+//v struct ENGINE_SE1
+//v {
+//v    unsigned int crc;		// Eng: crc on this struct
+//v    unsigned int version;		// Eng: version number
+//v    float	manpress_offset;	// Eng: Manifold pressure offset  
+//v    float	manpress_scale; 	// Eng: Manifold pressure scale (inch hg) 
+//v    float	trans_temp;		// Eng: Transmission temperature (deg C)
+//v    unsigned int canid_rpm_manpress;	// CANID: Eng: rpm:manifold pressure
+//v    unsigned int canid_temp;		// CANID: Eng: thermistor converted to temp
+//v    unsigned int canid_throttle;	// CANID: Eng: throttle (calibrated)
+//v    unsigned int canid_therm_throttle; // CANID: Eng: thermistor_throttle pot
+//v	char c[4*5];			// ASCII identifier
+//v    unsigned int b;			// Thermistor constant "B" (see data sheets: http://www.murata.com/products/catalog/pdf/r44e.pdf)
+//v    unsigned int rs;			// Series resistor, fixed (K ohms)
+//v    unsigned int ro;			// Thermistor room temp resistance (K ohms)
+//v    unsigned int tref;		// Reference temp for thermistor
+//v };
+//v #endif
+//v
+//  ========================================================================================================================
+// Shaft Encoder--Lower sheave
+#define CANID_UNIT_4			0x0080000C // P /home/deh/svn_sensor/sensor/se3/trunk/se3.srec	*      0  1  1	@Sensor unit: Lower sheave shaft encoder
+// First subsystem "SHAFTENC" (Shaft encoder) in this unit (Struct offsets begin at zero following each //U line)
+//U	"SHAFT_ENCODER2"	5	 // S FLASHP_SE4B 	@ Subsystem: Shaft encoder
+#define CANID_SE2H_COUNTERnSPEED		0x30800000 // I 0 @ SE2: (Lower sheave) Count and speed
+//   ------------------- for converting payload to output field (winch instrumentation) ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4   0    -1   1              0     11      "%8d"	  	@Shaft counter (ticks)
+//$   8   1   4   1    -1   0.114537232    0      2      "%8.1f"	@Shaft counter (feet/count)
+//$   8   5   8   1     1   4.0            0      3      "%6.0f"	@RPM: 4 black segments
+#define CANID_SE2H_ERROR2		0xD0800004 // I 1 @ SE2: error2
+#define CANID_SE2H_ERROR1		0xD0800014 // I 2 @ SE2: error1
+#define CANID_SE2H_ADC3_HistogramA	0xD0800024 // I 3 @ SE2: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+#define CANID_SE2H_ADC3_HistogramB	0xD0800034 // I 4 @ SE2: ADC3 HistogramB tx: bin number, rx: send bin count
+#define CANID_SE2H_ADC2_HistogramA	0xD0800044 // I 5 @ SE2: ADC2 HistogramA tx: request count, switch buffers; rx send count
+#define CANID_SE2H_ADC2_HistogramB	0xD0800054 // I 6 @ SE2: ADC2 HistogramB tx: bin number, rx: send bin count
+#define CANID_SE2H_ADC3_ADC2_READOUT	0xD0800064 // I 7 @ SE2: ADC3 ADC2 readings readout
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  	Description
+//i     0     0     "%x"    0			@ SE2: crc
+//i     1     1     "%u"    1         		@ SE2: struct version number
+//i     2     0     "%u"    5			@ SE2: Number of black segments
+//i     3     4     "%f"  0.11453721234 	@ SE2: Shaft counter to distance conversion
+//i     4     0     "%u"    901			@ SE2: High threshold register setting, ADC3
+//i     5     0     "%u"    400			@ SE2: Low  threshold register setting, ADC3
+//i     6     0     "%u"   1100			@ SE2: High threshold register setting, ADC2
+//i     7     0     "%u"    700			@ SE2: Low  threshold register setting, ADC2
+//i     8     6     "%c"  "Shaft sensor LOWER sheave..." @ SE2: Some ascii description about the unit's use
+//    Note: the next available index would be 13, since the above ascii takes up 6+ four byte slots.
+//c
+//c    "#define" lines only specify CAN ID's that are "owned" by a subsystem; another subsystem could respond using the same 
+//c  CAN ID and if this msg has a different payload layout its payload would be defined under the #define line in the originating 
+//c  subsystem.
+//c
+//i     16     7	"CANID_SE2H_ERROR2"		@ SE2: [0]encode_state er ct [1]adctick_diff<2000 ct
+//i     17     7	"CANID_SE2H_ERROR1"		@ SE2: [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//i     18     7	"CANID_SE2H_ADC3_HistogramA"	@ SE2: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+//i     19     7	"CANID_SE2H_ADC3_HistogramB"	@ SE2: ADC3 HistogramB tx: bin number, rx: send bin count
+//i     20     7	"CANID_SE2H_ADC2_HistogramA"	@ SE2: ADC2 HistogramA tx: request count, switch buffers; rx send count
+//i     21     7	"CANID_SE2H_ADC2_HistogramB"	@ SE2: ADC2 HistogramB tx: bin number, rx: send bin count
+//i     22     7	"CANID_SE2H_ADC3_ADC2_READOUT"	@ SE2: ADC3 ADC2 readings readout
+//v
+//v  // -----------------------------------------------------------------------------------------------
+//v #ifndef STRUCT_FLASHP_SE4B
+//v #define STRUCT_FLASHP_SE4B
+//v struct FLASHP_SE4B
+//v {
+//v 	unsigned int crc;		// crc-32 placed by loader
+//v	unsigned int version;		// struct version number
+//v 	unsigned int numblkseg;		// Number of black segments
+//v 	float ctr_to_feet;		// Shaft counts to feet conversion
+//v 	unsigned int adc3_htr_initial;	// High threshold registor setting, ADC3
+//v 	unsigned int adc3_ltr_initial;	// Low  threshold register setting, ADC3
+//v 	unsigned int adc2_htr_initial;	// High threshold registor setting, ADC2
+//v 	unsigned int adc2_ltr_initial;	// Low  threshold register setting, ADC2
+//v	char c[4*8];			// ASCII identifier
+//v    unsigned int canid_error2;	// [0]encode_state er ct [1]adctick_diff<2000 ct
+//v    unsigned int canid_error1;	// [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//v    unsigned int canid_adc3_histogramA;	// ADC3 HistogramA tx: request count, switch buffers. rx: send count
+//v    unsigned int canid_adc3_histogramB;	// ADC3 HistogramB tx: bin number, rx: send bin count
+//v    unsigned int canid_adc2_histogramA;	// ADC2 HistogramA tx: request count, switch buffers; rx send count
+//v    unsigned int canid_adc2_histogramB;	// ADC2 HistogramB tx: bin number, rx: send bin count
+//v    unsigned int canid_adc3_adc2_readout;	// ADC3 ADC2 readings readout
+//v };
+//v #endif
+//  ========================================================================================================================
+//  Shaft Encoder--Upper sheave shaft encoder
+#define CANID_UNIT_5			0x00A0000C // P /home/deh/svn_sensor/sensor/se3/trunk/se3.srec	*       0  1  1	@Sensor unit: Upper sheave shaft encoder
+//U	"SHAFT_ENCODER3"	6	 // S FLASHP_SE4B 	@ Subsystem: Shaft encoder
+#define CANID_SE3H_COUNTERnSPEED		0x30A00000 // I 0 @ SE3: (upper sheave) Count and Speed
+#define CANID_SE3H_ERROR2			0xD0A00004 // I 1 @ SE3: error2
+#define CANID_SE3H_ERROR1			0xD0A00014 // I 2 @ SE3: error1
+#define CANID_SE3H_ADC3_HistogramA		0xD0A00024 // I 3 @ SE3: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+#define CANID_SE3H_ADC3_HistogramB		0xD0A00034 // I 4 @ SE3: ADC3 HistogramB tx: bin number, rx: send bin count
+#define CANID_SE3H_ADC2_HistogramA		0xD0A00044 // I 5 @ SE3: ADC2 HistogramA tx: request count, switch buffers; rx send count
+#define CANID_SE3H_ADC2_HistogramB		0xD0A00054 // I 6 @ SE3: ADC2 HistogramB tx: bin number, rx: send bin count
+#define CANID_SE3H_ADC3_ADC2_READOUT		0xD0A00064 // I 7 @ SE3: ADC3 ADC2 readings readout
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  		  Description
+//i     0     0     "%x"    0			@ SE3: crc
+//i     1     1     "%u"    1         		@ SE3:: struct version number
+//i     2     0     "%u"    5			@ SE3: Number of black segments
+//i     3     4     "%f"  0.11453721234 	@ SE3: Shaft counter to distance conversion
+//i     4     0     "%u"    901			@ SE3: High threshold register setting, ADC3
+//i     5     0     "%u"    400			@ SE3: Low  threshold register setting, ADC3
+//i     6     0     "%u"   1100			@ SE3: High threshold register setting, ADC2
+//i     7     0     "%u"    701			@ SE3: Low  threshold register setting, ADC2
+//i     8     6     "%c"  "Shaft sensor UPPER sheave..." @ Some ascii description about the unit's use
+//    Note: the next available index would be 13, since the above ascii takes up 6+ four byte slots.
+//c
+//c    "#define" lines only specify CAN ID's that are "owned" by a subsystem; another subsystem could respond using the same 
+//c  CAN ID and if this msg has a different payload layout its payload would be defined under the #define line in the originating 
+//c  subsystem.
+//c
+//i     16     7	"CANID_SE3H_ERROR2"		@ SE3: [0]encode_state er ct [1]adctick_diff<2000 ct
+//i     17     7	"CANID_SE3H_ERROR1"		@ SE3: [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//i     18     7	"CANID_SE3H_ADC3_HistogramA"	@ SE3: ADC3 HistogramA tx: request count, switch buffers. rx: send count
+//i     19     7	"CANID_SE3H_ADC3_HistogramB"	@ SE3: ADC3 HistogramB tx: bin number, rx: send bin count
+//i     20     7	"CANID_SE3H_ADC2_HistogramA"	@ SE3: ADC2 HistogramA tx: request count, switch buffers; rx send count
+//i     21     7	"CANID_SE3H_ADC2_HistogramB"	@ SE3: ADC2 HistogramB tx: bin number, rx: send bin count
+//i     22     7	"CANID_SE3H_ADC3_ADC2_READOUT"	@ SE3: ADC3 ADC2 readings readout
+//v
+//v  // -----------------------------------------------------------------------------------------------
+//v #ifndef STRUCT_FLASHP_SE4B
+//v #define STRUCT_FLASHP_SE4B
+//v struct FLASHP_SE4B
+//v {
+//v 	unsigned int crc;		// crc-32 placed by loader
+//v	unsigned int version;		// struct version number
+//v 	unsigned int numblkseg;		// Number of black segments
+//v 	float ctr_to_feet;		// Shaft counts to feet conversion
+//v 	unsigned int adc3_htr_initial;	// High threshold registor setting, ADC3
+//v 	unsigned int adc3_ltr_initial;	// Low  threshold register setting, ADC3
+//v 	unsigned int adc2_htr_initial;	// High threshold registor setting, ADC2
+//v 	unsigned int adc2_ltr_initial;	// Low  threshold register setting, ADC2
+//v	char c[4*8];			// ASCII identifier
+//v    unsigned int canid_error2;	// [0]encode_state er ct [1]adctick_diff<2000 ct
+//v    unsigned int canid_error1;	// [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+//v    unsigned int canid_adc3_histogramA;	// ADC3 Histogram tx: request count, switch buffers. rx: send count
+//v    unsigned int canid_adc3_histogramB;	// ADC3 Histogram tx: bin number, rx: send bin count
+//v    unsigned int canid_adc2_histogramA;	// ADC2 Histogram tx: request count, switch buffers; rx send count
+//v    unsigned int canid_adc2_histogramB;	// ADC2 Histogram tx: bin number, rx: send bin count
+//v    unsigned int canid_adc3_adc2_readout;	// ADC3 ADC2 readings readout
+//v };
+//v #endif
+//  ========================================================================================================================
+#define CANID_UNIT_8			0x0100000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Sensor unit: Level wind
+//  ========================================================================================================================
+#define CANID_UNIT_9			0x0120000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Sensor unit: XBee receiver #1
+//  ========================================================================================================================
+#define CANID_UNIT_A			0x0140000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Sensor unit: XBee receiver #2
+//  ========================================================================================================================
+#define CANID_UNIT_B			0x0160000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Display driver/console
+//  ========================================================================================================================
+#define CANID_UNIT_C			0x0180000C // P /home/deh/svn_sensor/sensor/caw_Olimex/trunk/xxx.srec	*       0  1 1	@CAW's Olimex board
+//  ========================================================================================================================
+#define CANID_UNIT_D			0x01A0000C // P /home/deh/svn_sensor/sensor/pod6/trunk/pod6.srec	*       0  1 1	@POD board sensor prototype ("6" marked on board)
+//  ========================================================================================================================
+//  ========================================================================================================================
+//  Tension sensor--two load-cells with temp comp
+#define CANID_UNIT_F			0x01E0000C // P /home/deh/svn_sensor/sensor/tension/trunk/tension.srec	*       0  1  1	@Tension: 2 load-cell w temp comp
+//U	"TENSION_1"	9	// S TENSIONLC 	@ Subsystem: Tensiontwo_1 Tension Load-cell #1
+#define CANID_TENSION_1		0x5C00000 		// I 0 @ TEN11: Tension AD7799 #1 drum #1
+//   ------------------- for converting payload to output field  -----------------------------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   4   1    4    1    -1   1.0           0      -1    "%9.3f"	@TEN11: Tension (kgf)
+#define CANID_TENSION_CMD_1	0x5C0000C 		// I 1 @ TEN11: Tension_1: Command code: [0] command code, [1]-[8] depends on code
+//   Payload layouts for CAN command -- first byte is always the command code;
+//v
+//v #ifndef CMDCODE_TENSION
+//v #define CMDCODE_TENSION
+//v 
+//  *  Get Reading (CMD_RDG) codes for tension function */
+//v #define CANCMDTENSION_RDCALBTEN		 1 // Response: calibrated load-cell 	float
+//v #define CANCMDTENSION_RDUCALTEN		 2 // Response: uncalibrated load-cell 	int
+//v #define CANCMDTENSION_RDTHERM_AD		 3 // Response: thermistor AD7799 	uint
+//v #define CANCMDTENSION_RDTHERM_LC	 	 4 // Response: thermistor load-cell 	uint
+//v #define CANCMDTENSION_RDTEMP_AD		 5 // Response: load-cell temp deg C	float
+//v #define CANCMDTENSION_RDTEMP_LC		 6 // Response: AD7799 temp deg C	float
+//v #define CANCMDTENSION_ZERO_1		 7 // Zero offset for AD7799 		----		
+//v 
+//v #endif
+//v
+//  The following associate with the foregoing CAN ID
+//  The following are payload layouts for msgs that are responses for a specific type of reading--  
+//                              Number  Display       
+//   Get Reading command code	Type    Format	@ Description           
+//K "CANCMDTENSION_RDCALBTEN"	PY_FLT  "%0.3f" @ load-cell calibrated (float)
+//K "CANCMDTENSION_RDUCALTEN"   PY_S32  "%d" 	@ load-cell un-calibrated (int)
+//K "CANCMDTENSION_RDTHERM_AD"  PY_U32  "%u"	@ thermistor raw AD7799 (uint)
+//K "CANCMDTENSION_RDTHERM_LC"  PY_FLT  "%u"	@ thermistor raw load-cell (uint)
+//K "CANCMDTENSION_RDTEMP_AD"   PY_FLT  "%0f.2"	@ temp deg C load-cell (float)
+//K "CANCMDTENSION_RDTEMP_LC"   PY_FLT  "%0f.2"	@ temp deg C AD7799 (float)
+//
+
+//   ------------------- parameters/calibrations/CANIDs ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  		  Description
+//i     0     0     "%x"    0			& CRC		@ TEN11: crc
+//i     1     0     "%u"    1        		& VER		@ TEN11: struct version number
+//i     2     0     "%u"    -1186		& AD1OFFSET	@ TEN11: AD7799 #1 Offset 
+//i     3     4     "%f"  0.283543155E-2	& AD1SCALE	@ TEN11: AD7799 #1 Scale (convert to kgf) 
+//i     4     4     "%f"  3380.0		& THERM1_B	@ TEN11: Thermistor1 param: constant "B"
+//i     5     4     "%f"    10.0		& THERM1_RS	@ TEN11: Thermistor1 param: Series resistor, fixed (K ohms)
+//i     6     4     "%f"    10.0		& THERM1_RT	@ TEN11: Thermistor1 param: Thermistor room temp resistance (K ohms)
+//i     7     4     "%f"    290.0		& THERM1_TMP	@ TEN11: Thermistor1 param: Reference temp for thermistor
+//i     8     4     "%f"      0.0		& THERM1_OFFSET	@ TEN11: Thermistor1 param: Thermistor temp offset correction (deg C)
+//i     9     4     "%f"      1.0		& THERM1_SCALE	@ TEN11: Thermistor1 param: Thermistor temp scale correction
+//i     10    4     "%f"  3380.0		& THERM2_B	@ TEN11: Thermistor2 param: constant "B"
+//i     11    4     "%f"    10.0		& THERM2_RS	@ TEN11: Thermistor2 param: Series resistor, fixed (K ohms)
+//i     12    4     "%f"    10.0		& THERM2_RT	@ TEN11: Thermistor2 param: Thermistor room temp resistance (K ohms)
+//i     13    4     "%f"    290.0		& THERM2_TMP	@ TEN11: Thermistor2 param: Reference temp for thermistor
+//i     14    4     "%f"      0.0		& THERM2_OFFSET	@ TEN11: Thermistor2 param: Thermistor temp offset correction (deg C)
+//i     15    4     "%f"      1.0		& THERM2_SCALE	@ TEN11: Thermistor2 param: Thermistor temp scale correction
+//i     16    0	 "%x" "CANID_TENSION_1" & CANID_POLL	@ TEN11: CANID: Launch data polling CAN ID (time msg)
+//i     17    6     "%c" "Tension sensor drum 1......." @ Some ascii description about the subsystem use
+//
+
+//U	"CABLEANGLE_1"	10		// S CABLEANGLE 	@ Subsystem: Cable angle 1
+#define CANID_CABLEANGLE_1	0x5D00000 // I 0 @ CableAngle1: Cable angle AD7799 #2 drum #1
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   4   1    4   3    -1   1.0           0      -1      "%9.3f" @ CableAngle1: Angle (degrees) [1/2 float]	
+//   ------------------- Application CAN ID's -----------------------------------------------------------------------------
+#define CANID_CABLEANGLE_CMD	0x5D0000C // I 1 @ CableAngle1: [0] command code, [1]-[8] depends on code
+//
+//  Cable angle uses the same codes as tension for obtaining raw readings.
+//  The following associate with the foregoing CAN ID
+//  The following are payload layouts for msgs that are responses for a specific type of reading--           
+//    Command code           paysize pay-idx type format
+//K "CANCMDTENSION_RDCALBTEN"	5     2   5   4    "%0.3f" 	@ calibrated load-cell (float)
+//K "CANCMDTENSION_RDUCALTEN"   5     2   5   1    "%d" 	@ un-calibrated load-cell (int)
+//K "CANCMDTENSION_RDTHERM_AD"  5     2   5   0    "%u"		@ thermistor AD7799 (uint)
+//K "CANCMDTENSION_RDTHERM_LC"  5     2   5   0    "%u"		@ thermistor load-cell (uint)
+//K "CANCMDTENSION_RDTEMP_AD"   5     2   5   4    "%0f.2"	@ load-cell temp deg C (float)
+//K "CANCMDTENSION_RDTEMP_LC"   5     2   5   4    "%0f.2"	@ AD7799 temp deg C (float)
+
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  		  Description
+//i     0     0     "%x"    0			@ CableAngle1: crc
+//i     1     1     "%u"    1        		@ CableAngle1: struct version number
+//i     2     0     "%u"    -1186		@ CableAngle1: Offset AD7799 #1
+//i     3     4     "%f"     0.283543155E-2	@ CableAngle1: Scale (kgf) AD7799 #1
+//i     4     4     "%f"  3380.0		@ CableAngle1: Thermistor1 param: constant "B"
+//i     5     4     "%f"    10.0		@ CableAngle1: Thermistor1 param: Series resistor, fixed (K ohms)
+//i     6     4     "%f"    10.0		@ CableAngle1: Thermistor1 param: Thermistor room temp resistance (K ohms)
+//i     7     4     "%f"   290.0		@ CableAngle1: Thermistor1 param: Reference temp for thermistor
+//i     8     4     "%f"      0.0		@ CableAngle1: Thermistor1 param: Final temp offset correction (deg C)
+//i     9     4     "%f"      1.0		@ CableAngle1: Thermistor1 param: Final temp scale correction
+//i     10    4     "%f"  3380.0		@ CableAngle1: Thermistor2 param: constant "B"
+//i     11    4     "%f"    10.0		@ CableAngle1: Thermistor2 param: Series resistor, fixed (K ohms)
+//i     12    4     "%f"    10.0		@ CableAngle1: Thermistor2 param: Thermistor room temp resistance (K ohms)
+//i     13    4     "%f"   290.0		@ CableAngle1: Thermistor2 param: Reference temp for thermistor
+//i     14    4     "%f"      0.0		@ CableAngle1: Thermistor2 param: Final temp offset correction (deg C)
+//i     15    4     "%f"      1.0		@ CableAngle1: Thermistor2 param: Final temp scale correction
+//i	16    1     "%f"    50.0		@ CableAngle1: Minimum tension required (units to match)
+//i     17    0     "%u"    2			@ CableAngle1: Number of tension readings between cable angle msgs
+//i     18    0     "%u"    4			@ CableAngle1: Number of times alarm msg is repeated
+//i     19    4     "%f"    0.0			@ CableAngle1: Cable angle polynomial coefficient 0
+//i     20    4     "%f"    0.0			@ CableAngle1: Cable angle polynomial coefficient 1
+//i     21    4     "%f"    0.0			@ CableAngle1: Cable angle polynomial coefficient 2
+//i     22    4     "%f"    0.0			@ CableAngle1: Cable angle polynomial coefficient 3
+//i     23    4     "%f"    0.0			@ CableAngle1: Cable angle polynomial coefficient 4
+//i     24    7   "CANID_CABLEANGLE_1"		@ CableAngle1: [0] command code, [1]-[8] depends on code
+//i     25    6     "%c"  "Cable angle sensor drum 1..." @ Some ascii description about the subsystem use
+//    Note: the next available index would be 32, since the above ascii takes up 6+ four byte slots.
+//v // Tension 
+//v #ifndef STRUCT_CABLEANGLE
+//v #define STRUCT_CABLEANGLE
+//v
+//v struct CABLEANGLE
+//v {
+//v 	unsigned int crc;		// crc-32 placed by loader
+//v	unsigned int version;		// struct version number
+//v	struct AD7799PARAM ad;		// Parameters for one AD7799 (w thermistors)
+//v	float	tn_min;			// Minimum tension for valid cable angle measurement
+//v	unsigned int n;			// Number of tension readings between cable angle msgs
+//v	unsigned int alrm;		// Number of time alarm msg repeated
+//v	float	a[5];			// Coefficients for angle approx polynomial
+//v     unsigned int canid_cableangle_cmd;	// command id
+//v	char	c[4*8];
+//v
+//v };
+//v #endif
+//v
+//  ========================================================================================================================
+// Logger & gps
+#define CANID_UNIT_E			0x01C0000C // P /home/deh/svn_sensor/sensor/co1_sensor_ublox/trunk/co1.srec *       1  1  1	@Logger: sensor board w ublox gps & SD card
+#define CANID_TIMESYNC			0x00200000 // I 0 	@ GPS time sync distribution msg
+//   size pay-idx   fix  sign scale      offset  outfield  format              Field description
+//$   8     1   8   0     2   1              0     -1      "%s"        @Linux time * 64
+//$   1     1   1   0     1   1              0     -1      "%u"	@ Tick within sec
+//$   4     1   4   0     1   1              0     -1      "%u"	@ Linux time 
+#define CANID_FIX_LATLON			0xA1C00000 // I 1 @GPS winch fix: lattitude:longitude
+//$   4     1   4   1    -1  1.666666666666667E-6  0   6  "%11.8f"      @Lattitude (deg + = North)
+//$   4     5   8   1    -1  1.666666666666667E-6  0   7  "%11.8f"      @Longitude (deg + = West)
+#define CANID_FIX_HT_TYP_NSAT		0xB1C00000 // I	2 @GPS winch fix: heigth:type fix:number sats
+//$   6     1   4  0      1   1              0      8       "%d"        @height (m)
+//$   6     5   5  0      1   1              0      9       "%1d"       @fix type:
+//$   6     6   6  0      1   1              0     10       "%2d"       @number of satellites
+
+#define CANID_LG_ER1			0xD1C00004 // I 3 	@ 1st code  CANID_UNITID_CO_OLI GPS checksum error
+#define CANID_LG_ER2			0xD1C00014 // I 4 	@ 2nd code  CANID_UNITID_CO_OLI GPS Fix error
+#define CANID_LG_ER3			0xD1C00024 // I 5 	@ 3rd code  CANID_UNITID_CO_OLI GPS Time out of step
+
+//  ========================================================================================================================
+//  ================================= EXAMPLE HC dummy =====================================================================
+#define CANID_UNIT_99			0xfffffffC	// P /home/deh/null	* 0 1 1 @Dummy for missing CAN IDs
+//U	"DUMMY_HC"	1	// S DUMMY_HOST	@ Subsystem: Dummy for CAN IDs not yet implemented
+#define CANID_MC_STATE			0xfffffff4	// I 0 @ CANID: Send msgs during launch
+#define CANID_TIME_MSG			0xffffffE4	// I 1 @ CANID: Time msg
+#define CANID_TILT_XYZ_CAL		0xffffffCC	// I 2 @ CANID: Raw tilt ADC readings
+//
+//v #ifndef SDUMMY // Prevent multiple defines
+//v #define SDUMMY
+//v
+//v // Subsystem 1 - struct definition: MC
+//v
+//v struct DUMMY_HOST
+//v {
+//v };
+//v #endif
+//v
+
+
+//  ================================= EXAMPLE MC with TILT SENSOR and CABLE ANGLE =========================================
+//c CANIDUNIT_19 is an arbitrary name.  "CANIDUNIT" as name for CAN IDs that are unit unique serial number. 19th unit.  
+// Shaft Encoder--Lower sheave
+#define CANID_UNIT_19			0x0280000C // P /home/deh/GliderWinchCommons/mc/etmc/etmc0/trunk/etmc0.srec *      0  1  1	@Sensor unit: Lower sheave shaft encoder
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// First subsystem "MASTER CNTL" (MC = subsystem number 1) in this unit.  (Struct offsets begin at zero following each //U line)
+//U	"MASTER_CNTL"	2	// S MASTER_CNTL	@ Subsystem: Master controller subsystem
+#define CANID_MC_MOTOR_KEEPALIVE		0xA0800000 // I 0 @Curtis Controller keepalive
+//  (currently assumed no payload)
+//   ------------------- for converting payload to output ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4    0    -1   1              0     -1      "%2d"	  	@MC: State number
+#define CANID_MC_DRUM_SELECT		0xD0800814 // I 1 @ Drum selection
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4    0    -1   1              0     -1      "%d"	  	@MC: Drum number 
+#define CANID_MC_REQUEST_PARAM		0xD0800824 // I 2 @ Request parameters from HC
+//  (no payload)
+// ###  many more to be added #####
+//
+//    Array Number read   value
+//    index  type  format  data		  	Description
+//i	0     0     "%x"     0			@MC: crc
+//i     1     1     "%u"     1                  @MC: struct version number
+//i	2     1     "%i"    47			@MC: Keep alive tick count
+//
+//v #ifndef STRUCTMC // Prevent multiple defines
+//v #define STRUCTMC
+//v
+//v // Subsystem 1 - struct definition: MC
+//v
+//v struct MASTER_CNTL // Master Controller
+//v {
+//v    unsigned int crc;		// crc on this struct
+//v    unsigned int version;		// version number
+//v    unsigned int keep_alive_ct; 	// Tick count for motor controller keep alive
+//v };
+//v #endif
+//v
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Second subsystem "TILT" (TILT = tilt sensor) in this unit (Struct offsets begin at zero following each //U line)
+//U	"TILT_SENSE"	7	// S TILT_SENSE	@ Subsystem: Tilt sensor
+//                                        
+//      name                         CAN ID value   sub index description
+#define	CANID_TILT_XYZ_RAW		0x4280000C // I 0 @ Raw tilt ADC readings
+//   ------------------- for converting payload to viewable output --------------------------------------
+//  The following defines two payload layouts for the foregoing CAN ID--
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   5   1   1   0     0   1              0     -1      "%1u"	  	@Tilt: Specify X,Y,Z payload
+//$   5   2   5   0    -1   1              0     -1      "%8u"	  	@Tilt: X,or Y, or Z raw readings
+//$   6   1   1   0     0   1              0     -1      "%1u"	  	@Tilt: Calibration Matrix Row
+//$   6   2   2   0     0   1              0     -1      "%1u"	  	@Tilt: Calibration Matrix Column
+//$   6   2   6   1    -1   1              0     -1      "%f"	  	@Tilt: Calibration Matrix value
+#define CANID_TILT_ALARM		0x02800000 // I 1 @ Tilt: alarm: Vector angle exceeds limit
+//c     This msg is sent immediately when the winch tilt exceeds the alarm limit, and immediately repeated 
+//c  "repeat" times.  
+//    size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4   1    -1   1              0     -1      "%0.1f"  	@Tilt: Azimuth (degrees)
+//$   8   5   8   1    -1   1              0     -1      "%0.1f"  	@Tilt: Elevation (degrees)
+#define	CANID_TILT_XYZ			0x42800000 // I 2 @ Calibrated to angle: x,y,z tilt readings
+//c     When this msg is *received* (by subsystem) only byte 1 of the payload is used and a response with the
+//c   same CAN ID and payload byte 1 is return with the following 4 bytes carrying the ADC reading for
+//c   the axis designated.
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   5   1   1   0     0   1              0     -1      "%1u"	  	@Tilt: Vector number (X=0;Y=1;Z=2)
+//$   5   2   5   1     0   1              0     -1      "%u"	  	@Tilt: ADC reading
+//
+#define CANID_TILT_ANGLE		0x42E00000 // I 3 @ Tilt: Calibrated angles (X & Y)
+//$   8   1   4   1    -1   1              0     -1       "%f"		@Tilt: X (pitch) angle
+//$   8   5   8   1    -1   1              0     -1       "%f"		@Tilt: X (roll) angle
+//   ----------- calibration/parameters/CAN IDs used for subsystem "TILT" 6 -----------------------------
+//c    Reference readings are obtained by rotating the accelerometer to acheive a maximum and minimum
+//c  for each axis.  These provide a calibration for the ADC at 1g.  The average is the zero g point.
+//
+//c    Calibration is performed by measuring the winch x,y,z (with the accelerometer installed of course),
+//c  and the ADC readings read.  A computation then generates the four quaternion elements for the rotating
+//c  readings into a vector where it points down (-Z) when the winch is level.
+//
+//    Array Number read   value
+//    index  type  format  data		  	Description
+//i	0     0     "%x"     0			@Tilt: crc
+//i     1     1     "%u"     1                  @Tilt: struct version number
+//i	2     1     "%i"  1300			@Tilt: X  1g reference ADC reading
+//i     3     1     "%i"   258 			@Tilt: X -1g reference ADC reading
+//i	4     1     "%i"  1300			@Tilt: Y  1g reference ADC reading
+//i     5     1     "%i"   258 			@Tilt: Y -1g reference ADC reading
+//i	6     1     "%i"  1300			@Tilt: Z  1g reference ADC reading
+//i     7     1     "%i"   258 			@Tilt: Z -1g reference ADC reading
+//i     8     4     "%f"  0.0                   @Tilt: Winch pitch during calibration (+deg=nose up)
+//i     9     4     "%f"  0.0			@Tilt: Winch roll during calibration (+deg=left bank)
+//i    10     4     "%f"  0.100			@Tilt: Quaternion Rot Matrix q0
+//i    11     4     "%f"  0.200 		@Tilt: Quaternion Rot Matrix q1
+//i    12     4     "%f"  0.310 		@Tilt: Quaternion Rot Matrix q2
+//i    13     4     "%f"  0.310 		@Tilt: Quaternion Rot Matrix q3
+//i    14     4     "%f"  10.0			@Tilt: tilt vector alarm limit (either + or -)
+//i    15     0     "%u"   64			@Tilt: Polling ticks between msgs
+//i    16     0     "%u"    4			@Tilt: Number of times alarm is repeated
+//c
+//c    The following inserts the CANID by looking up in the table of CAN ID's that is built from all the #define lines 
+//c  in this file. If the name is not found, then there is an error, i.e. *all* CAN ID's that are used by a subsystem need 
+//c  to be specified in this file.
+//c 
+//c    "#define" lines only specify CAN ID's that are "owned" by a subsystem; another subsystem could respond using the same 
+//c  CAN ID and if this msg has a different payload layout its payload would be defined under the #define line in the originating 
+//c  subsystem.  The following are CANID's define elsewhere in this file.
+//c
+//i    17     7	"CANID_MC_STATE"		@CANID: Send msgs during launch
+//i    18     7 "CANID_TIME_MSG"		@CANID: Time msg
+//i    19     7 "CANID_TILT_XYZ_CAL"		@CANID: Raw tilt ADC readings
+//i    20     7 "CANID_TILT_ALARM"		@CANID: Alarm--Vector angle exceeds limit
+//i    21     7 "CANID_TILT_XYZ"		@CANID: Calibrated to angle: x,y,z tilt readings
+
+//   ----------------------------------------------------------------------------------
+//   ----- Struct for tilt calibrations and parameters that would go in the
+//   ----- subsystem code.
+//v // -----------------------------------------------------------------------------------------------
+//v #ifndef STRUCTSUB7 // Prevent multiple defines
+//v #define STRUCTSUB7
+//v
+//v // Subsystem 7 - struct definitions: TILT sensor
+//v
+//v struct TILTZP // Vector ADC zero point calibration
+//v {
+//v    int plus1g;	// Axis oriented for max reading
+//v    int neg1g;	// Axis oriented for min reading
+//v };
+//v
+//v
+//v struct TILT_SENSE // Everything for a subsystem 6 (tilt sensor)
+//v {
+//v    unsigned int crc;	// crc on this struct
+//v    unsigned int version;	// version number
+//v    struct TILTZP vec[3];	// X,Y,Z 1g +/- ADC calibrations
+//v    float calpitch;		// Winch pitch during calibration (+deg=nose up)
+//v    float calroll;		// Winch roll during calibration (+deg=left bank)
+//v    float qrot[4];		// Quaternion elements for rotation
+//v    float alarm;		// Elevation angle alarm limit
+//v    unsigned int rate;	// Polling msgs tick between sending msgs
+//v    unsigned int repeat;	// Consecutively repeat an alarm msg count
+//v    unsigned int canid_state;	// CANID: MC state
+//v    unsigned int canidtime;		// CANID: Time msg
+//v    unsigned int canid_tilt_xyz_cal;	// CANID: tilt: raw adc readings
+//v    unsigned int canid_tilt_alarm;	// CANID: tilt: alarm
+//v    unsigned int canid_tilt_xyz;	// CANID: tilt: calibrated angle
+//v };
+//v #endif
+//v
+//  The subsystem program uses the foregoing struct in either of several ways--
+//  1) struct is held in flash outside the program, e.g. high-flashp would
+//       be an area defined in the linker script file (.ld).
+//     struct SUB6* psub6 = (struct SUB6*)&_highflashp;
+//       where highflashp is defined in the linker .ld file.
+//  2) struct is held in flash inside the program.
+//     const struct SUB6 sub6;  // Places struct in program somewhere
+//
+//  3)  It could be placed in sram and the program code initializes it from
+//      a flash area setup as in 1) or 2) above.
+//
+//   ----------------------------------------------------------------------------------
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Second subsystem "CABLEANGLE" (Cable Angle computation) in this unit (Struct offsets begin at zero following each //U line)
+//U	"CABLE_ANGLE"	8	// S CABLEANGLEDUMMY	@ Subsystem: Cable Angle
+//c
+//c  Cable angle is computed from fairlead geometry, tension reading for tensior sensor, and force measurement 
+//c  from the fairlead sheave load-cell.
+//                                        
+//      name                         CAN ID value   sub index description
+#define	CANID_CABLE_ANGLE_1		0x3A000000 // I 0 @ Cable angle for drum #1
+//   ------------------- for converting payload to viewable output --------------------------------------
+//  The following defines payload layouts for the foregoing CAN ID--
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   4   1   4   1     -1   1              0     -1      "%f"	  	@CableAngle: Angle referenced to horizon
+//
+#define CANID_CABLE_ANGLE_ALARM		0x2A000000 // I 1 @ Cable angle unreliable for drum #1
+//c  Cable angle "alarm" msgs are sent when the tension reading is below a threshold setting since 
+//c  the computations will be unreliable.  The payload is useful for debugging and monitoring.
+//$   8   1   4   1     -1   1              0     -1      "%f"	  	@CableAngle: Angle referenced to horizon
+//$   8   5   8   1     -1   1              0     -1      "%f"		@CableAngle: Tension reading used
+//
+//   ----------- calibration/parameters/CAN IDs used for subsystem "CABLEANGLE"	7 -----------------------------
+//    Array Number read   value
+//    index  type  format  data		  	Description
+//i	0     0     "%x"     0			@CableAngle: crc
+//i     1     1     "%u"     1                  @CableAngle: struct version number
+//i	2     1     "%f"  50.0			@CableAngle: Minimum tension required (units to match)
+//i     3     1     "%f"  15.0 			@CableAngle: Effective angle between sheaves (deg)
+//i     4     0     "%u"    2			@CableAngle: Number of tension readings between cable angle msgs
+//i     5     0     "%u"    4			@CableAngle: Number of times alarm mgs is repeated
+//c
+//c    "#define" lines only specify CAN ID's that are "owned" by a subsystem; another subsystem could respond using the same 
+//c  CAN ID and if this msg has a different payload layout its payload would be defined under the #define line in the originating 
+//c  subsystem.
+//c
+//i     6     7	"CANID_TENSION_1"		@CANID: Tension drum #1 (*)
+//i     7     7 "CANID_TILT_ANGLE"		@CANID: Pitch and Roll angle
+//i     8     7 "CANID_MC_DRUM_SELECT"		@CANID: Drum selection
+//c
+//c (*) Receiving "CANID_TENSION_1" msgs basically "poll" the Cable Angle system, i.e. tension msgs 
+//c are received and used to compute cable angle.  Every 'rate' tension msgs, a cable angle msg is sent.
+//   -----------------------------------------------------------------------------------------------
+//v  // -----------------------------------------------------------------------------------------------
+//v #ifndef STRUCTSUB8 // Prevent multiple defines
+//v #define STRUCTSUB8
+//v
+//v // Subsystem 8 - struct definitions: Cable Angle Computation
+//v
+//v struct CABLEANGLEDUMMY // Everything for a subsystem 7 (cable angle computation)
+//v {
+//v    unsigned int crc;		// crc on this struct
+//v    unsigned int version;		// version number
+//v    float mintension;		// CableAngle: Minimum tension required (units to match)
+//v    float sheaveangle;		// Effective angle between sheaves (deg)
+//v    unsigned int rate;		// Number of tension readings between cable angle msgs
+//v    unsigned int repeat;		// Number of times alarm mgs is repeated
+//v    unsigned int CANID_TENSION_1;		// CANID: Tension drum #1 (*)
+//v    unsigned int CANID_TILT_ANGLE;		// CANID: Pitch and Roll angle
+//v    unsigned int CANID_MC_DRUM_SELECT;	//CANID: Drum selection
+//v };
+//v #endif
+//v
+//
+//   ----------------------------------------------------------------------------------
+

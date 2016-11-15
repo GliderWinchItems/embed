@@ -1,0 +1,76 @@
+#!/bin/bash
+# Execute 'dateselect', then do the reformatting process on the POD readout data
+# 02-21-2011 deh
+
+# Directory where files retrieved from FIT are stored
+SAVEDIR=/home/$USER/winch/download
+
+# This script might be located in ~/bin, so navigate to where the action starts
+cd /home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+# Usage: ./mm /dev/ttyUSB0 or, ./mm /dev/ttyUSB0 120211.125217 90
+# Where 2nd form is 'device yymmdd.hhmmss duration'
+
+# This may be needed to access the serial port without 'sudo' or 'su'--
+sudo chown $USER:users $1
+
+# Set CLOCAL (local doesn't wait for modem) here since I can't get 'dateselect' to set it
+stty clocal -F $1
+
+# Readout packets between selected times on the command line
+./dateselect $1 $2 $3
+
+if [[ $? -ne 0 ]]
+then
+	echo "Skipping reformat and sending file"
+	exit
+fi
+
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'ratechangecic' converts gps 5 Hz to 64 Hz
+# 'reformatgps2' merges gps and tension readings into one line
+
+../read*/reformat $2 | sort -k 1 | tee $2RS | ../read*/ratechangecic | sort | ../read*/reformatgps2 | tee $2RM | ./float_time | tee $2FT
+
+# Plot the file and save plot image as a png file
+./podplot $2FT
+
+# Pack up files for sending
+OUTFILE=$2.gz
+tar -zcf $OUTFILE $2 $2RM $2FT.pdf
+
+# Save the file to a second, and  accessible, USB flash drive
+if [ -d "/media/PATRIOT" ]
+then
+	cp $OUTFILE /media/PATRIOT/
+	echo "$OUTFILE has been copied to PATRIOT usb flash drive"
+fi
+
+# Save the file in a directory in the linux USB flash drive
+#  NOTE: this drive is mounted at /cdrom for non-system accesses
+if [ -d "/cdrom/winch/download" ]
+then
+	sudo cp $OUTFILE /cdrom/winch/download
+	sudo cp $2.RM 	 /cdrom/winch/download
+	sudo cp $2.pdf   /cdrom/winch/download
+
+	echo "$OUTFILE has been copied to /cdrom/winch/download directory"
+fi
+
+# Save the file in a directory in the linux USB flash drive
+#  NOTE: this drive is mounted at /cdrom for non-system accesses
+if [ -d "/home/$USER/winch/download" ]
+then
+	cp $OUTFILE /home/$USER/winch/download
+	echo "$OUTFILE has been copied to ~/winch/download directory"
+fi
+
+# Send tar'ed file to FIT server
+echo " "
+echo "Attempting to send compressed file to FIT server"
+./sendFITfile $OUTFILE
+
+exit
+

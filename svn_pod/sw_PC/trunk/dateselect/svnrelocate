@@ -1,0 +1,31 @@
+#!/bin/bash
+# script: svnrelocate 
+# Switch svn IP addresses
+# 08/19/2012 deh
+
+# Argument example: ~/svn_pod
+# Go to directory
+cd $1; OUT=$?
+
+# Exit if directory change failed
+if  [ $OUT != 0 ] ; then 
+	echo "FAILED TO CD TO DIRECTORY: "; echo $1
+	exit $OUT
+fi
+
+echo UPDATING: $1
+
+# Pipe svn info to edit routine along with new IP address
+svn info | $HOME/svn_pod/sw_PC/trunk/dateselect/svnrelocateedit $2; OUT=$?
+echo $OUT
+
+# Exit if the IP argument did not pass the check 
+if  [ $OUT != 0 ] ; then 
+	echo "FAILED SVN EDIT"
+	exit $OUT
+else
+	echo "SUCCESS"
+fi
+echo 
+
+exit 0;

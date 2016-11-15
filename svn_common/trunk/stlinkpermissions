@@ -1,0 +1,17 @@
+#!/bin/sh
+# Test scripts
+
+# Find the line 'lsusb' output that has the ST-LINK
+BUS="$(lsusb | awk /ST-LINK/ | sed -e 's/D.*$//' -e 's/Bus //' -e 's/ //')"
+DEV="$(lsusb | awk /ST-LINK/ | sed -e 's/:.*$//' -e 's/Bus //' -e 's/[0-9][0-9][0-9]//' -e 's/Device //' -e 's/ //')"
+
+# Give the hapless Op something gloat over
+echo "/dev/bus/usb/$BUS/$DEV"
+
+# Change the permissions
+sudo chown $USER /dev/bus/usb/$BUS/$DEV
+#ls -l /dev/bus/usb/$BUS
+exit
+
+
+

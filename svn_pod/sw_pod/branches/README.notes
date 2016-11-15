@@ -1,0 +1,25 @@
+branche created--
+08/27/2012
+../svn_pod/sw_pod/branches/pod_v1_r2.0_b1
+
+This is for updating r2.0 which is in (original) POD, which is in Uli's 
+hands 8/27/2012.  For one, the GPS setup for BOX is different than the BOX Uli
+has and the GPS sentence lengths are seen as incorrect.
+
+10/13/2012
+Add--
+../svn_pod/sw_pod/branches/pod_v2b_r0.0
+
+This a version for POD #2 and POD #2b--5 Hz GPS and 32 KHz osc not used.
+rev 668 (appears) to work with 1 Hz GPS on BOX 1, and BOX 3.  Following rev 668
+changes are made to shift it over to the 5 Hz GPS.
+
+03/18/2013
+
+Delete directory: pod_v1_r2.0_b1
+No longer being used.
+
+pod_v2b_r0.0 - POD 1 & 2 with Garmin 18X 5Hz
+pod_v2b_ublox - POD 3 with u-blox GPS (and some code for handling either Garmin or u-blox)
+
+

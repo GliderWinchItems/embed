@@ -1,0 +1,104 @@
+Run with full data set
+
+ POLYNOMIAL REGRESSION OF DEGREE  3
+
+C-----   INTERCEPT
+      DATA RCPT/    0.1846577091823139D+03/
+
+C-----   REGRESSION COEFFICIENTS
+      DATA D(1) /   -0.1674382041103757D+00/
+      DATA D(2) /    0.4643964180650588D-04/
+      DATA D(3) /   -0.3280919994878813D-08/
+
+        ANALYSIS OF VARIANCE FOR   3  DEGREE POLYNOMIAL
+
+
+ SOURCE OF VARIATION  DEGREE      SUM OF        MEAN          F    IMPROVEMENT
+                        OF        SQUARES       SQUARE      VALUE  IN TERMS OF
+                     FREEDOM                                       SUM OF SQUARE
+
+ DUE TO REGRESSION     3      90841.38599  30280.46200 362034.80973    184.52770
+ DEVIATION ABOUT
+        REGRESSION  2661        222.56509      0.08364
+ TOTAL              2664      91063.95108
+
+
+ POLYNOMIAL REGRESSION OF DEGREE  4
+
+C-----   INTERCEPT
+      DATA RCPT/    0.3300292364891771D+03/
+
+C-----   REGRESSION COEFFICIENTS
+      DATA D(1) /   -0.4447654276715244D+00/
+      DATA D(2) /    0.2402890694472502D-03/
+      DATA D(3) /   -0.6221188092939049D-07/
+      DATA D(4) /    0.6586156737541099D-11/
+
+        ANALYSIS OF VARIANCE FOR   4  DEGREE POLYNOMIAL
+
+
+ SOURCE OF VARIATION  DEGREE      SUM OF        MEAN          F    IMPROVEMENT
+                        OF        SQUARES       SQUARE      VALUE  IN TERMS OF
+                     FREEDOM                                       SUM OF SQUARE
+
+ DUE TO REGRESSION     4      90980.93213  22745.23303 728777.17996    139.54613
+ DEVIATION ABOUT
+        REGRESSION  2660         83.01895      0.03121
+ TOTAL              2664      91063.95108
+
+==========================================================================================
+Data set with first 9 removed (before hot water poured int)
+
+ POLYNOMIAL REGRESSION OF DEGREE  3
+
+C-----   INTERCEPT
+      DATA RCPT/    0.1842470135306806D+03/
+
+C-----   REGRESSION COEFFICIENTS
+      DATA D(1) /   -0.1668560846068187D+00/
+      DATA D(2) /    0.4618572621662085D-04/
+      DATA D(3) /   -0.3245833476352035D-08/
+
+        ANALYSIS OF VARIANCE FOR   3  DEGREE POLYNOMIAL
+
+
+ SOURCE OF VARIATION  DEGREE      SUM OF        MEAN          F    IMPROVEMENT
+                        OF        SQUARES       SQUARE      VALUE  IN TERMS OF
+                     FREEDOM                                       SUM OF SQUARE
+
+ DUE TO REGRESSION     3      90568.23976  30189.41325 465670.37784    179.23349
+ DEVIATION ABOUT
+        REGRESSION  2651        171.86435      0.06483
+ TOTAL              2654      90740.10410
+
+
+
+
+
+
+
+
+ POLYNOMIAL REGRESSION OF DEGREE  4
+
+C-----   INTERCEPT
+      DATA RCPT/    0.3304154723474884D+03/
+
+C-----   REGRESSION COEFFICIENTS
+      DATA D(1) /   -0.4458004897940127D+00/
+      DATA D(2) /    0.2412339733456500D-03/
+      DATA D(3) /   -0.6256208392137756D-07/
+      DATA D(4) /    0.6631542361654201D-11/
+
+        ANALYSIS OF VARIANCE FOR   4  DEGREE POLYNOMIAL
+
+
+ SOURCE OF VARIATION  DEGREE      SUM OF        MEAN          F    IMPROVEMENT
+                        OF        SQUARES       SQUARE      VALUE  IN TERMS OF
+                     FREEDOM                                       SUM OF SQUARE
+
+ DUE TO REGRESSION     4      90707.88717  22676.971791865291.44667    139.64741
+ DEVIATION ABOUT
+        REGRESSION  2650         32.21694      0.01216
+ TOTAL              2654      90740.10410
+
+

@@ -1,0 +1,60 @@
+branch created--
+
+10/13/2012
+Add directory--
+../svn_pod/sw_pod/branches/pod_v2b_r0.0
+
+This a version for POD #2 and POD #2b--5 Hz GPS and 32 KHz osc not used.
+rev 668 (appears) to work with 1 Hz GPS on BOX 1, and BOX 3.  Following rev 668
+changes are being made to shift it over to the 5 Hz GPS.
+
+10/19/2012
+
+Changed back to work with 5 Hz gps.
+- $GPRMC sentence slightly different with POD 1, i.e. "A" at end of fields is not
+present on POD 2 gps, probably due to differences in NEMA setup.
+
+#ifdef GPS_SWITCH_PRESENT added to gps_packetize.c to make it easy to ignore the power
+up/down switch for enabling the GPS 5c regulator power.
+
+Commented out packet type "2" in gps_packetize.c, since it would give a packet with
+zero extended linux time after the unit came up out of sleep mode.
+
+Fixed search so that it won't stop on a zero time packet.
+
+Added epoxy to tacked on resistor divider for GPS time sync pulse.
+
+Seems to work, but auto-shutdown needs some investigation, as well as five pushbutton
+pushes shutdown.
+
+Rev 671 at this point.
+
+10/22/2012
+
+Rev 676 -- copy of this directory made to ../tags and shipped POD 2 to Uli 10/23/2012
+
+Further mods begin for POD 1 revised for 5 Hz GPS w accelerometer
+
+11/01/2012
+
+'launchtimes' table added and working.
+'pushbutton times' table added, compling, not debugged.
+SDcard_fixed_assignments.h added to bring block number allocation together.
+
+Committed revision 691.
+
+
+03/14/2013
+
+POD 1 
+- Replacement Garmin 18x 5Hz received and configured.  ARGH! After neaty
+getting it soldered to the pod board I discover the baud was set to 
+38,400 instead ot 57,600.  Rather than wrestle with re'doing the connector
+to do configuration I changed 'p1_initialization.c' to 38400 for flashing
+POD 1.  POD 2 is at 57600.
+
+Result of mis-match of baud rate is that the menu comes up correctly (115,200 baud)
+and there is gibberish that follows since the GPS serial data is being seen by the
+POD software at the wrong rate and the lines look like GPS sentence errors.
+
+

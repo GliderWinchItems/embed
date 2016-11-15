@@ -1,0 +1,22 @@
+// PODfields.txt - -7/21/2014
+// POD fields are taken from the 'RMX files which bring the POD
+//   readings onto one line with rate-change included.
+//
+//  1 Tension
+//  2 Day of week (e.g. Sun)
+//  3 Month (e.g. Jul)
+//  4 Day of month (1-31,e.g. 13)
+//  5 Hour (00-23)
+//  6 Minute (00-59)
+//  7 Second (00-59)
+//  8 Year (e.g. 2014)
+//  9 Tick within second (0-63)
+// 10 Tension packet ID (always '1')
+// 11 Lattitude of pod (degs)
+// 12 Longitude of pod (degs)
+// 13 Height of pod (meters above msl)
+// 14 Velocity (East, m/s)
+// 15 Velocity (North, m/s)
+// 16 Velocity (Up, m/s)
+
+

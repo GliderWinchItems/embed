@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+long dofile(char *filename, long noRecords);
+
+main(int argc, char *argv[])
+{
+	int noRecords;
+	
+	if(argc != 2) 
+		exit(EXIT_FAILURE);
+		
+	noRecords = dofile(argv[1], 0L);
+	if(noRecords < 1)
+		exit(EXIT_FAILURE);	
+	dofile(argv[1], noRecords);
+
+	exit(EXIT_SUCCESS);
+}
+
+long dofile(char *filename, long noRecords)
+{
+	long unix_time;
+	long tension;
+	float x_acc, y_acc, z_acc, total_acc;
+	char human_time[30];
+	long tick;
+
+	long noLines = 0;
+	FILE *in = NULL;
+	
+	in = fopen(filename, "r");
+	if(!in)
+		exit(EXIT_FAILURE);
+		
+	while(1==1)
+	{
+		int n;
+		int ch = fgetc(in);				/* Peek at 1st char of line */
+		
+		if(ch == EOF) break;
+
+		if(ch != '1')					/* Skip non-data lines */
+		{
+			while(ch != '\n')
+			{
+				ch = fgetc(in);
+				if(ch == EOF) break;	/* Handle incomplete line */
+			}
+			continue;					/* Process next record */
+		}
+
+		ungetc(ch, in);					/* Put the 1st char back */
+
+		n = fscanf(in, "%ld %ld %f %f %f %f\n",
+				&unix_time, &tension, &x_acc, &y_acc, &z_acc, &total_acc);
+				
+		if(n != 6)						/* Number of fields is bad */
+			continue;
+
+		noLines += 1;					/* Good line.  Count it. */
+
+		if(noRecords != 0)				/* Process it */
+		{
+			printf("%ld %ld %f %f %f %f\n",
+					unix_time, tension, x_acc, y_acc, z_acc, total_acc);
+		}
+	}
+	
+	fclose(in);
+
+	return noLines;
+}

@@ -1,0 +1,8 @@
+#!/bin/bash
+# Compile (with subroutines) and execute canldr
+# 09/19/2013
+
+
+# Execute--test version.  $1 is ttyUSB number (0, 1, 2...)
+sudo ./canldr /dev/ttyUSB$1 ~/svn_sensor/PC/sensor/canldr/test/CSA.progs
+

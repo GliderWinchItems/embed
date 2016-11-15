@@ -1,0 +1,20 @@
+#!/bin/bash
+# Builds the database from the .sql files
+echo ==================================================================================================================================================================
+export FLOAT_TYPE=soft
+echo $FLOAT_TYPE
+
+# Update the database
+cd ../../../../svn_common/trunk/db
+./db_start
+echo "################## "
+echo "STARTED DB SERVER"
+echo "##################"
+sleep 2
+./db_updatej
+
+# Back to original location
+cd ../../../svn_sensor/sensor/tension/trunk
+
+exit
+

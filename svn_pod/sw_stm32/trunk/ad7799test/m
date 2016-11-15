@@ -1,0 +1,16 @@
+cd ../devices
+make clean
+make
+cd ../lib/libmi*
+make clean
+make
+cd ../libu*
+#make clean
+make
+cd ../libsu*
+make clean
+make
+cd ../../ad77*
+make clean
+make
+

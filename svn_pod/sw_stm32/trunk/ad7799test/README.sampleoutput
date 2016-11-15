@@ -1,0 +1,41 @@
+10-15-2011
+Sample output--
+
+ad7799test 06-17-2011
+The four leds will 'walk' on, then off, in the sequence LED3,4,5,6
+While LEDs are flash enter chars on keyboard and hit return to echo
+'x' as the first char will break this loop and enter loop for macros(test USAR)
+AD7799_1 register tinkering BEGIN
+Registers follow
+hclk 48000000 pclk1 24000000 pclk2 12000000 sysclk 48000000
+ID    :      49 
+Config:     721 
+Mode  :    200f 
+Offset:  800000 
+FScale:  549700 
+++     1000
+++     1068
+++      955
+++      977
+++      976
+++      896
+++      816
+++      950
+++      995
+++     1030
+++     1147
+++     1132
+++      992
+++      894
+++      924
+++     1000
+++     1005
+++      955
+++      963
+++      961
+++     1049
+++     1140
+++     1135
+++      899
+++      899
+

@@ -1,0 +1,50 @@
+README.tension
+04/24/2016
+
+Some brief/overview notes on the organization of this masterful mess--
+
+'main'--
+1) Does initialization
+
+2) Endless loop that is background
+   - Compute deg C for thermistors
+   - Compute temp compensation for AD7799s
+   - printf for serial port monitoring
+   The bottom of the loop triggers the low level
+     interrupt for CAN polling (and so does the timer; see below)
+  
+tim3_ten.c - times this mess
+
+Interrupts: 4096/sec--
+
+1)   polls AD7799s via tim3_ten_ptr
+       set by:
+       p1_initialization.c:142:	tim3_ten_ptr = &ad7799_poll_rdy_ten_both;
+
+2)   triggers low level interrupt
+       I2C1_ER uses pointer *tim3_ten_ll_ptr
+         the pointer is set by:
+	 CAN_poll_loop.c:46:	tim3_ten_ll_ptr = &CAN_poll;
+       I2C1_ER is triggered by:
+         'main' each pass through the endless loop, and
+	 TIM3_IRQHandler in tim3_ten.c (once every two(?) interrupts)
+
+AD7799 poll--(via tim3_ten interrupt)
+
+ Basic scheme: alternate enabling the /CS line for the two AD7799s
+ at a rate much higher than the conversion rate, and checking if data
+ is ready.  If the data is ready read the data register and resume
+ switching the /CS line.
+
+  ad7799_filter_ten.c: ad7799_poll_rdy_ten_both();
+    which--
+    - checks if the currently selected AD7799 has data:
+      - if ready, then start a readout, but do not switch /CS lines
+      - if not ready, then switch /CS lines
+    - And upon each call, take the "last_good_reading" for each AD7799 and
+      run it through two stages of CIC filtering.  The first stage
+      is "fast" for CAN use, and the second stage slows the rate and further
+      filters it for printf serial port monitoring use.
+
+	
+

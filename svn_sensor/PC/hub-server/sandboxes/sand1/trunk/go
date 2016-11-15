@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo
+echo # STARTING ECHO2 AND SAND1--
+echo #  Engine Display: MANIFOLD PRESSURE and RPM
+echo 
+echo # Start sand1 (sandbox)
+echo # Input connection: ip and local port number: 10.1.1.80 32123
+~/svn_sensor/PC/hub-server/sandboxes/sand1/trunk/sand1 0.0.0.0 32124 10.1.1.80 32123 &
+echo " UP AND READY" && echo " CLIENTS CAN NOW CONNECT TO 32124"
+echo # sandbox output connection: 127.0.0.1 32124
+cd ~/svn_java/Echo2/dist
+java -jar Echo2.jar 127.0.0.1 32124
+echo Done
+exit
+
+

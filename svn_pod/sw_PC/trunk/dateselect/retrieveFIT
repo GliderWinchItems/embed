@@ -1,0 +1,56 @@
+#!/bin/bash
+# Retrieve a .bz2 POD data file from the FIT server, un-tar and plot, saving .png and pdf images
+# 02-21-2012 deh
+# 03-22-2012 deh Changes for 'gz from 'bz2.
+
+case $1 in
+	*h) 
+echo help--
+echo usage: "retrieveFIT <date>.<time>.gz"
+echo date: "yymmdd e.g. 120221 = year 2012, month (01-12), day (01-28/31)"
+echo time: "hhmmss e.g. 013630 = hour (00-59) 01, minute (00-59) 36, second (00-59) 30"
+echo example: "retrieveFIT 120221.013630<enter>"
+echo Do not forget the dot separating the date and time
+echo
+exit;;
+	*)
+
+# Files downloaded from FIT are saved in this directory
+SAVEDIR=/home/$USER/winch/download
+
+# Retrieve file specified on the command line e.g.: retrieveFIT 120221.015336
+rsync -av -e 'ssh -p 41574' $FITIP:/winch/download/$1.gz $SAVEDIR/
+
+# untar the two files (no extension = raw readout; *RM = reformatted/merged file
+cd $SAVEDIR
+tar -zxf $1.gz
+
+#
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'reformat2' outputs stdout with 'RM' appended (ReformattedMerged)
+cd /home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+../read*/reformat $SAVEDIR/$1 | sort -k 1 | ../readbackformatter_deh/reformat2 | tee $SAVEDIR/$1RM
+
+# copy the files to the file accessible by FAT and some other OS
+sudo cp $SAVEDIR/$1* /cdrom/winch/download
+
+# Convert $1RM file to $1RD format (ascii month replaced with numeric, day-of-month eliminated)
+cd /cdrom/winch/download
+sudo ~/svn_pod/sw_PC/trunk/re*/reformat3 $SAVEDIR/$1 > $SAVEDIR/$1RD
+
+sudo cp $SAVEDIR/$1* /media/PATRIOT
+sudo cp $SAVEDIR/$1* /cdrom/winch/download
+
+# Go the directory where the 'gnuplot' scripts reside
+cd ~/svn_pod/sw_PC/trunk/dateselect
+
+# Plot the file and save image as .pdf (and/or .png)
+./podplot "$SAVEDIR/$1RM"
+;;
+esac
+
+exit
+

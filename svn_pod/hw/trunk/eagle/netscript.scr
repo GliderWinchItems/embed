@@ -1,0 +1,598 @@
+# NetScript
+# 
+# Exported from VET6_POD.sch at  4/05/2011 23:03:26 
+# 
+# EAGLE Version 4.13 Copyright (c) 1988-2004 CadSoft
+# 
+Change Class 0;
+Signal '+5V/2'    'C5'       '+' \
+                  'RED'      'MP' \
+                  'RED1'     'MP' \
+                  'RR3'      'P$5' \
+                  'RR3'      'P$6' \
+                  'U$12'     '13' \
+                  'U$12'     '9' \
+                  'U$3'      '13' \
+                  'U$3'      '9' \
+                  'U$40'     '5' \
+                  ;
+Change Class 0;
+Signal '+5V/3'    'C21'      '+' \
+                  'JP4'      '7' \
+                  'JP5'      '7' \
+                  'U$15'     '5' \
+                  ;
+Change Class 0;
+Signal '+7V'      'C1'       'P$1' \
+                  'D2'       'C' \
+                  'JP2'      '3' \
+                  'R16'      '2' \
+                  'R8'       '2' \
+                  'U$15'     '1' \
+                  'U$8'      '1' \
+                  ;
+Change Class 0;
+Signal '+12_VIA_RESISTOR' 'C10'      '+' \
+                  'R16'      '1' \
+                  'U$40'     '1' \
+                  ;
+Change Class 0;
+Signal 'AD7799_1_AIN1+' 'R13'      '2' \
+                  'U$3'      '5' \
+                  ;
+Change Class 0;
+Signal 'AD7799_1_AIN1-' 'R14'      '2' \
+                  'U$3'      '6' \
+                  ;
+Change Class 0;
+Signal 'AD7799_1_AIN3+' 'R13'      '1' \
+                  'RR3'      'P$2' \
+                  'RR3'      'P$3' \
+                  'U$3'      '3' \
+                  ;
+Change Class 0;
+Signal 'AD7799_1|PAD' 'U$11'     'MP' \
+                  'U$3'      '11' \
+                  ;
+Change Class 0;
+Signal 'AD7799_2_AIN1+' 'U$12'     '5' \
+                  'U$4'      'P$6' \
+                  ;
+Change Class 0;
+Signal 'AD7799_2_AIN1-' 'U$12'     '6' \
+                  'U$4'      'P$4' \
+                  ;
+Change Class 0;
+Signal 'AD7799_2_AIN3+' 'U$12'     '3' \
+                  'U$4'      'P$8' \
+                  ;
+Change Class 0;
+Signal 'AD7799_2_AIN3-' 'U$12'     '4' \
+                  'U$4'      'P$7' \
+                  ;
+Change Class 0;
+Signal 'AD7799_2|PAD' 'U$12'     '11' \
+                  'U$14'     'MP' \
+                  ;
+Change Class 0;
+Signal 'ADS7799_1_AIN3-' 'R14'      '1' \
+                  'RR3'      'P$4' \
+                  'THRM'     '1' \
+                  'U$3'      '4' \
+                  ;
+Change Class 0;
+Signal 'BATT_BOTTOM_CELL_IN' 'D2'       'A' \
+                  'R8'       '1' \
+                  'U$24'     '8' \
+                  ;
+Change Class 0;
+Signal 'BATT_TOP_CELL_IN_7V+' 'D1'       'A' \
+                  'R7'       '1' \
+                  'U$24'     '6' \
+                  ;
+Change Class 0;
+Signal 'BOOT0'    'IC6'      '94' \
+                  'RR5'      'P$4' \
+                  ;
+Change Class 0;
+Signal 'BOTTOM_CELL' 'D1'       'C' \
+                  'JP2'      '2' \
+                  'R7'       '2' \
+                  ;
+Change Class 0;
+Signal 'BRDIGE1_YELLOW_AIN1-' 'C13'      '1' \
+                  'C56'      '1' \
+                  'R4'       '2' \
+                  'U$3'      '8' \
+                  ;
+Change Class 0;
+Signal 'BRDIGE2_YELLOW_AIN1+' 'C17'      '1' \
+                  'R11'      '2' \
+                  'U$12'     '7' \
+                  'U$4'      'P$1' \
+                  'U$4'      'P$3' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE1_FILTER+' 'C3'       '2' \
+                  'R3'       '2' \
+                  'R5'       '1' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE1_FILTER-' 'C3'       '1' \
+                  'R2'       '2' \
+                  'R4'       '1' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE1_WHITE_AIN2+' 'C14'      '1' \
+                  'C56'      '2' \
+                  'R5'       '2' \
+                  'U$3'      '7' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE1_WHITE_SIG+' 'R3'       '1' \
+                  'WHT'      'MP' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE1_YELLOW_SIG-' 'R2'       '1' \
+                  'YEL'      'MP' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE2_FILTER+' 'C18'      '2' \
+                  'R10'      '2' \
+                  'R12'      '1' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE2_FILTER-' 'C18'      '1' \
+                  'R11'      '1' \
+                  'R9'       '2' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE2_WHITE_AIN1-' 'C17'      '2' \
+                  'C19'      '1' \
+                  'C20'      '1' \
+                  'R12'      '2' \
+                  'U$12'     '8' \
+                  'U$4'      'P$2' \
+                  'U$4'      'P$5' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE2_WHITE_SIG+' 'R10'      '1' \
+                  'WHT1'     'MP' \
+                  ;
+Change Class 0;
+Signal 'BRIDGE2_YELLOW_SIG-' 'R9'       '1' \
+                  'YEL1'     'MP' \
+                  ;
+Change Class 0;
+Signal 'C!+'      'C6'       'P$1' \
+                  'IC5'      '1' \
+                  ;
+Change Class 0;
+Signal 'C!-'      'C6'       'P$2' \
+                  'IC5'      '3' \
+                  ;
+Change Class 0;
+Signal 'C2+'      'C7'       'P$1' \
+                  'IC5'      '4' \
+                  ;
+Change Class 0;
+Signal 'C2-'      'C7'       'P$2' \
+                  'IC5'      '5' \
+                  ;
+Change Class 0;
+Signal 'GND'      'BLK'      'MP' \
+                  'BLK1'     'MP' \
+                  'C1'       'P$2' \
+                  'C10'      '-' \
+                  'C11'      '2' \
+                  'C12'      '2' \
+                  'C13'      '2' \
+                  'C14'      '2' \
+                  'C15'      '-' \
+                  'C16'      '-' \
+                  'C19'      '2' \
+                  'C2'       '2' \
+                  'C20'      '2' \
+                  'C21'      '-' \
+                  'C25'      '1' \
+                  'C27'      'P$2' \
+                  'C28'      'P$2' \
+                  'C31'      'P$2' \
+                  'C32'      'P$2' \
+                  'C33'      'P$2' \
+                  'C34'      'P$2' \
+                  'C35'      'P$2' \
+                  'C36'      'P$2' \
+                  'C4'       '1' \
+                  'C48'      'P$2' \
+                  'C5'       '-' \
+                  'C8'       'P$2' \
+                  'C9'       'P$2' \
+                  'IC5'      '15' \
+                  'IC6'      '10' \
+                  'IC6'      '19' \
+                  'IC6'      '20' \
+                  'IC6'      '27' \
+                  'IC6'      '49' \
+                  'IC6'      '74' \
+                  'IC6'      '99' \
+                  'JP1'      '5' \
+                  'JP2'      '1' \
+                  'JP3'      '5' \
+                  'JP4'      '1' \
+                  'JP5'      '1' \
+                  'R15'      '2' \
+                  'R20'      '1' \
+                  'R27'      '1' \
+                  'R6'       '1' \
+                  'RR3'      'P$7' \
+                  'RR4'      'P$4' \
+                  'RR5'      'P$5' \
+                  'RR5'      'P$6' \
+                  'RR5'      'P$7' \
+                  'SHD'      'MP' \
+                  'SHD1'     'MP' \
+                  'THRM'     '2' \
+                  'U$1'      '10' \
+                  'U$1'      '12' \
+                  'U$1'      '14' \
+                  'U$1'      '16' \
+                  'U$1'      '18' \
+                  'U$1'      '20' \
+                  'U$1'      '4' \
+                  'U$1'      '6' \
+                  'U$1'      '8' \
+                  'U$10'     'P$6' \
+                  'U$10'     'P$7' \
+                  'U$12'     '12' \
+                  'U$13'     'P$3' \
+                  'U$15'     '2' \
+                  'U$2'      'P$3' \
+                  'U$2'      'P$6' \
+                  'U$24'     '4' \
+                  'U$3'      '10' \
+                  'U$3'      '12' \
+                  'U$40'     '2' \
+                  'U$6'      'P$10' \
+                  'U$6'      'P$14' \
+                  'U$7'      '2' \
+                  'U$8'      '2' \
+                  ;
+Change Class 0;
+Signal 'JTAG_R-TO-GND-11' 'RR4'      'P$5' \
+                  'U$1'      '11' \
+                  ;
+Change Class 0;
+Signal 'JTAG_R-TO-GND-17' 'RR5'      'P$2' \
+                  'U$1'      '17' \
+                  ;
+Change Class 0;
+Signal 'JTAG_R-TO-GND-19' 'RR5'      'P$3' \
+                  'U$1'      '19' \
+                  ;
+Change Class 0;
+Signal 'JTCK'     'IC6'      '76' \
+                  'RR2'      'P$8' \
+                  'U$1'      '9' \
+                  ;
+Change Class 0;
+Signal 'JTDI'     'IC6'      '77' \
+                  'RR2'      'P$6' \
+                  'U$1'      '5' \
+                  ;
+Change Class 0;
+Signal 'JTDO'     'IC6'      '89' \
+                  'RR4'      'P$8' \
+                  'U$1'      '13' \
+                  ;
+Change Class 0;
+Signal 'JTIMS'    'IC6'      '72' \
+                  'RR2'      'P$7' \
+                  'U$1'      '7' \
+                  ;
+Change Class 0;
+Signal 'JTRST'    'IC6'      '90' \
+                  'RR2'      'P$5' \
+                  'U$1'      '3' \
+                  ;
+Change Class 0;
+Signal 'NRST'     'IC6'      '14' \
+                  'RR5'      'P$1' \
+                  'U$1'      '15' \
+                  'U$13'     'P$2' \
+                  ;
+Change Class 0;
+Signal 'OSC_IN'   'C25'      '2' \
+                  'IC6'      '12' \
+                  'Q2'       '2' \
+                  'R1'       '1' \
+                  ;
+Change Class 0;
+Signal 'OSC_OUT'  'C4'       '2' \
+                  'IC6'      '13' \
+                  'Q2'       '1' \
+                  'R1'       '2' \
+                  ;
+Change Class 0;
+Signal 'PA5_SPI1_SCK_AD7799_SCK' 'IC6'      '30' \
+                  'U$12'     '1' \
+                  'U$3'      '1' \
+                  ;
+Change Class 0;
+Signal 'PA6_SPI1_MISO_AD7799_DOUT/RDY' 'IC6'      '31' \
+                  'U$12'     '15' \
+                  'U$3'      '15' \
+                  ;
+Change Class 0;
+Signal 'PA7_SPI1_MOSI_AD7799_DIN' 'IC6'      '32' \
+                  'U$12'     '16' \
+                  'U$3'      '16' \
+                  ;
+Change Class 0;
+Signal 'PA8_TIM1_CH1|ENCODER2_B' 'IC6'      '67' \
+                  'JP5'      '3' \
+                  ;
+Change Class 0;
+Signal 'PA9_TIM1_CH2|ENCODER2_A' 'IC6'      '68' \
+                  'JP5'      '5' \
+                  ;
+Change Class 0;
+Signal 'PA10_GPIO|ENCODER_REG_CE' 'IC6'      '69' \
+                  'U$15'     '4' \
+                  ;
+Change Class 0;
+Signal 'PA11_GPIO|PB_2_DIVIDED' 'IC6'      '70' \
+                  'U$10'     'P$2' \
+                  'U$16'     '2' \
+                  'U$9'      'P$7' \
+                  ;
+Change Class 0;
+Signal 'PA12_GPIO|VCC_REG_CE' 'IC6'      '71' \
+                  'R15'      '1' \
+                  'U$16'     '3' \
+                  'U$8'      '3' \
+                  ;
+Change Class 0;
+Signal 'PB2_BOOT1' 'IC6'      '37' \
+                  'R27'      '2' \
+                  ;
+Change Class 0;
+Signal 'PB6_USART1_TX*' 'IC5'      '11' \
+                  'IC6'      '92' \
+                  ;
+Change Class 0;
+Signal 'PB7_USART1_RX*' 'IC5'      '12' \
+                  'IC6'      '93' \
+                  ;
+Change Class 0;
+Signal 'PB8_GPIO|XB_DTR/SLEEP_RQ' 'IC6'      '95' \
+                  'U$6'      'P$9' \
+                  ;
+Change Class 0;
+Signal 'PB9_GPIO|XB_/RESET' 'IC6'      '96' \
+                  'U$6'      'P$5' \
+                  ;
+Change Class 0;
+Signal 'PB12_GPIO|SD_CD' 'IC6'      '51' \
+                  'U$2'      'P$1' \
+                  ;
+Change Class 0;
+Signal 'PB13_SPI2_SCK|SD_SCK' 'IC6'      '52' \
+                  'U$2'      'P$5' \
+                  ;
+Change Class 0;
+Signal 'PB14_SPI2_MISO|SD_DO' 'IC6'      '53' \
+                  'U$2'      'P$7' \
+                  ;
+Change Class 0;
+Signal 'PB15_SD_DI' 'IC6'      '54' \
+                  'U$2'      'P$2' \
+                  'U$5'      'P$8' \
+                  ;
+Change Class 0;
+Signal 'PB_1'     'U$24'     '3' \
+                  ;
+Change Class 0;
+Signal 'PB_2'     'U$24'     '5' \
+                  'U$9'      'P$2' \
+                  ;
+Change Class 0;
+Signal 'PB_3'     'U$24'     '7' \
+                  'U$9'      'P$3' \
+                  ;
+Change Class 0;
+Signal 'PC1_ADC12_IN11|Y-AXIS' 'IC6'      '16' \
+                  'JP3'      '3' \
+                  ;
+Change Class 0;
+Signal 'PC2_ADC12_IN12|Z-AXIS' 'IC6'      '17' \
+                  'JP3'      '2' \
+                  ;
+Change Class 0;
+Signal 'PC6_GPIO|SD_WP' 'IC6'      '63' \
+                  'U$5'      'P$4' \
+                  ;
+Change Class 0;
+Signal 'PC10_UART4_TX' 'IC5'      '10' \
+                  'IC6'      '78' \
+                  ;
+Change Class 0;
+Signal 'PC11_UART4_RX' 'IC5'      '9' \
+                  'IC6'      '79' \
+                  ;
+Change Class 0;
+Signal 'PC14_32KHZ_OSC' 'C12'      '1' \
+                  'IC6'      '8' \
+                  'Q1'       'P$1' \
+                  ;
+Change Class 0;
+Signal 'PC15_32KHZ_OSC' 'C11'      '1' \
+                  'IC6'      '9' \
+                  'Q1'       'P$2' \
+                  ;
+Change Class 0;
+Signal 'PD0_OSC_IN|10MHZ_OSC' 'IC6'      '81' \
+                  'U$7'      '3' \
+                  ;
+Change Class 0;
+Signal 'PD2_GPIO|PB_3_DIVIDED' 'IC6'      '83' \
+                  'U$10'     'P$3' \
+                  'U$16'     '1' \
+                  'U$9'      'P$6' \
+                  ;
+Change Class 0;
+Signal 'PD3_USART2_CTS*|XB_/CTS' 'IC6'      '84' \
+                  'U$6'      'P$12' \
+                  ;
+Change Class 0;
+Signal 'PD4_USART2_RTS*|XB_/RTS' 'IC6'      '85' \
+                  'U$6'      'P$16' \
+                  ;
+Change Class 0;
+Signal 'PD5_USART2_TX*|XB_DIN' 'IC6'      '86' \
+                  'U$6'      'P$3' \
+                  ;
+Change Class 0;
+Signal 'PD6_USART2_RX*|XB_DOUT' 'IC6'      '87' \
+                  'U$6'      'P$2' \
+                  ;
+Change Class 0;
+Signal 'PD9_5V/2_ANALOG_CE' 'IC6'      '56' \
+                  'R20'      '2' \
+                  'U$40'     '4' \
+                  ;
+Change Class 0;
+Signal 'PD12_TIM4_CH1*|ENCODER_B' 'IC6'      '59' \
+                  'JP4'      '3' \
+                  ;
+Change Class 0;
+Signal 'PD13_TIME4_CH2*|ENCODER_A' 'IC6'      '60' \
+                  'JP4'      '5' \
+                  ;
+Change Class 0;
+Signal 'PE3'      'IC6'      '2' \
+                  'RR1'      'P$1' \
+                  ;
+Change Class 0;
+Signal 'PE3LED'   'LED43'    'C' \
+                  'RR1'      'P$8' \
+                  ;
+Change Class 0;
+Signal 'PE4'      'IC6'      '3' \
+                  'RR1'      'P$2' \
+                  ;
+Change Class 0;
+Signal 'PE4LED'   'LED43'    'C1' \
+                  'RR1'      'P$7' \
+                  ;
+Change Class 0;
+Signal 'PE5'      'IC6'      '4' \
+                  'RR1'      'P$3' \
+                  ;
+Change Class 0;
+Signal 'PE5LED'   'LED65'    'C' \
+                  'RR1'      'P$6' \
+                  ;
+Change Class 0;
+Signal 'PE6'      'IC6'      '5' \
+                  'RR1'      'P$4' \
+                  ;
+Change Class 0;
+Signal 'PE6LED'   'LED65'    'C1' \
+                  'RR1'      'P$5' \
+                  ;
+Change Class 0;
+Signal 'PE14|AD7799_2_/CS' 'IC6'      '45' \
+                  'U$12'     '2' \
+                  ;
+Change Class 0;
+Signal 'PE15|AD7799_1/CS' 'IC6'      '46' \
+                  'U$12'     '10' \
+                  'U$3'      '2' \
+                  ;
+Change Class 0;
+Signal 'PULLUP_|SD_IRQ' 'U$2'      'P$8' \
+                  ;
+Change Class 0;
+Signal 'PULLUP_|SD_P9' 'U$2'      'P$9' \
+                  'U$5'      'P$6' \
+                  ;
+Change Class 0;
+Signal 'RS232_R1IN_USART2_RX' 'IC5'      '13' \
+                  'U$24'     '2' \
+                  ;
+Change Class 0;
+Signal 'RS232_R2IN_UART4_RX' 'IC5'      '8' \
+                  'JP1'      '3' \
+                  ;
+Change Class 0;
+Signal 'T1OUT_USART2_TX' 'IC5'      '14' \
+                  'U$24'     '1' \
+                  ;
+Change Class 0;
+Signal 'T2OUT_UART4_TX' 'IC5'      '7' \
+                  'JP1'      '1' \
+                  ;
+Change Class 0;
+Signal 'V+'       'C15'      '+' \
+                  'C32'      'P$1' \
+                  'IC6'      '21' \
+                  'L2'       '2' \
+                  ;
+Change Class 0;
+Signal 'VCC'      'C2'       '1' \
+                  'C27'      'P$1' \
+                  'C28'      'P$1' \
+                  'C31'      'P$1' \
+                  'C33'      'P$1' \
+                  'C34'      'P$1' \
+                  'C35'      'P$1' \
+                  'C36'      'P$1' \
+                  'C48'      'P$1' \
+                  'IC5'      '16' \
+                  'IC6'      '100' \
+                  'IC6'      '11' \
+                  'IC6'      '22' \
+                  'IC6'      '28' \
+                  'IC6'      '50' \
+                  'IC6'      '6' \
+                  'IC6'      '75' \
+                  'JP3'      '6' \
+                  'L1'       '1' \
+                  'L2'       '1' \
+                  'LED43'    'A' \
+                  'LED43'    'A1' \
+                  'LED65'    'A' \
+                  'LED65'    'A1' \
+                  'R6'       '2' \
+                  'RR2'      'P$1' \
+                  'RR2'      'P$2' \
+                  'RR2'      'P$3' \
+                  'RR2'      'P$4' \
+                  'RR4'      'P$1' \
+                  'RR5'      'P$8' \
+                  'U$1'      '1' \
+                  'U$1'      '2' \
+                  'U$12'     '14' \
+                  'U$3'      '14' \
+                  'U$5'      'P$1' \
+                  'U$5'      'P$2' \
+                  'U$5'      'P$3' \
+                  'U$5'      'P$5' \
+                  'U$6'      'P$1' \
+                  'U$7'      '4' \
+                  'U$8'      '5' \
+                  ;
+Change Class 0;
+Signal 'VCC_SD_CARD' 'C16'      '+' \
+                  'L1'       '2' \
+                  'U$2'      'P$4' \
+                  ;
+Change Class 0;
+Signal 'VRS232+'  'C8'       'P$1' \
+                  'IC5'      '2' \
+                  ;
+Change Class 0;
+Signal 'VRS232-'  'C9'       'P$1' \
+                  'IC5'      '6' \
+                  ;

@@ -1,0 +1,42 @@
+#!/bin/bash
+# Script to start hub-server attached to a serial port, with an attached
+# logfile.
+#
+# Usage: $hub-server-start
+#
+# If you want a console, open a bash shell & enter: "nc localhost 32123"
+#
+export SERVER="$(which hub-server)"	# hub-server command
+export SERIAL="$1"		# Serial I/O device file
+export HS_PORT="32123"				# SERVER listens on localhost:$HS_PORT
+export HS_OUT_LOG="./hub-server-stdout.log"
+export HS_ERR_LOG="./hub-server-stderr.log"
+export HS_DAT_LOG="./hub-server-data.log"
+
+
+export x=$SERVER
+if [ -z "$x" ]; then echo "# fatal: hub-server not deployed"; exit 1; fi
+echo "# Starting \"$x\" on \"localhost:$HS_PORT"
+
+export x=$SERIAL
+if [ ! -c "$x" ]; then echo "# fatal: can't find \"$x\""; exit 2; fi
+if [ ! -r "$x" ]; then echo "# fatal: can't read \"$x\""; exit 3; fi
+if [ ! -w "$x" ]; then echo "# fatal: can't write \"$x\""; exit 4; fi
+echo "# Connecting serial device \"$x\""
+
+# Log file separators
+export SEP="#################### $(date) ####################"
+echo >>$HS_OUT_LOG "$SEP"
+echo >>$HS_ERR_LOG "$SEP"
+echo >>$HS_DAT_LOG "$SEP"
+
+# Start server
+$SERVER >>$HS_OUT_LOG 2>>$HS_ERR_LOG &
+
+# Connect data log file
+socat -u TCP4:localhost:$HS_PORT STDIO >>$HS_DAT_LOG &
+
+# Connect serial device file to server
+socat TCP4:localhost:$HS_PORT $SERIAL,raw,echo=0,crnl &
+
+# Huzzah

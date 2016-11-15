@@ -1,0 +1,21 @@
+echo =========== DEVICES ====================
+cd ../../../sw_stm32/trunk/devices
+#make clean
+make
+echo =========== LIBMISCSTM32 ====================
+cd ../lib/libmi*
+#make clean
+make
+echo =========== LIBXBEESTM32 ====================
+cd ../libxbee*
+#make clean
+make
+echo =========== LIBMUSARTSTM32 ====================
+cd ../libus*
+#make clean
+make
+echo =========== XBONEWAY_P ======================
+cd ../../../../sw_XB_pod/trunk/xbrange_p
+make clean
+make
+

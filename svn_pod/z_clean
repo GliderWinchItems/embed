@@ -1,0 +1,9 @@
+for x in o a list hex map srec; do
+    echo "# Cleaning \"*.$x\" files"
+    find . -name '*.'"$x" -type f -exec rm -f {} \;
+done
+
+for x in Utest2 gpiotest sdcardtest sdcardtest2; do
+    echo "# Cleaning \"$x\" file"
+    find . -name "$x" -type f -exec rm -f {} \;
+done

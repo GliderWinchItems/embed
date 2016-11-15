@@ -1,0 +1,39 @@
+Load-cell wiring
+../svn_pod/hw/trunk/eagle/Load_cell_cabling.txt
+04/30/2016
+
+Phoenix connector
+
+ Male - POD board end
+   SACC_M8FS-4CON-M (Straight) #1681169
+   Digikey: 277-4324-ND
+     Or,
+   #1554209 (Rt angle)
+   277-4668-ND
+
+ Female - Load cell end
+   SACC-M8MS-4CON-F (Straight) #1681185
+   Digikey: 277-4359-ND
+
+6P6C Jack w flying leads
+  Jameco Part #: 124039
+
+ 
+Signal  TopADC  BotADC  6C6C jack  Phoenix    Load cell   
+ Name   color   color   pin cable  color pin  cable
+PWR+   RED1     RED2    WHT   1     WHT  2    RED
+SIG-   YEL2     YEL3    GRN   4     RED  3    GRN
+SIG+   WHT2     WHT1    RED   3     GRN  1    WHT
+PWR-   BLK      BLK     BLK   2     BLK  4    BLK
+...    ...      ...     ...   5  Reserved for +, or thermistor
+...    ...      ...     ...   6  Reserved for -, or thermistor
+
+CAT5 cable wiring to 6P6C
+1 org/w  ...  pigtail
+2 org    1    wht
+3 grn/w  2    blk
+4 blu    3    red
+5 blu/w  4    grn
+6 grn    5    reserved
+7 brn/w  6    reserved
+8 brn    ---  pigtail

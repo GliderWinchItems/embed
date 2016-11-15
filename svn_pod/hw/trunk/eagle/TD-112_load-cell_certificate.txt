@@ -1,0 +1,35 @@
+Industrial Commerical Scales
+http://www.icscale.com/td112.htm
+
+TD112-S 2K
+Certificate of Calibration
+
+Model		TD112
+Capacity	2klb
+Serial no.	T62785
+Output		2.9976 mV/V
+Zero		<+/- 2% of Full Scale
+Creep(1 hour)	<+/- 0.05% of Full Scale
+Non-Linearity	<+/- 0.03% of Full Scale
+Hysteresis	<+/- 0.03% of Full Scale
+Repeatability	<+/- 0.02% of Full Scale
+Temperature Effect on Output	<16 PPM/deg C of Applied Load
+Temperature Effect on Output	<26 PPM/deg C of Applied Load
+Operating Temperature Range	-40 deg C to 80 deg C
+Compensated Temperature Range	-10 deg C to 40 deg C
+Safe Overload		150%
+Ultimate Overload	300%
+Input impedance		385 +/-30 ohms
+Output impedance	350 +/-3 ohms
+Insulation Resistance	> 5,000 Meg-ohms
+Recommended Excitation	10v DC/AC
+Maximum Excitation	20v DC/AC
+
+Color Code:
+	Red	+ Excitation
+	Black	- Excitation
+	Green	+ Signal
+	White	- Signal
+
+Date: 2007/04/10	Inspector "yung"
+

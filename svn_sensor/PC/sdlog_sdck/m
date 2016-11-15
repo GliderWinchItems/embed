@@ -1,0 +1,13 @@
+export TMP="../../../tmp"
+
+if [ ! -f "$TMP/sdX" ]; then
+	echo "# Uncompressing file \"$TMP/SD8.tz2\" to get test file \"$TMP/sdX\""
+	export HERE="$PWD"
+	cd $TMP
+	tar -xjf SD8.tz2
+	cd $HERE
+fi
+
+rm -f sdlog_sdck
+gcc -o sdlog_sdck sdlog_sdck.c sdcard_scan.c sdcard_utils.c sdcardio.c 
+./sdlog_sdck --sdcard=$TMP/sdX

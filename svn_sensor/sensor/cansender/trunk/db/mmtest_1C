@@ -1,0 +1,4 @@
+#!/bin/bash
+./mm CANSENDER_2 CAN_UNIT_1C
+cd ..
+make flash

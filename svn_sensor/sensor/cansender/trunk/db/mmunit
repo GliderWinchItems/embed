@@ -1,0 +1,1 @@
+make -f Makefile_unit clean && make -f Makefile_unit TSELECT=-DCAN_UNIT_12 && make -f Makefile_unit flash

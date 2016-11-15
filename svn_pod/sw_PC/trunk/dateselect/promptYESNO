@@ -1,0 +1,47 @@
+#! /bin/bash
+# From: Shell Programming in 24 hours, p 345 
+# Name: promptYESNO
+# Desc:	Asks a yes/no question
+# Args:	$1 -> prompt
+#	#2 -> default answer
+# GLOBALS: YESNO -> set to the users response y for yes, n for no
+#
+promptYESNO () {
+	YESNO=""
+	if [ $# -lt 1 ] ; then	
+		return 1
+	fi
+
+	_YNPROMPT="$1 (y/n)? "
+	_YNDEFANS=""
+
+	case "$2" in
+		[yY]|[yY][eE][sS]) _YNDEFANS='y' ;;
+		[nN]|[nN][oO])	   _YNDEFANS='n' ;;
+	esac
+
+	_YNPROMPT="$_YNPROMPT${_YNDEFANS:+[$_YNDEFANS] }"
+
+	while :
+	do
+		printf "$_YNPROMPT"
+		read YESNO
+		case "${YESNO:-$_YNDEFANS}" in
+			[yY]|[yY][eE][sS])
+				YESNO="y"
+				break
+				;;
+			[nN]|[nN][oO])
+				YESNO="n"
+				break
+				;;
+
+			*) YESNO="" ;;
+		esac
+	done
+
+	unset _YNPROMPT _YNDEFANS
+	export YESNO
+	return 0
+}
+

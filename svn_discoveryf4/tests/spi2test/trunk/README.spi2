@@ -1,0 +1,68 @@
+README.spi2
+
+11-26-2013
+
+
+spi2rw.c,h 
+
+This does a send/receive transfer whereby the outgoing
+bytes are taken from a buffer, and the incoming bytes are
+stored in another buffer.
+
+The call to the read/write supplies a pointer to the two
+buffers, and a byte count.
+
+The enable line for the external hardware is normally high
+after initialization and low during the transfers.  The call
+to initiate a read/write lowers this line, and when the
+interrupt routine has transfered the last byte thel is
+raised.
+
+SPI busy is based on the i/o bit for the external hardware.
+
+Char-by-char interrupt driven.
+
+When the interrupt routine has transferred all the bytes it
+checks a pointer.  If the pointer is non-zero it will do a
+subroutine call using that pointer, and that subroutine could
+do something else.
+
+The interrupt priority is assigned in the spi2rw.h file.
+
+Pin assignments are in the initialization code.
+
+The polarization might need changing to match the hardware--
+
+The polarization is SCK high, data high, and the enable line
+is high for idle, low during transfers.
+
+THIS ROUTINE HAS NOT BEEN PROVEN TO WORK, other than it "appears
+to go throught the code correctly."
+
+spi2test.c
+
+This routine is a simple routine that sends a bit pattern, while
+receiving the incoming bytes.  The incoming bytes are printed
+and over-printed on the same line so that changes in the incoming
+bit can be observed.
+
+Before starting the loop the outgoing bit patter is printed.
+
+The timing includes the LEDs for a visual indication that it is
+running.
+
+The program is currently setup to use the USB user port (i.e.
+ttyACM0).  A bit cumbersome at best and baffling at worst.
+Once flashed with the program it begins to run.  The LEDs will 
+show it running briefly, then stop.  It is waiting for the PC
+usb initialization.  Since no keyboard input is needed the following
+command will get the usb going--
+sudo cat /dev/ttyACM0
+Note that each time the F4 board RESET is pushed the above command
+will exit.  Using 'minicom' doesn't require restarting, but it can
+"lock up" when things such as powering the F4 board down and then back
+up, and might even require rebooting the PC to get it working again.
+The serial port/FTDI approach to output doesn't suffer this malady.
+
+
+

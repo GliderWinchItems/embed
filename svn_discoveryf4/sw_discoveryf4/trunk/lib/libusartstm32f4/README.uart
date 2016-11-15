@@ -1,0 +1,83 @@
+README.uart
+
+11/21/2013
+
+Strategy:
+
+The USART/UART can be used either DMA or char-by-char interrupt driven.  It is
+intended that for very high speeds the DMA mode would be used.
+
+The 'init' routined called determines which is used.  Much of the code is used for
+both cases.
+
+Circular buffering is used in both cases.  The interrupt handling is different, 
+however.  For the dma mode, only the dma stream used for tx interrupts.  The dma
+stream for rx does not interrupt and operates as a circular buffer.  For the
+char-by-char interrupt mode both rx and tx buffers are circular and both rx and
+tx interrupt upon each transfer.
+
+Notes (in no particular order)
+
+1.  USART/UART pins
+
+uart_pins.c selects the pins to configure for the uart.  All the paired options are
+present for each uart, but only one combination is not commented out.
+
+Note: lines might have to be added to accommodate combinations such as for USART1,
+PA9 and PB7.  AND, such combination might require adding enabling two ports.
+
+2. DMA streams
+
+When using the DMA
+
+3. There is no check for calls to init DMA and non-DMA use of the same USART/UART.
+
+4. DMA tx
+
+The DMA memory address register is set along with the number of bytes to send, and
+the memory address computed and saved that points to next byte in the buffer following
+the one just sent.  When sending gets to the end of the buffer and needs to wrap around,
+the remaining bytes to the end of the buffer are sent, and on the following interrupt
+the bytes from the beginning of the buffer through the last byte that had been added to
+the buffer is sent.
+
+5.  Control blocks
+
+An array of control blocks holds one block for each possible USART/UART.  USART/UART
+number runs 1-6 ('F405, F407), and corresponds to the array indices of 0 - 5.  The
+pointer to the control block can be obtained via '&cb_uart[index]'. 
+
+6. 'fopen'
+
+'fopen' ends up calling '_open' in 'newlib_support.c'.  '_open' then calls bsp_uart_open 
+with a pointer to "name" e.g. "tty2", and the corresponding control block pointer is 
+returned if successful (NULL for error).  '_open' then adds the pointer to a table of
+file descriptors and returns the file descriptor.
+
+7. Putting/getting bytes
+
+Calls can be made by passing the control pointer of the uart of interest, or by passing 
+the uart number (1-6).
+
+8.  DMA streams
+
+The stream numbers for the rx and tx are required with the dma init call.  These stream numbers
+are checked and channel number is looked up.  USART1 and USART6 are the only two with more
+than one option.
+
+9.  DMA stream management
+
+'nvic_dma_mgr.c' handles the forwarding of dma interrupts.  The routine is passed the irq number
+for the dma interrupt, a pointer (e.g. control uart control block) and the address of the interrupt
+handler.  These are stored in an array.
+
+When the interrupt occurs it vectors to a subroutine call in nivc_dma_mgr.c that picks up 
+the address of interrupt handler and passes the pointer along with the call.  
+
+The usart/uart routine uses the same interrupt handler for all usart/uart dma transfers.  The
+common routine uses the control block pointer that it is passed by nvic_dma_mgr.c to access
+the buffers, etc. for the uart in question.
+
+
+
+

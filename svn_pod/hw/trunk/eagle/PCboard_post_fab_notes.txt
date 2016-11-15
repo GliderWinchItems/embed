@@ -1,0 +1,125 @@
+VET6_POD pc board notes:
+
+1.  RJ-45 upside down [again!]
+
+If the RJ-45 pins jack is mounted on the board (i.e. it has to be on the
+underside of the board), the numbering is then backwards.  Looking into the
+RJ-45 jack with it right side up, pin #1 is the leftmost pin.
+
+When the RJ-45 is mounted on the bottom of the board, the pin numbering
+below matches the connector and schematic.
+
+Pin  Color       Signal net name               DB9
+1  - grn/wht     T1OUT_USART1_TX                2  grn
+2  - grn         RS232_R1IN_USART1_RX           3  red
+3  - org/wht     PA1|RJ-45_SPARE
+4  - blu         GND                            5  blk
+5  - blu/wht     RJ-45|RS232_R2IN_UART4_RX
+6  - org         PA0_WKUP|RJ-45
+7  - brn         TOP_CELL_RAW
+8  - brn/wht     PB1_ADC8|BOTTOM_CELL
+
+About 15 in of CAT5 cable (stranded) is used from the RJ-45 pads to the
+jack.  The connections to the remote jack are made the same as if the 
+jack were mounted directly on the board (so that the cable plugging into
+the remote jack will also work on the board-mounted jack.
+
+The CAT5 wires are small enough to go through the strain-relief holes/pads 
+beside the RJ-45 connector pads.  (Note: the strain relief vias are connected
+to GND, so I drilled them out JIC the sharp corners might cut through the 
+insulation of the wires.)
+
+For the right-angle jack.  For the vertical, the
+pin spacing and mounting holes are wider.
+
+2.  Pin #1 on IC dots not showing up on board silk screen.
+
+3.  MCP1702 doesn't have a heatsink pad so tstop not needed on board.
+
+4. LED's
+
+a.  "LED" legend for 4 leds whacked off by tstop edging.
+b.  Polarity line would be useful.
+c.  Furture designs--tri-color single unit(?)--
+http//search.digikey.com/scripts/DkSearch/dksus.dll?Detail&name=CLV1A-FKB-CJ1M1F1BB7R4S3CT-ND
+
+5. AD7799_1 aliasing filter details--
+
+Board #1
+  |  R31,33 R26,28 R22,24  C21   C20   C19
+  1    100    330    330  12.2  22.0  22.0 
+  2    100    330    330  12.2  22.0  22.0 
+  3    100
+  4    100
+  5    100
+  6    100    330    330  10.0   4.7   4.7
+
+12-5-2011 values changed
+C21 = 4.7+2.2 uf
+C19,C20 = 4.7 uf
+R31,R33 = 0 ohm
+R22, R26 = 330/2 
+Target- 9 db down at 50 Hz
+
+6. R113 substitute (only had 100 ohm 0603)
+
+Board #
+  |  R113
+  1    39 0805
+  2    39 0805
+  3    39 0805
+  4    39 0805
+  5    39 0805
+
+7. Strain guage YEL & WHT numbers are backwards
+
+YEL2 and WHT2 on the silk screen should be YEL1 and WHT1, etc.
+
+8. 5v strain gauge regulator needs bigger cap
+
+47 uf added.  100 uf did better
+
+9. 3.2v ADC regulator needs bigger cap
+
+Same as 8. above.
+
+10. C12, C14 and C110--Needs to be bigger
+
+C14|C110--Adding 4.7 uf across the existing 0.1 uf gave a noticeable improvement of the
+AD7799 noise.
+
+C12--However, the AD7799 3.3v switch can cause the 3.3v regulator (IC4, MCP1702) voltage
+to drop enough to cause a low voltage reset of the processor.  Increasing C12 to 47 uf
+tantalum solved the problem.  Another solution might be to slow the FET switching via
+an RC on the gate, and/or setting the pin current drive to the lowest setting.
+
+The best/simplest solution appears to be a separate regulator for the AD7799 3.3v digital side (as
+well as the 5v analog, of course).
+
+11. Accelerometer
+
+Sparkfun triple axis accelerometer, P/N SEN-09269 pins are somewhat different than the PC
+board layout.  Offset the accel board by one pin, use a jumper used for the V+.  The pin
+alignment is below--
+
+Left to right (across bottom)
+Board Accel
+  V+   jumper
+  Gnd  ST
+  X    Z   ADC12-IN10
+  Y    Y   ADC12-IN11
+  Z    X   ADC12-IN12
+  Gnd  Gnd
+	Vcc
+		
+  Note: that for the software, the X,Y,Z order is also reversed from that shown on the Sparkfun
+board.
+
+  Note: X - ADC12-IN10 is labled incorrectly on the eagle .sch,.brd files as ADC12-IN11, when it
+should be ADC12-IN10...
+
+12. Open load-cell circuit protection
+
+Piggyback 470K resistors across C18 C19 (C121, C123) so that inputs to the ADC don't float if the
+load-cell is not connected.  This may cause a lockup of the AD7799.
+

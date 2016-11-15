@@ -1,0 +1,19 @@
+if [ "$1" = "-?" -o "$1" = "--help" ]; then
+	echo "# Usage: $ m [<sandbox_file>]"
+	exit 0
+fi
+
+if [ -z "$1" ]; then
+	echo "# Making \"hub-server\""
+	SANDBOX="hub-server-sock-data.c"
+else
+	echo "# Making \"hub-server\" with sandbox file \"$1\""
+	if [ ! -f "$1" ]; then
+		echo "# Error: Can't find sandbox file \"$1\""
+		exit 1
+	fi
+	SANDBOX="$1"
+fi
+
+rm  -f hub-server
+gcc -Wall -I. -o hub-server hub-server.c hub-server-sock.c "$SANDBOX" hub-server-queue.c hub-server-util.c -pthread

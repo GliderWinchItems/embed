@@ -1,0 +1,93 @@
+10-15-2011
+Sample output--
+
+sdcardtest2 USART1 txint rxint 09-21-2011
+pclk1_freq  (MHz)        :        24
+sysclk_freq (MHz)        :        48
+caw_init()   (us)        :     66947
+Routine spi2 divide code :         2
+Forced  spi2 divide code :         2
+
+CSD 00 26 00 32 5f 59 83 c8 be fb cf ff 92 40 40 d7 
+SDC_CSD_STRUCTURE      [127:126] =      0      0
+SDC_TAAC               [119:112] =     38     26
+SDC_NSAC               [111:104] =      0      0
+SDC_TRAN_SPEED          [103:96] =     50     32
+SDC_CCC                  [95:84] =   1525    5f5
+SDC_READ_BL_LEN          [83:80] =      9      9
+SDC_READ_BL_PARTIAL      [95:84] =      1      1
+SDC_WRITE_BLK_MISALIGN   [78:78] =      0      0
+SDC_READ_BLK_MISALIGN    [77:77] =      0      0
+SDC_DSR_IMP              [76:76] =      0      0
+SDC_C_SIZE               [73:62] =   3874    f22
+SDC_VDD_R_CURR_MIN       [61:59] =      7      7
+SDC_VDD_R_CURR_MAX       [58:56] =      6      6
+SDC_VDD_W_CURR_MIN       [55:53] =      7      7
+SDC_VDD_W_CURR_MAX       [52:50] =      6      6
+SDC_C_SIZE_MULT          [49:47] =      7      7
+SDC_ERASE_BLK_EN         [46:46] =      1      1
+SDC_SECTOR_SIZE          [45:39] =     31     1f
+SDC_WP_GRP_SIZE          [38:32] =    127     7f
+SDC_WP_GRP_ENABLE        [31:31] =      1      1
+SDC_R2W_FACTOR           [28:26] =      4      4
+SDC_WRITE_BL_LEN         [25:22] =      9      9
+SDC_WRITE_BL_PARTIAL     [21:21] =      0      0
+SDC_FILE_FORMAT_GRP      [15:15] =      0      0
+SDC_COPY                 [14:14] =      1      1
+SDC_PERM_WRITE_PROTECT   [13:13] =      0      0
+SDC_TMP_WRITE_PROTECT    [12:12] =      0      0
+SDC_FILE_FORMAT          [11:10] =      0      0
+SDC_CRC                    [7:1] =    107     6b
+SDC_ALWAYS_1               [0:0] =      1      1
+SD Card size: number blocks 1984000, of block size: 512
+
+CID 03 53 44 53 44 30 31 47 80 01 0c 03 7a 00 7a f1 
+SDC_CID_MID       [127:120] =      3      3   : Manufacturer ID 
+SDC_CID_OID       [119:104] =      SD         : OEM/Application ID 
+SDC_CID_PNM       [103:64]  =      SD01G      : Product name
+SDC_CID_PRV       [63:56]  =       8.0        : Product revision 
+SDC_CID_PSN       [55:24] = 17564538 010c037a : Product serial number
+SDC_CID_MDT       [19:8]    =   2007       10 : Manufacturing date (yr mo)
+SDC_CID_CRC       [7:1]     =    120       78 : CRC7 checksum
+SDC_CID_ALWAYS_1  [0:0]     =      1        1 : Always one
+
+NOTE: very rudimentary type-in editing 
+Enter: 'p xxxx<ret>' to read block number xxxx into buffer and display 
+Enter: 'w xxxx<ret>' to write block number xxxx out of buffer 
+Enter: 'c xxxx|yyyy <ret>' to compare block x with block y 
+
+p 0
+Block number: 0    sdcard_read duration (us):      3792
+01 00 00 00 24 05 00 00 5d 63 00 00 f6 a0 01 00    ....$...]c......
+a2 8f 02 00 4a cb 01 00 ba 7b 00 00 81 04 00 00    ....J....{......
+12 04 00 00 1c 04 00 00 1f 04 00 00 09 04 00 00    ................
+f0 03 00 00 ec 03 00 00 ff 03 00 00 18 04 00 00    ................
+2a 04 00 00 32 04 00 00 48 01 00 00 00 24 07 00    *...2...H....$..
+00 2d 04 00 00 29 04 00 00 2f 04 00 00 27 04 00    .-...).../...'..
+00 0b 04 00 00 f6 03 00 00 ef 03 00 00 f0 03 00    ................
+00 f6 03 00 00 04 04 00 00 0b 04 00 00 02 04 00    ................
+00 fe 03 00 00 09 04 00 00 12 04 00 00 17 04 00    ................
+00 48 01 00 00 00 24 09 00 00 1d 04 00 00 1e 04    .H....$.........
+00 00 1a 04 00 00 1b 04 00 00 13 04 00 00 09 04    ................
+00 00 07 04 00 00 01 04 00 00 03 04 00 00 1f 04    ................
+00 00 2d 04 00 00 11 04 00 00 f5 03 00 00 ff 03    ..-.............
+00 00 1c 04 00 00 27 04 00 00 48 01 00 00 00 24    ......'...H....$
+0b 00 00 21 04 00 00 17 04 00 00 06 04 00 00 f4    ...!............
+03 00 00 f8 03 00 00 16 04 00 00 2d 04 00 00 27    ...........-...'
+04 00 00 11 04 00 00 fc 03 00 00 ef 03 00 00 f1    ................
+03 00 00 01 04 00 00 0c 04 00 00 0d 04 00 00 16    ................
+04 00 00 48 05 00 00 00 88 05 00 00 20 00 52 01    ...H........ .R.
+81 04 27 08 0b 0a 67 0a 68 0a 68 0a 68 0a 68 0a    ..'...g.h.h.h.h.
+68 0a 68 0a 68 0a 68 0a 68 0a 68 0a 1a 00 1a 01    h.h.h.h.h.h.....
+c4 03 d0 06 64 08 b2 08 b3 08 b3 08 b3 08 b3 08    ....d...........
+b3 08 b3 08 b3 08 b3 08 b3 08 b3 08 1b 00 20 01    .............. .
+d9 03 f7 06 94 08 e3 08 e3 08 e3 08 e3 08 e3 08    ................
+e3 08 e4 08 e4 08 e4 08 e4 08 e4 08 68 01 00 00    ............h...
+00 24 0d 00 00 25 04 00 00 30 04 00 00 30 04 00    .$...%...0...0..
+00 2d 04 00 00 31 04 00 00 36 04 00 00 2a 04 00    .-...1...6...*..
+00 19 04 00 00 1d 04 00 00 33 04 00 00 45 04 00    .........3...E..
+00 4d 04 00 00 48 04 00 00 40 04 00 00 43 04 00    .M...H...@...C..
+00 44 04 00 00 48 00 00 00 00 00 00 00 00 00 00    .D...H..........
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+00 00 00 00 00 00 00 00 06 00 00 00 00 00 00 00    ................
+

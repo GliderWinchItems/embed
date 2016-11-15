@@ -1,0 +1,126 @@
+HowtoF103debug.txt
+06/30/2016
+
+1.  Raisonance jtag plugged in!
+
+2. Open terminal and start the ocd server
+
+in ~/bin, or some directory that is in PATH have the following
+script (set to execute):
+openocd -f interface/rlink.cfg -f board/olimex_stm32_h103.cfg
+
+
+ Start server:
+	openocdstart
+
+It should look like the following:
+
+deh@dehmain:~/bin$ openocdstart
+Open On-Chip Debugger 0.9.0 (2016-02-11-21:20)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Warn : Adapter driver 'rlink' did not declare which transports it allows; assuming legacy JTAG-only
+Info : only one transport option; autoselect 'jtag'
+adapter speed: 1000 kHz
+adapter_nsrst_delay: 100
+jtag_ntrst_delay: 100
+none separate
+cortex_m reset_config sysresetreq
+Info : clock speed 375 kHz
+Info : JTAG tap: stm32f1x.cpu tap/device found: 0x3ba00477 (mfg: 0x23b, part: 0xba00, ver: 0x3)
+Info : JTAG tap: stm32f1x.bs tap/device found: 0x06414041 (mfg: 0x020, part: 0x6414, ver: 0x0)
+Info : stm32f1x.cpu: hardware has 6 breakpoints, 4 watchpoints
+
+3.  Open another terminal (or use the one for compiling/flashing)
+
+  Connect to the server:
+	telnet localhost 4444
+
+It should look like this--
+
+deh@dehmain:~$ telnet localhost 4444
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Open On-Chip Debugger
+> 
+
+4. Command: 
+
+At the ">" prompt
+
+
+----- display some location(s)
+mdw 0x20000000 32 [displays 32 words starting at address 0x20000000]
+mdh [for half words]
+mdb [for bytes]
+
+----- write some location(s)
+mww 0x20000000 0xff [write word with 0xff to location 0x20000000]
+
+----- Processor hangs
+
+halt
+[Look at pc, then  go to <program name>.list file]
+  Ctl F for find and enter (paste) pc address with no leading 0x0
+  Find ascii source code where it is hung
+  Go to source code and beginning thinking.
+
+If hang was in some trap loop, e.g. hard fault where the an address
+was out-of-bounds:
+  mdw <sp>  calculator, or guess how big the stack
+  Look for 0x080....x address, from the bottom upwards.
+  When x is odd that was a routine call.
+  Look up the routine call by going to the .list file and doing a
+   find with the x rounded down, e.g. F -> E.  The preceding 
+   instruction is the call.
+
+
+----- Single stepping
+step
+[then it usually it is 'reg' to display the registers]
+
+----- Setting a breakpoint
+
+halt [set points cannot be set with it running]
+bp  0x<address> 2 [The " 2" is needed]
+bp [displays currently set breakpoints]
+resume [continues], or
+reset [does a processor reset]
+
+If the processor is not halted:
+
+target stm32f1x.cpu is not halted
+can't add breakpoint: target running
+Failure setting breakpoint, the same address(IVA) is already used
+
+halt
+up-arrow to the "bp " line.  
+
+Success looks like this--
+> bp 0x8006050 2
+breakpoint set at 0x08006050
+
+When the break point is encountered it stops with something like
+the following:
+
+target state: halted
+target halted due to debug-request, current mode: Handler External Interrupt(29)
+xPSR: 0x6100002d pc: 0x08006050 msp: 0x20004edc
+
+To find the address to set the breakpoint--
+
+Copy source line from .c file, then go to .list file and ctl F paste for the
+lookup.
+
+
+
+
+
+  
+
+
+
+
+

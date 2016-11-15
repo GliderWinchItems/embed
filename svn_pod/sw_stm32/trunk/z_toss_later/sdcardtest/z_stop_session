@@ -1,0 +1,5 @@
+cd ../../..
+./z_clean
+
+echo "# Doing svn commit"
+svn -m "" commit

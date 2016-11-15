@@ -1,0 +1,144 @@
+#!/bin/bash
+# Convert and plot data from the raw unformatted data file NOT in the .gz file
+# 05-19-2012 deh
+# 11-28-2012 deh hack of mmg_plotx
+
+# Usage: mmag_plotx 5 121117 121117.launch1 1
+
+# arg 1 = Number hours from UTC (e.g. EST = 5)
+# arg 2 = subdirectory, e.g. 121117 (yymmdd)
+# arg 3 = file name, e.g. 121104.234957 (yymmdd.hhmmss)
+# arg 4 = 'reformatgpsaccelmerge' argument
+#         '0': // Tension only
+#         '1': // Tension and GPS
+#         '2': // Tension and Accelerometer
+#         '3': // Tension, GPS, Accelerometer
+
+# Make sure correct number of arguments
+# If no argument supplied setup a default USB port
+if [ $# -ne 4 ] ; then
+	echo "THREE arguments required, e.g. ww 5 121104 121104.234957"
+	echo "  Where 1st = Number hours offset from UTC"
+	echo "    and 2nd = subdirectory (yymmdd)"
+	echo "    and 3rd = filename (yymmdd.hhmmss)"
+	echo "    and 4th = data code--"
+	echo "            0 = tension only"
+	echo "            1 = tension and gps"
+	echo "            2 = tension and accelerometer"
+	echo "            3 = tension, accelerometer, and gps"
+	exit	
+fi
+
+if [ $1 -gt 8 -o $1 -lt 0 ]; then
+	echo "FIRST argument is out-of-range: UTC offset for local time: 0 to 8"
+	exit
+fi
+
+# Time zone adjustment for 'reformat.c'
+export TZONEOFFSET=$1
+
+# Make sure we have the directory for computed results
+if ! [ -d "/home/$USER/winch/computed/$2" ]
+then
+	mkdir /home/$USER/winch/computed/$2
+fi
+
+
+echo $LOCAL
+
+# This script might be located in ~/bin, so navigate to where the action starts
+DATESELDIR=/home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+# Directory where files retrieved from FIT are stored
+SAVEDIR=/home/$USER/winch/download/$2
+
+# Directory where computed files are located
+COMPDIR=/home/$USER/winch/computed/$2
+
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'reformat2' outputs stdout with 'RM' appended (ReformattedMerged)
+cd $DATESELDIR
+echo $SAVEDIR/$3 
+
+# ===== TENSION ONLY (option "0") ==========
+case $4 in
+	*0)
+
+# Specify exact length of tension only line length so that float_time will strip out junk lines
+TONLYLENGTH=52
+
+#../read*/reformat $SAVEDIR/$3 | sort -k 1 | tee $COMPDIR/$3RS | ../read*/ratechangecic | tee $COMPDIR/$3RC | sort | ../read*/reformatgps2 | tee $COMPDIR/$3RM | ./float_timegps $COMPDIR/$3.param | tee $COMPDIR/$3FT
+
+../read*/reformat $SAVEDIR/$3 | sort -k 1 | tee $COMPDIR/$3RS | sort -k 1 | tee $COMPDIR/$3RCS | ../read*/reformatgpsaccelmerge $4 | tee $COMPDIR/$3RM | stripjunk0 | ./float_time $TONLYLENGTH | tee $COMPDIR/$3FT
+
+# Strip extraneous lines from 'RM file.  'X' = file for matlab input
+awk '{if ( length > 110 ) print $0 }' $COMPDIR/$3RM > $COMPDIR/$3RMX
+
+# Plot the file and save plot image as a png file
+./podplot0 $COMPDIR/$3FT
+
+	;;
+esac
+
+
+# ===== Tension and GPS only ==========
+case $4 in
+	*1)
+
+../read*/reformat $SAVEDIR/$3 | sort -k 1 | tee $COMPDIR/$3RS | ../read*/ratechangecic | tee $COMPDIR/$3RC | sort | ../read*/reformatgps2 | tee $COMPDIR/$3RM | ./float_timegps $COMPDIR/$3.param | tee $COMPDIR/$3FT
+
+
+
+# Strip extraneous lines from 'RM file
+awk '{if ( length > 110 ) print $0 }' $COMPDIR/$3RM > $COMPDIR/$3RMX
+
+# Plot the file and save plot image as a png file
+./podplot $COMPDIR/$3FT
+
+	;;
+esac
+
+# ===== Tension and accelerometer only ==========
+case $4 in
+	*2)
+
+../read*/reformat $SAVEDIR/$3 | sort -k 1 | tee $COMPDIR/$3RS | ../read*/ratechangecic | sort -k 1 > $COMPDIR/$3RCS 
+ ../read*/ratechangecic_accel < $COMPDIR/$3RCS | tee $COMPDIR/$3RA | sort > $COMPDIR/$3RAS
+ ../read*/reformatgpsaccelmerge $4 < $COMPDIR/$3RAS > $COMPDIR/$3RM
+  ./float_timegps | tee $COMPDIR/$3FT < $COMPDIR/$3RM
+
+# Strip extraneous lines from 'RM file.  'X' = file for matlab input
+awk '{if ( length > 110 ) print $0 }' $COMPDIR/$3RM > $COMPDIR/$3RMX
+
+
+# Plot the file and save plot image as a png file
+./podplot $COMPDIR/$3FT
+#./podplotgps $COMPDIR/$3FT
+
+	;;
+esac
+
+# ===== Tension, accelerometer, and GPS ==========
+case $4 in
+	*3)
+
+../read*/reformat $SAVEDIR/$3 | sort -k 1 | tee $COMPDIR/$3RS | ../read*/ratechangecic | sort -k 1| tee $COMPDIR/$3RCS | ../read*/ratechangecic_accel | tee $COMPDIR/$3RA | sort | tee $COMPDIR/$3RAS
+ ../read*/reformatgpsaccelmerge $4 < $COMPDIR/$3RAS > $COMPDIR/$3RM
+  ./float_timegps | tee $COMPDIR/$3FT < $COMPDIR/$3RM
+
+# Strip extraneous lines from 'RM file.  'X' = file for matlab input
+awk '{if ( length > 110 ) print $0 }' $COMPDIR/$3RM > $COMPDIR/$3RMX
+
+
+# Plot the file and save plot image as a png file
+./podplot $COMPDIR/$3FT
+#./podplotgps $COMPDIR/$3FT
+
+	;;
+esac
+
+
+exit
+

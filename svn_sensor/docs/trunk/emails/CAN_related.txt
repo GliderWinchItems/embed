@@ -1,0 +1,304 @@
+From: 	Donald E Haselwood <dhaselwood@verizon.net>
+To: 	Charles Wells <c.wells@ieee.org>
+Cc: 	George S. Moore <george_moore@agilent.com>
+Subject: 	CAN saga: port update
+Date: 	01/09/2013 08:45:21 PM
+
+
+Charlie,
+
+I had a error in my earlier CAN saga report--
+
+/RTS
+
+"It is looking like" port A can be used with CAN and at the same time
+USART1 is used, even though the USART1 CTS, RTS module shares PA 11|12
+with CAN RX, TX.  This is because the RTS (PA12, output pin) has a
+separate enable bit in one of the USART setup registers.  So, if RTS is
+not enabled, then the RTS output does not conflict with the CAN TX.
+
+Once I get the loopback sending data itself I can verify this.
+
+/input_pin
+
+Concerning input pins, the CAN needs the input pin to be high in order
+to leave initialization mode.  This means that the input pin can be
+either input floating with something external pulling up the pin, or
+input set to pull up/down (with the output register set high so as to
+pull up).  This (as I understand it!) is because when the "request
+initialization mode" bit is turned off the module then looks for at
+least 11 recessive bits, which means the input pin needs to be high.  If
+the pin is floating (and nothing connected to it) it may, or may not,
+exit.  This explains some "funny" things I was experiencing.
+
+The universe was made more orderly when I found that a subroutine that I
+had used with the XBee setup to set pins (rather than the long way of
+coding inline "and/or's") had a bug.
+
+/loopback_&_silent_mode
+
+For the universe to remain well ordered, understanding of loopback &
+silent modes needs to be included.  Two bits involved--
+silent loopback
+ 0     0  NORMAL: CAN TX ->tx pin; CAN RX sensed rx pin. 
+
+ 0     1  LOOPBACK (24.5.2): CAN TX ->tx pin and internally connected to
+CAN RX, rx pin not sensed 
+
+ 1     0  SILENT (24.5.1): tx pin high (recessive), CAN_RX senses rx pin
+(receive only)
+
+ 1     1  "HOT SELFTEST" (24.5.3): tx pin high, but CAN TX internally
+connected to CAN RX, rx pin not sensed.
+
+The driver chip I have on the POD board also has a "normal/silent" mode
+input that will disconnect the driver output from the bus.
+
+Don
+
+
+
+
+From: 	Donald E Haselwood <dhaselwood@verizon.net>
+To: 	Charles Wells <c.wells@ieee.org>
+Cc: 	George S. Moore <george_moore@agilent.com>
+Subject: 	sensor: using timers for low interrupt priority processing
+Date: 	01/12/2013 11:08:40 PM
+
+
+Charlie,
+
+I stumbled into a misconception.  Moving the seeming-to-work CAN code
+from the Olimex to the POD board I ran into "null" hard-fault.  I
+finally isolated it to 'vector.c' not having the interrupt handler
+pointer set for TIM5.  An interrupt on TIM5 is forced when the CAN
+receive FIFO 0 interrupt is processed, so that low level interrupt
+processing can continue.  I fixed it and away it went.  But wait!  Why
+didn't I have that bug with the Olimex board?
+
+Answer: The Olimex board doesn't have TIM5 and the test routine was not
+using the low-level interrupt processing scheme.
+
+I had come to the conclusion eons ago when shifting from the Olimex to
+the POD that even though the peripherals didn't support some of the
+interrupt vectors the M3 core still did.  There is no error when
+enabling the NVIC (which is part of the core).
+
+The Olimex processor (64 pin, STM32F103RB--128K flash, 20K SRAM), which
+is a medium density part, has timers 1-4.  
+
+The POD board processor (100 pin, STM32F103VC, or VE--128K flash, 20K
+SRAM, or 256K flash, 64K SRAM), which is a high density part, has timers
+1-8.
+
+The 'canwinch_pod.c' routine triggers TIM5 and TIM7 for the low and high
+priority received messages.  So far, the test routine hasn't used this,
+so it worked OK on the Olimex.  When I shifted to the POD board the
+vector for TIM5 was not set so it jumped to the hard-fault trap.  What
+was happening was that Olimex simply ignored the TIM5 and TIM7 forced
+interrupts.  The NVIC setup didn't give an error giving the impression
+that there was no problem.  On the POD board the TIM5 and TIM7
+interrupts took place, and by happenstance the vector for TIM5 was
+missing (and the attribute "WEAK" meant there wasn't any error during
+compilation).
+
+Bottom-line--either the sensor board has to deal with the limited
+timers, or go to a high a density part, which I was planning on anyway,
+but unaware of the timer issue.  (Another nail-in-the-coffin for using
+the Olimex for the CO.)
+
+
+Don
+
+
+
+
+From: 	Donald E Haselwood <dhaselwood@verizon.net>
+To: 	Charles Wells <c.wells@ieee.org>
+Cc: 	George S. Moore <george_moore@agilent.com>
+Subject: 	Can Olimex
+Date: 	01/15/2013 09:33:16 PM
+
+
+Charlie,
+
+I've got the POD and Olimex sending to each other (warrants a minor
+huzzah!).  I don't need another Olimex for now, but it would be handy
+for testing with multiple units on the bus.
+
+The big problem was with with the CAN driver on the POD.  So far I've
+dealt with three drivers--
+
+Here is the one on the POD that didn't work correctly (NXP)--
+http://www.nxp.com/documents/data_sheet/TJA1051.pdf
+
+Here is the driver that the Olimex uses (TI)--
+http://www.ti.com/lit/ds/symlink/sn65hvd230.pdf
+
+Here is the one on the POD that works OK (Microchip)--
+http://ww1.microchip.com/downloads/en/DeviceDoc/21667f.pdf
+
+I don't know why the NXP driver didn't work correctly.  It would put out
+a bus waveform that looked liked a stair-step.  At first I thought the
+5v supply was being pulled down.  I tried a huge capacitor and it made
+absolutely no difference.  I'm rather certain(?) that I didn't have the
+part in backwards.  The pins are such that it might do "funny things" in
+backwards and not get smoked.
+
+BTW, my original layout that used PA11,12 for CAN was correct.  After
+sorting out the software setup for the pins and alternate functions it
+should work OK, and I didn't have to cut traces and shift to PB8,9.  On
+the POD board it will work correctly in loopback with the CAN on portA
+pins 11,12, portB 8,9 and portD 0,1.  I scoped the portA and it was
+putting out xmit bits that looked correct so the board layout was OK.  
+
+There is the 3.3v issue.  The Olimex/TI part is designed to run on 3.3v.
+The other two are *compatible* with 3.3v processors, but run on 5.0 v.
+Below 4.5v they have a low voltage shutdown.  My first read of the
+datasheet missed that detail and I thought the part would work on 3.3 as
+well as 5.0v.
+
+The OLimex/TI 3.3v driver swings the bus about 1.0.  Seems a bit puny
+and should be more like 2.0v or more.  The 5.0v driver swings the bus
+2.0v.  The MCP2551 datasheet shows the differential 1.5 min to 3.0 max,
+so I guess that is reasonable.  My bus terminations are 135 ohms (a pair
+of 270 ohms (what I had on hand)) at each end, giving about 67 ohms
+total load.  The datasheets all use 60 ohms in their tests.
+
+I think I am using the scope correctly for this.  The left goes to one
+side of the bus and the right to the other.  The left amp is set to
+"invert" and the vertical is set on "add".  This should, and appears, to
+give the differential.  If I don't switch the left to "invert" and have
+"add" set the result is essentially zero for all the bits.
+
+I looked at the waveform at the POD end with the termination missing at
+the Olimex end (the scope is on the other termination) and no unit at
+the other end.  There is some HF ringing at the transition at about 5
+MHz.  (BTW, the bus is 25 ft of 4 wire telephone cable.)  When the
+Olimex is plugged in the ringing goes away.  Aha!  The jumper (solder
+bridge) on the Olimex has a 120 ohm resistor!  The schematic shows the
+jumper, but it doesn't show it connected.  I wicked the solder bridge.
+The ringing w/o one termination is still present with the Olimex plugged
+in.  The differential voltage swings are about the same as before.  (One
+of the datasheets shows a figure for the driver down to 45 ohms and with
+the three terminations it was about 43 ohms.)
+
+With both terminations pulled it fails.  With one termination it works.
+There wasn't a convenient way to scope the bus without the terminations.
+(BTW, the data rate is 500K bits/sec.)
+
+
+Don
+
+
+
+
+From: 	Donald E Haselwood <dhaselwood@verizon.net>
+To: 	Charles Wells <c.wells@ieee.org>
+Cc: 	George S. Moore <george_moore@agilent.com>
+Subject: 	Re: Can Olimex: Baudrate
+Date: 	01/16/2013 12:28:27 PM
+
+
+Charlie,
+
+/struct'ing
+
+I've decided to modify 'canwinch_pod.c' to pass parameters via a
+'struct'.  To make the routine more general purpose the TBS1 and TBS2
+parameters (sample point register settings) need to be external to the
+routine.  
+
+If they are hard coded in the routine, then the routine will be
+dependent on the processor clock.  For example, the POD running on the 8
+MHz xtal can run at 72 MHz (PLL set to 9x).  With TBS1 & TBS2 set to 5,
+12, the pre-scalar is (72/2) divided by (1_TBS1+TBS2) = 18, that divided
+by the baudrate, e.g. 500,000 gives a pre-scalar of 4.  1 Mbps -> 2.
+Now suppose we run on the internal 8 MHz RC oscillator.  The internal
+osc gets divided by 2 before going to the PLL, and the PLL max is 16x.
+This sets the clock limit at 64 MHz.  The AHB bus is now 32 MHz instead
+of 36 MHz.  Divide by the (1_TBS1+TBS2) and the pre-scalar is 1,777,777
+divided by the baudrate.  Obviously, one could not mix units on the CAN
+bus.
+
+However, if the TBS1, TBS2 are jiggered a bit the rates can be made to
+match.  For example, one unit runs on an xtal at 72 MHz and the baudrate
+is set to 500,000 bps.  Another runs on the internal osc at 64 MHz.  If
+the (TBS1 + TBS2 + 1) is jiggered to sum to 16 rather than 18, a
+pre-scalar of 4 gives 500,000 bps.  Hence, the TBS1, TBS2 should not be
+baked into the CAN routine, and passing a 'struct' with parameters looks
+like the best approach.
+
+Don
+
+
+
+On Tue, 2013-01-15 at 23:12 -0500, charles.a.wells wrote:
+> Don,
+> 
+> > I'll see how the afternoon goes (if the doc is on-time, etc.).  Now that
+> > the POD<->Olimex is working there less pressing need for another Olimex.
+> > If I don't get to your house tomorrow you could bring it Monday.
+> 
+> I'll put it in the van.  If I'm here, the van's here.  It will also be along Mon a.m.
+> 
+> > I have the POD<->Olimex now running at 1 Mbps.  I added another 15'
+> > cable to the 28' one.  I figure we should be running all the development
+> > and testing at max data rate and maybe near max line length, then for
+> > field use drop the data rate to 500K.
+> 
+> I say do all development at the rate used in the field.  Do a 1Mbps
+>  test from time to time as development progresses.
+> 
+> I'd worry more about software timing issues not being fully wrung out
+>  during development testing if that testing happens at some other bit
+>  rate.  The notion that the bus will certainly work at 500Kbps if it
+>  works at 1Mbps is probably sound.  The notion that the embedded
+>  software will work the same in both cases is a good deal weaker.  I'd
+>  worry more about latent software timing bugs and less about the bus.
+> 
+> Char1ie
+> 
+> 
+
+
+
+
+From: 	charles.a.wells <charles.a.wells@earthlink.net>
+Reply-To: 	Charles Wells <c.wells@ieee.org>
+To: 	Donald E Haselwood <dhaselwood@verizon.net>
+Cc: 	George S. Moore <george_moore@agilent.com>
+Subject: 	Re: CAN: processor clock
+Date: 	01/16/2013 10:09:13 PM
+
+
+Don,
+
+Yes, that level of robustness is indeed a bit surprising.  I guess the hardware re-sync on each bit gives it wide latitude to handle clock rate differences.
+
+Sounds like CAN is a good fit for the winch project.
+
+Char1ie
+
+On Jan 16, 2013, at 10:03 PM, Donald E Haselwood <dhaselwood@verizon.net> wrote:
+
+> Charlie,
+> 
+> I made the changes to pass most of the parameters via a struct to the
+> CAN routine (rev 101).  I then tinkered with different processor
+> clocking speeds.  To my surprise it works with rather disparate clocks.
+> The 'sjw' that keeps resynchronizing on each transition is rather
+> robust.
+> 
+> With the Olimex running on its 8 MHz xtal and the PLL at 9x, yielding a
+> 72 MHz processor clock and 36 MHz AHB, hence CAN, clock, I could ran the
+> POD board on its 8 MHz xtal and the PLL set to 8x, then to 7x.  I fully
+> expected it to not work at all at even 8x (versus the other on 9x).
+> Clearly, that brings it closer to not working, so it looks like the
+> tolerance of the RC internal oscillator is not an issue.
+> 
+> Don
+> 
+> 
+
+

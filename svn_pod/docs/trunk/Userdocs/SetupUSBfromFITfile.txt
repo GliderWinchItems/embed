@@ -1,0 +1,163 @@
+~/svn_pod/docs/trunk/Userdocs/SetupUSBfromFITfile.txt
+Setting up USB stick from compressed image file stored on FIT server
+
+======================================================================================================
+08/31/2012
+
+The following is a one-step version where the uncompression and writing to the desitnation is done as it downloads.
+
+1. Get name of file on FIT to be downloaded
+[Computer running Ubuntu on USB drive #1]
+
+sshFIT
+cd /usbdriveimage
+ls -l
+
+Example output of above--
+...
+deh@FIT:/usbdriveimage$ ls -l
+total 3455380
+-rw-r--r-- 1 deh deh            9 2012-08-27 13:07 ubuntu_12.04LTS_live_image.120825.2137.blockcount.uncompressed
+-rw-r--r-- 1 deh users 3538291501 2012-08-25 22:40 ubuntu_12.04LTS_live_image.120825.2137.gz
+-rw-r--r-- 1 deh users         76 2012-08-26 00:27 ubuntu_12.04LTS_live_image.120825.2137.md5sum.compressed
+-rw-r--r-- 1 deh deh           36 2012-08-27 12:39 ubuntu_12.04LTS_live_image.120825.2137.md5sum.uncompressed
+
+<file>.gz - is the compressed image
+<file>.md5sum.compressed - md5sum of the .gz file
+<file>.md5sum.uncompressed - md5sum of the uncompressed file
+<file>.blockcout.uncompressed - the used block count of the original stick
+
+For convenience use the cursor and highlight the name, e.g.
+ubuntu_12.04LTS_live_image.120825.2137.gz
+and right click/copy.
+
+==> 'exit' to exit the FIT.
+
+2. Plug in the destination USB drive
+
+Identify the device name--
+mount
+
+[Near the end of the listing find something like the following]
+/dev/sdc1 on /media/disk type vfat (ro,nosuid,nodev,shortname=lower,flush,utf8,uid=1000)
+
+(To make life easy) copy the file name from the screen using cursor to highlight and right click to copy--
+Example: highlight from the above and right click/copy
+ubuntu_12.04LTS_live_image.120825.2137.gz
+
+Enter the commmand.
+Example: 
+usbimagecopy1step [type this, then right click/paste to get the following]
+usbimagecopy1step ubuntu_12.04LTS_live_image.120825.2137.gz [then add /dev/sdc]
+usbimagecopy1step ubuntu_12.04LTS_live_image.120825.2137.gz /dev/sdc
+
+Upon "Enter" it will begin the download.  No status of the progress shows with this version
+(since it uses 'ssh' instead of 'scp').
+
+When the download is complete it fetches the blockcount and md5sum, then begins computing
+a local md5sum (which will take a while since it has to read the blocks for the blockcount
+downloaded.  When it is complete the two md5sums are compared.  A "SUCCESS" message is presented
+if it all is OK.
+
+3.  Testing the newly written drive.
+
+I noticed that first boot only gives a single line that credits the author and stops.  The next
+reboot then "works" (starts with the fuzzy purple screen).
+
+
+======================================================================================================
+08/26/2012
+
+The following is the first version that requires two steps (download and uncompress/write destination)
+
+1. Get name of file on FIT to be downloaded
+[Computer running Ubuntu on USB drive #1]
+
+sshFIT
+cd /usbdriveimage
+ls -l
+
+Example output of above--
+...
+deh@FIT:/usbdriveimage$ ls -l
+total 3455380
+-rw-r--r-- 1 deh deh            9 2012-08-27 13:07 ubuntu_12.04LTS_live_image.120825.2137.blockcount.uncompressed
+-rw-r--r-- 1 deh users 3538291501 2012-08-25 22:40 ubuntu_12.04LTS_live_image.120825.2137.gz
+-rw-r--r-- 1 deh users         76 2012-08-26 00:27 ubuntu_12.04LTS_live_image.120825.2137.md5sum.compressed
+-rw-r--r-- 1 deh deh           36 2012-08-27 12:39 ubuntu_12.04LTS_live_image.120825.2137.md5sum.uncompressed
+
+<file>.gz - is the compressed image
+<file>.md5sum.compressed - md5sum of the .gz file
+<file>.md5sum.uncompressed - md5sum of the uncompressed file
+<file>.blockcout.uncompressed - the used block count of the original stick
+
+For convenience use the cursor and highlight the name, e.g.
+ubuntu_12.04LTS_live_image.120825.2137.gz
+and right click/copy.
+
+'exit' to exit the FIT.
+
+
+2. Download compressed image from FIT to USB drive
+
+[Now running with two USB drives.  One with Ubuntu, and 
+one that receives the compressed image file.]
+
+Example: Plug in orange PATRIOT drive [USB drive #2]
+Check how it shows up--
+cd /media
+ls [Shows PATRIOT in the list]
+
+Note: If the 2nd USB drive is plugged in before ubuntu has booted up it
+might not show up as mounted (in which unplug, wait a few seconds, and
+plug it back in). 
+
+
+usbimagecopy <file name (.gz file)> <output path>
+
+Example--
+usbimagecopy ubuntu_12.04LTS_live_image.120825.2137.gz /media/PATRIOT
+
+Remaing time will show in lower right-hand corner.
+
+Check that the downloaded file is the same size as the one on the FIT.  I had
+the download "stall" and after a long time it timed out with no error showing,
+however the file size was smaller than the one on the FIT.  If the file size
+is not the same there is no point in proceeding.  Most likley gunzip would see
+something wrong with the file.
+
+If the file sizes are the same, the md5sum should also match.  The script
+downloads the md5sums for the compressed and uncompressed images.  The script
+computes only the compressed md5sum.  If the two don't compare, then there is
+no point to uncompressing and writing the destination USB drive, as "something"
+is different.
+
+
+3. Uncompress/copy downloaded file to destination USB drive
+
+[USB drive #3 added, i.e. now running with 3 USB drives.  One with Ubuntu,
+one with downloaded compressed file, and one that gets the uncompressed
+image.]
+
+usbimagewrite <file name> <source path> <destination DEVICE!>
+
+Example
+usbimagewrite ubuntu12.04LTS.120815.1620.gz /media/PATRIOT /dev/sdd
+
+4.  Checking the md5sums
+
+The md5sum for the original compressed and uncompressed images are on the FIT
+server.  The download is the compressed file, so the comparison is made between
+a md5sum made on the local file and the one from the FIT server.  When the compressed
+file is uncompressed and written to the destination USB drive, a md5sum made on
+the destination USB drive is compared to the original uncompressed file from the FIT.
+
+Don't try to run the destination USB drive until the md5sum has been made since the
+running of it will changes things and the md5sum will be different.
+
+When the destination USB drive is written the md5sum from the FIT for the 
+uncompressed image is displayed.  The block count is also displayed.  You have to
+type in the command line with this block count to the command line that the 
+script displays.
+
+

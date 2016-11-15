@@ -1,0 +1,33 @@
+README.functions - Usage of peripheral functions
+STM373FCxT6 sensor board
+(See also README.pins for pin assigments)
+
+10/04/2012
+
+
+The emitter ressitors of two photosensors, A & B, go directly to
+the PA1, PA3 inputs.  The comparator has the level on one side set
+by DAC1.  The DAC output goes to the timer encoder inputs.
+
+Comparator: see p 275 Ref Manual (RM0313)
+DAC: see p 251 Ref Manual (RM0313)
+
+
+Comparator #1--
+Phototransistor A -> PA1 -> COMP1_INP
+DAC1_OUT1 -> PA4 -> COMP1_INM
+COMP1_OUT -> PA11 -> TIM4_CH1
+
+Comparator #2--
+Phototransistor B -> PA3 -> COMP2_INP
+DAC1_OUT2 -> PA5 -> COMP2_INM
+COMP1_OUT -> PA12 -> TIM4_CH2
+
+
+Also the ADC can be used to check the voltages--
+PA1 -> ADC_IN1
+PA3 -> ADC_IN3
+DAC1_OUT1 -> PA4/ADC_IN4
+DAC1_OUT2 -> PA4/ADC_IN5
+
+

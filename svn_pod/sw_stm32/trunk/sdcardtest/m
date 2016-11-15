@@ -1,0 +1,12 @@
+echo =================================================================================================================
+rm -f *.o sdcardtest.map
+cd ..
+make
+cd sdcardtest/
+fgrep sdc_pt_queue *.map
+fgrep sdc_queue *.map
+fgrep sdcard_err *.map
+fgrep sdcard_marker *.map
+fgrep sdcard_status *.map
+fgrep sdlog_err *.map
+fgrep caw_ *.map

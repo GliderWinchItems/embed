@@ -1,0 +1,32 @@
+#!/bin/bash
+echo ==================================================================================================================================================================
+cd ../../../../svn_pod/sw_stm32/trunk/devices
+#make clean
+make
+cd ../lib/libmi*
+#make clean
+make
+cd ../libu*
+#make clean
+make
+cd ../libsu*
+#make clean
+make
+cd ../../../../../svn_sensor/sw_f103/trunk/lib/libdev*
+make clean
+make
+cd ../lib*sensormisc
+make clean
+make
+cd ../../../../sensor/tilt/trunk
+make clean
+make
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "If this is because of: tmpstruct.h: No such file or directory, try ./m"
+	exit
+fi
+
+
+
+

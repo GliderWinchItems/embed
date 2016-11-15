@@ -1,0 +1,89 @@
+HowToMatlabPlots.txt
+11/29/2012
+
+
+1.  Process raw data - mmag_plotx
+
+mmag_plotx <winch/download directory> <raw file name> <code>
+
+# Usage: mmag_plotx 121117 121117.launch1 1
+
+# arg 1 = subdirectory, e.g. 121117 (yymmdd)
+# arg 2 = file name, e.g. 121104.234957 (yymmdd.hhmmss)
+# arg 3 = 'reformatgpsaccelmerge' argument
+#         '0': // Tension only
+#         '1': // Tension and GPS
+#         '2': // Tension and Accelerometer
+#         '3': // Tension, GPS, Accelerometer
+
+
+The run produces a 'RMX file, which is the 'RM file with short line
+lengths discarded.
+
+2.  Transfer 'RMX file to Windows PC
+
+On the PC store the files in--
+C:\MATLAB_SR11\winch\transfer
+
+3. Start Matlab
+
+4. Set path to data input
+
+File|Set Path|Browse
+
+Navigate to directory in 2. above.
+
+5. Edit Matlab program to change input file name
+
+File|Open|
+C:\MATLAB_SR11\winch\transfer\data_extract_type_6.m
+
+  a.  Edit 'file_spec' with new file name
+
+  b.  Edit winch position: 'wnch_lat' and 'wnch_long' with new settings
+
+6. Run program
+
+EDU>>data_extract_type_6
+
+7. Save plots for transfer
+
+File|Export|
+select thumb drive path
+select jpeg
+name: xxxxxfigN.jpg
+Where: 
+xxxxx = name, e.g. launch1
+N = figure number
+
+Eject thumb drive
+
+8. On Linux box
+
+Run script
+matlabplotsaving 121117 /media/LEXAR
+
+Which does the following--
+
+  a. Copy thumb'ed plots to winch/computed directory
+Example--
+cp /media/LEXAR/*launch?fig?.jpg ~/winch/computed/121117/
+
+  b. Remove "executable"
+Example--
+chmod -x ~/winch/computed/121117/*
+
+  c. Compress jpg files--
+Example--
+tar -cvf matlabpdf.gz launch?fig?.jpg
+
+  d. Copy to FIT server
+Example--
+ rsync -av -e 'ssh -p 41574' ~/winch/computed/121117/matlabpdf deh@10.1.1.100:/winch/computed/
+sending incremental file list
+matlabpdf
+
+sent 2294125 bytes  received 31 bytes  917662.40 bytes/sec
+total size is 2293760  speedup is 1.00
+
+

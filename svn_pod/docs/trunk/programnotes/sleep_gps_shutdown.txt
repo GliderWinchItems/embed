@@ -1,0 +1,51 @@
+05/13/2013
+Problem--POD1 discharged battery completely for Uli.
+
+Summary of shutdown logic
+
+GPS turned on by--
+
+Goal: Turn the GPS on 
+
+1) 800 grams difference between the highest and lowest readings taken
+over a 1/2 sec interval (i.e. 128 tension readings).  Exceeding this
+threshold is taken as "activity", e.g. handling the rigging.
+
+2) Tension over a threshold, 10000 (raised to 30000).  30 Kgf, about 66 lbs
+turns the GPS on.  GPS data will be late into the launch.  If the threshold
+is set too low, having the rigging in a situation where the tension exceeds
+the threshold means the GPS never turns off.
+
+GPS turned off by--
+
+Goal--shutdown the (large) battery drain from the GPS when launching is over.
+
+1) One hour after the last of either 1) or 2) above.  1) or 2) above reset
+the one hour timeout.  If this time is set too short, then delays between launches
+might cause the GPS to shutdown and not turn back on in time to get good
+data for the next launch.  E.g. the glider is ready but there is a "hold" while
+a plane lands/takesoff, so there is no activity as far as the load-cell is concerned.
+
+Sleep mode caused by--
+
+Goal--Stop everything and go into low power state.
+
+1) 5 hours after the GPS goes off.
+
+2) Five pushes of the pushbutton within 10 secs.
+
+3) 's' command from the computer.
+
+4) Either battery cell drops below 3.45 volts.
+
+If the POD is somehow awakened and left on the shelf the GPS should timeout and 
+then 5 hour timeout puts it back into sleep.  The battery drain is therefore 1 hour of
+GPS and processor (but likely no load-cell load), and 5 hours of just the processor (and
+likely no load-cell)
+
+If at any time the battery drops to near end-of-charge the POD will shut down, and if
+awakened the menu outputs, followed by a low battery message and back into the sleep
+mode.
+
+
+

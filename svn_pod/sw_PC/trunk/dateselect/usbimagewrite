@@ -1,0 +1,25 @@
+#!/bin/bash
+# 08/27/2012
+# Uncompress the USB image file and write it to USB stick
+#
+# usbimagewrite <file name> <source path> <destination DEVICE!>
+# Example
+# usbimagewrite ubuntu12.04LTS.120815.1620.gz /media/PATRIOT /dev/sdd
+# 
+date
+gunzip -c $2/$1 conv=sync,noerror | sudo dd of=$3 
+date
+# Compute md5sum of USB destination stick
+echo "Compare the just-written USB drive md5sum with the original"
+echo "To compute the just-written USB drive md5sum use the following blockcount, "
+cat $2/$1.blockcount.uncompressed
+echo "in the following command,"
+echo "sudo dd if=$2 count=<block count> | md5sum"
+echo "The original md5sum is"
+cat $2/$1.md5sum.uncompressed
+
+
+
+
+exit
+

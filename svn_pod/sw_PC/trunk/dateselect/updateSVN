@@ -1,0 +1,37 @@
+#!/bin/bash
+# updateSVN
+# Updates each of the svn's
+# 09/09/2012 deh
+# 05/25/2013 deh added sensor2
+# 02/25/2015 deh added svn_common
+
+echo Updating svn_common
+cd ~/svn_common
+svn update
+
+echo Updating svn_pod
+cd ~/svn_pod
+svn update
+
+echo Updating svn_sensor
+cd ~/svn_sensor
+svn update
+
+echo Updating svn_discoveryf4
+cd ~/svn_discoveryf4
+svn update
+
+echo Updating svn_ultrasonic
+cd ~/svn_ultrasonic
+svn update
+
+echo Updating svn_sensor2
+cd ~/svn_sensor2
+svn update
+
+echo Updating svn_et
+cd ~/svn_et
+svn update
+
+
+exit

@@ -1,0 +1,37 @@
+ublox_setup.txt
+05/06/2014
+
+1. POD versus Sensor board
+
+Select serial port for u-blox
+FTDI is on USART1
+Fix #define accordingly for board.
+
+2.  BAUD
+
+Default ublox 38400
+57600 maybe better at 5 fixes per second
+ but the initial config will have to be 38400,
+ then after the change recompile/reflash for the
+ new baud rate.
+
+3.  Compile and flash
+
+../svn_pod/*32/tr*/u*
+rlinkpermissions
+./mm && make flash
+
+4. Windows (maybe wine) 
+
+Run u-center
+
+On Virtualbox--
+Enable FTDI serial port.
+
+- Configuration view for changing parameters.
+- Send after each selection change
+- CFG to save after changes
+
+Text (F8) shows u-blox msg stream.
+
+

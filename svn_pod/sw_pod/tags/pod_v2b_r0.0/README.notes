@@ -1,0 +1,32 @@
+branch created--
+
+10/13/2012
+Add directory--
+../svn_pod/sw_pod/branches/pod_v2b_r0.0
+
+This a version for POD #2 and POD #2b--5 Hz GPS and 32 KHz osc not used.
+rev 668 (appears) to work with 1 Hz GPS on BOX 1, and BOX 3.  Following rev 668
+changes are being made to shift it over to the 5 Hz GPS.
+
+10/19/2012
+
+Changed back to work with 5 Hz gps.
+- $GPRMC sentence slightly different with POD 1, i.e. "A" at end of fields is not
+present on POD 2 gps, probably due to differences in NEMA setup.
+
+#ifdef GPS_SWITCH_PRESENT added to gps_packetize.c to make it easy to ignore the power
+up/down switch for enabling the GPS 5c regulator power.
+
+Commented out packet type "2" in gps_packetize.c, since it would give a packet with
+zero extended linux time after the unit came up out of sleep mode.
+
+Fixed search so that it won't stop on a zero time packet.
+
+Added epoxy to tacked on resistor divider for GPS time sync pulse.
+
+Seems to work, but auto-shutdown needs some investigation, as well as five pushbutton
+pushes shutdown.
+
+Rev 671 at this point.
+
+

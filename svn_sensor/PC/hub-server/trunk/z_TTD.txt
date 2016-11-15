@@ -1,0 +1,35 @@
+File: hub-server-TTD.txt -- Things to do.
+Author: c. wells
+Date made: 20140402.2355
+Last edit: 20140403.1750
+
+0. Enhance all error handling (i.e., don't just quit on error).  Make hub-server-d behave properly whilst stopping or crashing a connected client (e.g., Java debugging).
+
+1. Add file ("-i"/"--infile="/"-o"/"--outfile=") & UART connects.
+
+2. Deamonize (or maybe not and just use "daemonize").
+
+3. Add "-g" (and "--group") mode.
+
+4. Add "-a" (and "--accept") and "-c" (and "--connect") switches.
+
+5. Add "-e" (and "--eol=<num>") switch(es).
+
+6. Add "-d" (and "--dle=<num>") switch(es).
+
+7. Add binary mode ("-b"/"--binary").
+
+8. Add read/only connections (??).
+
+9. Add socks4 (or maybe socks5) protocol.
+
+A. Add control/status connection.
+   - Change "-a"/"-c" status.
+
+B. Documents
+    - User manual
+    - Developer (internals) manual
+
+C. Add windows compatibility
+
+D. "--config=<filename>"

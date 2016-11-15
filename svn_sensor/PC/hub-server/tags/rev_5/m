@@ -1,0 +1,11 @@
+echo "# Making \"hub-server\""
+rm  -f hub-server
+gcc -o hub-server hub-server.c hub-server-sock.c hub-server-queue.c hub-server-util.c -pthread -Wall
+
+echo "# Making \"hub-server-test\""
+rm  -f hub-server-test
+gcc -o hub-server-test z_test/hub-server-test.c
+
+echo "# Making \"hub-server-proxy\""
+rm  -f hub-server-proxy
+gcc -o hub-server-proxy hub-server-proxy.c -pthread -Wall

@@ -1,0 +1,54 @@
+From: Donald E Haselwood <dhaselwood@verizon.net>
+Date: May 20, 2012 9:38:22 PM EDT
+To: "george_moore@agilent.comUlrich Neumann" <ulineumann@yahoo.com>, Charles Wells <c.wells@ieee.org>
+Subject: POD graphs and data: 120519_3rd launch
+
+Attached is the converted data file and graphs for the May 19, 2012, 3rd
+launch.
+
+At the end of this launch something happened with the load-cell.  My
+current guess is that there was a momentary open circuit that caused the
+ADC to lockup.  From the graphs it appears to have taken place during
+the ground handling after the release, and it looks like after the chute
+was on the ground.
+
+The load-cell fault causes the tension data for the full time period
+compressed, so I stripped off some of the trailing data as well as
+little of the data at the beginning during the period when there was no
+tension or accelerometer data that indicated activity.
+
+The file attached--
+
+'120519.182300RM' covers the full data downloaded.
+'120519.182300RM.pdf' is the graph of the full data download
+'1120519.182300ARM.pdf' is the graph of the stripped down file
+
+The format of the 'RM file is--
+Column 1 - linux time (good for computer sorting, not good for humans)
+Column 2 - tension (grams)
+Column 3 - Z axis (g)
+Column 4 - X axis (g)
+Column 5 - Y axis (g)
+Column 6 - square root of sum of squares of X, Y, Z (g)
+Column 7 - 13 Readable date/time (gmt)
+Column 8 - 1/64th tick with in one second
+
+
+- Each line is 1/64th of a second
+
+- The accelerometer data logs at 1/8 the rate of the tension so there
+are 8 identical accelerometer readings in a row.
+
+- The accelerometer readings that are all 1 at the beginning is merely
+padding until the first accelerometer packet in the readout is
+encountered.
+
+Depending on what you open the pdf with the program might allow
+stretching the plot horizontally (and vertically if desired) and get a
+better look at the detail.  
+
+I send separate emails with the 1st and 2nd launches.
+
+Don
+
+   

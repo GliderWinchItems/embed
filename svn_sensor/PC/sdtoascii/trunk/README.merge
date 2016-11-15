@@ -1,0 +1,27 @@
+
+
+Final format:
+
+White Space separated fields.
+Zero (place holder) if not implemented
+
+Field
+1.	linux time *64 (same as POD ascii/hex format)
+2.	POD tension
+3.	engine rpm
+4. 	engine manifold pressure
+5.	engine temperature (transmission)
+6.	engine throttle
+7.	drive shaft count
+8.	drive shaft rpm
+9.	upper sheave count
+10.	upper sheave rpm
+11.	lower sheave count
+12.	lower sheave rpm
+13.	POD GPS lattitude
+14.	POD GPS longititude
+15.	POD GPS height
+16.	POD GPS velocity East
+17.	POD GPS velocity North
+18.	POD GPS velocity height
+19.	

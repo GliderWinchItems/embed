@@ -1,0 +1,5 @@
+-- db_connect: script
+-- connect to database
+connect 'jdbc:derby://localhost:1527//home/deh/svn_common/trunk/db/pcc';
+show tables in APP;
+

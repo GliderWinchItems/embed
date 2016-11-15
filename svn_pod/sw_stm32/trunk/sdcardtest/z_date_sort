@@ -1,0 +1,7 @@
+if [ -x "$1" ]; then
+    export dir="."
+else
+    export dir="$1"
+fi
+
+find $1 -type f -exec stat --format="%y -- %n" {} \; | sort -r | fgrep -v '/.svn/' | fgrep -v './z_date_sort'

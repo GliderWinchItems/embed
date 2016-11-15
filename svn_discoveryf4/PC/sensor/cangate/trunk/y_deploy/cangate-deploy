@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# compile
+cd ..
+./mm
+
+cp -p ./cangate /usr/local/bin/
+cp -p ./checkstruct /usr/local/bin/
+
+echo "# cangate executable has been copied to /usr/local/bin/"

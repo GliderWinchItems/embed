@@ -1,0 +1,73 @@
+// CAN_id_decode_table.txt    06/25/2014
+//
+// type = code for how payload is arranged and converted
+//   0 = two 4 byte ints
+//   1 = one 8 byte int
+//   2 = one 4 byte int, two 1 byte bytes
+//   3 = one 4 byte int
+//
+// fld = field number in output line that brings multiple messages for one time tick interval together (-1 = omit)
+//
+// fx = 0 for int field, 1 for float field
+//                                                          fld fx scale offset format     fld fx scale offset format     fld fx scale offset format
+//                                CAN id           type     --------------------------    ---------------------------     --------------------------                Description
+#define CAN_TIME_SYNC		0X00200000	//  1,     -1   0      1   0 "%016llX"	                                                                  @Linux time * 64
+#define CAN_ENG_RPMMANIFOLD	0x40800000	//  0,      1   1    5.0   0 "%7.0f",         2  1  9.629E3  -0.5  "%5.1f"                                @Engine rpm:Manifold pressure
+#define CAN_ENG_THERMTHROTL	0x30800000	//  0,     -1   0      1   0 "%5d",          -1  0        1     0  "%5d"		                  @Engine thermistor:Throttle pot
+#define CAN_SHAFT1		0x31e00000	//  0,      3   0      5   0 "%d",            4  1      4.0     0  "%6.0f"		                  @Shaft sensor (upper sheave) count:rpm
+#define CAN_ENG_THROTTLE	0x80800000 	//  3,      5   0      1   0 "%d"							                  @Engine throttle pot
+#define CAN_ENG_TEMP		0x70800000 	//  3,      6   1   0.01   0 "%6.1f",							                  @Engine temperature (deg C * 100)
+#define CAN_FIX_LATLON		0xB4000000 	//  0,      7   1   1E-5   0 "%d",            8  1     1E-5     0  "%d"	                                  @Fix lattitude: longitude (minutes * 1E5)
+#define CAN_FIX_HT_TYP_NSAT	0xC4000000 	//  2,      9   0      1   0 "%4d",          10  0        1     0, "%1d"    11  0   1   0 "%2d"	          @Fix height (m), Fix type, Number satellites
+
+
+=========================================================================================================================================================================================================
+== Version 2 06/27/2014  ==
+// Each payload field--
+//   pay-idx: First byte of payload (1-8)
+//   pay-idx: Last byte of payload (1-8)
+//   fix: 0 = fixed pt output, 1 = floating pt (double) output, 2 = linux time convert
+//   sign: 1 = not signed, -1 = signed
+//   scale * offset: calibration = (reading * scale) + offset;
+//   outfield = output line field position (0 - 32)
+//   format: format for conversion to ascii, e.g. "%6.1f"
+//   description: for listing purposes.
+
+
+//      C code name               CAN id          CAN unit description     
+#define CAN_TIME_SYNC		0x00200000 @GPS/Logger: co1_sensor_ublox
+//   pay-idx fix  sign scale      offset  outfield  format              Field description
+//$   1   8   0     2   1              0     -1      "%s"         @Linux time * 64
+
+#define CAN_ENG_RPMMANIFOLD	0x40800000 @Engine: rpm:manifold pressure
+//$   1   4   1     1   5.0            0      1      "%6.0f"      @RPM with 5 black segments
+//$   5   8   1     1   9.629E-3    -0.5             "%5.1f"      @Manifold pressure (inch hg)
+
+#define CAN_ENG_THERMTHROTL	0x30800000 @Engine: thermistor:throttle pot
+//$   1   4   0     1   1              0     -1      "%d"         @Thermistor reading (ADC reading)
+//$   4   8   0     1   1              0     -1      "%d"         @Throttle pot reading (ADC reading)
+
+#define CAN_SHAFT1		0x31e00000 @Shaft sensor (upper sheave)
+//$   1   4   0    -1   1              0     11      "%8d"	  @Shaft counter (ticks)
+//$   1   4   1    -1   0.114537232    0      2      "%8.1f"      @Shaft counter (feet/count)
+//$   5   8   1     1   4.0            0      3      "%6.0f"      @RPM: 4 black segments
+
+#define CAN_ENG_THROTTLE	0x80800000 @Engine: throttle
+//$   1   4   0     1   1              0      4      "%d"         @Throttle setting (0-99)
+
+#define CAN_ENG_TEMP		0x70800000 @Engine: thermistor converted to temp
+//$   1   4   1     1    0.01          0      5      "%6.1f"      @transmission temp (deg C)
+
+#define CAN_FIX_LATLON		0xB4000000 @GPS winch fix: lattitude:longitude
+//$   1   4   1    -1  1.666666666666667E-6  0   6  "%11.8f"      @Lattitude (deg + = North)
+//$   5   8   1    -1  1.666666666666667E-6  0   7  "%11.8f"      @Longitude (deg + = West)
+
+#define CAN_FIX_HT_TYP_NSAT	0xC4000000 @GPS winch fix: heigth:type fix:number sats
+//$   1   4  0      1   1              0      8       "%d"        @height (m)
+//$   5   5  0      1   1              0      9       "%1d"       @fix type:
+//$   6   6  0      1   1              0     10       "%2d"       @number of satellites
+
+
+
+
+

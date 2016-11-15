@@ -1,0 +1,3 @@
+rm -rf *.tmp a.out
+rm -rf ../../../tmp/sdX
+rm -rf sdlog_sdck

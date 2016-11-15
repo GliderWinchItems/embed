@@ -1,0 +1,67 @@
+HowTo_retrieveFITdata.txt
+
+03-22-2012
+
+Objective: Retrieve POD data from the FIT into a file on the USB drive
+that can be accessed by another OS.
+
+1.  Determine file name on the FIT to retrieve--
+
+sshFIT	[connect to FIT]
+cd /winch/download [navigate to download directory]
+ls -l [list files in directory]
+exit [Be sure you are not still connected when you do
+the rest of the steps.]
+
+[Note file name to be retrieved.  The easiest way is
+to position the cursor and hold down the left mouse
+button and drag the cursor across the file name, excluding
+the ".gz".  In the following example the above steps and the
+responses are shown below--]
+
+deh@P4-1:~> sshFIT
+Linux FIT 2.6.35-32-generic #65-Ubuntu SMP Tue Jan 24 13:48:14 UTC 2012 i686 GNU/Linux
+Ubuntu 10.10
+
+Welcome to Ubuntu!
+ * Documentation:  https://help.ubuntu.com/
+
+33 packages can be updated.
+30 updates are security updates.
+
+New release 'natty' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+Last login: Thu Mar 22 20:54:45 2012 from pool-72-91-120-62.tampfl.fios.verizon.net
+cd /deh@FIT:~$ cd /winch/download
+deh@FIT:/winch/download$ ls -l
+total 468
+-rw-r--r-- 1 deh    deh     66671 2012-03-13 22:28 120225.131700.gz
+-rw-rw-r-- 1 ubuntu ubuntu  40639 2012-03-13 22:14 120314.014453.gz
+-rw-r--r-- 1 root   root   368300 2012-03-13 22:29 toss.gz
+deh@FIT:/winch/download$ 
+
+[File: 120314.014453.gz is POD data that starts on March 14, 2012 at 
+hour:minute:second 01:44:53.  'gz is the type of compression.]
+
+2.  Retrieve the file from the FIT
+
+Execute the script with the file name (without the '.gz') to be retrieved--
+
+retrieveFIT 120314.014453
+
+If it is successful it will end with a graph of the data.  
+To exit the graph put the cursor on the terminal window, click, hit
+enter,...the graphing script has an indefinite pause so it waits so a
+<enter> kills the graph.
+
+The file retrieved is un-compressed into three files (raw, sorted/merged, graph pdf) and 
+stored in /cdrom/winch/download under Ubuntu, but F:\winch\download (if the USB drive 
+happens to be drive F in Windows).  
+
+On my Vista laptop Windows shows the USB drive as "F: Install Ubuntu".  The "install" doesn't
+mean it will install it.
+
+
+
+

@@ -1,0 +1,41 @@
+#!/bin/bash
+# mmchk <path> <0 = do not make clean; not 0 = make clean>
+echo ==================================================================================================================================================================
+echo 
+# Location of 'mmchk' script
+DIR=/home/deh/svn_sensor/common_all/trunk
+
+# Check that svn_pod subroutine libraries are compiled
+$DIR/mmchk ../../../../../svn_pod/sw_stm32/trunk/devices 	0
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+$DIR/mmchk ../../../../../svn_pod/sw_stm32/trunk/lib/libmiscstm32 	0
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+$DIR/mmchk ../../../../../svn_pod/sw_stm32/trunk/lib/libsupportstm32 	0
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+$DIR/mmchk ../../../../../svn_pod/sw_stm32/trunk/lib/libusartstm32	0
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+# Check that svn_sensor subroutine libraries are compiled
+$DIR/mmchk ../../../../sw_f103/trunk/lib/libdevicestm32 	1
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+$DIR/mmchk ../../../../sw_f103/trunk/lib/libsensormisc 		0
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+$DIR/mmchk ../../../../sw_f103/trunk/lib/libvectormatrixquat 	0
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+ls ../../../../../svn_discoveryf4/PC/sensor/cangate/trunk
+
+# Compile the application program
+$DIR/mmchk ./ 	1
+if [ `echo $?` -ne 0 ] ; then	exit 1 ; fi
+
+
+ 
+exit 0
+
+

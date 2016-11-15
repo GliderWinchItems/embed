@@ -1,0 +1,3 @@
+# usage: sc <d> <n> # where <d> is a single decimal digit and <n> is length of payload
+#
+hub-server-test "$1"000000 "$1"999999 $2 | socat -t20 -T20 STDIO TCP4:localhost:32123 >0"$1".tmp

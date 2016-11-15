@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# command line
+# hub-socat <port> <uart device>
+# Examples--
+# socat_server 32123 /dev/ttyUSB0
+# socat_server 32124 /dev/ttyUSB3
+# socat_server 32125 /dev/ttyACM0
+#
+
+# hub-server
+hub-server --nodelay 0.0.0.0 $1 &
+
+# socat   connect ip:port  FILE:device,baud rate, raw, no echo, & = background
+socat TCP4:localhost:$1,nodelay FILE:$2,b230400,raw,echo=0,crtscts=0 &
+
+exit

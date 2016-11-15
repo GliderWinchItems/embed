@@ -1,0 +1,272 @@
+gateway_format.txt
+GATEWAY<->PC message format
+12-01-2013
+
+CURRENT IMPLEMENTATION SUBJECT TO CHANGE!
+(Some revisions- 12-17-2013)
+
+1.  Ascii/hex | Binary
+
+Messages received/sent on the CAN bus are in binary.  The registers in the 
+STM32 CAN peripheral module are binary.  Checking msgs, e.g. the msg id, 
+checksum, sequence number, etc., is done in binary.
+
+The link between the gateway and a PC when done with a usb-uart interface
+cable is limited in bandwidth, though 921,600 baud works.  Direct usb-to-usb
+via driver on the F4 should have a practical bit rate of about 6,000,000.
+Currently the usb drive on the 'F4 is unsatisfactory for this use, so until
+a usable routine is found, or written, the gateway-to-PC link is serial and
+at best a lower bit rate than direct usb.  Therefore the concern about data
+rate on the link and efficiency.
+
+The Gonzaga projects are based on PCs running Windows, and Java or Matlab w Java.
+For convenience the use of ascii/hex is planned on the "PC side" of the link.
+The data rate for the project is around 10K Bytes/sec and this can be accommdated
+with some headroom with a serial link running at 115,200 baud.  A CAN message
+"G" format is implemented on the gateway (link_mode 2) that makes coding/decoding
+from ascii/hex<->binary relatively simple.  The only compression is the dropping
+of a 4 byte word that holds to the payload count (dlc) to one byte as the
+dlc count is 8 max, and  
+
+Later when higher speeds are needed, the link mode would be set for binary with
+more compression.  
+
+This gives rise to (currently) 3 "modes" which can be set--
+0 - Binary w comression
+1 - Ascii/hex w same compression as binary
+2 - Ascii/hex w only the payload count compressed
+
+2.  Framing
+
+Messages between the PC and STM32 are framed by a newline '\n' byte between messages.
+For ascii/hex msgs this means that the data are ascii "lines".  For binary
+messages a "frame" is designated by encountering a 'n' which was not preceded by an
+"escape" byte.  The '\n' and escape bytes that are in the data are preceded by
+an escape byte.  The escape byte is chosen to as not be a a common bit combination 
+in the data streams, e.g. 0x00, 0x01 0xff, 0xfe, would be particularly poor choices
+as each data instance would require two bytes to be sent, and under the worst case
+would be no better than ascii/hex.
+
+'\n' End of frame, is defined in 
+"../common_all/trunk/common_can.h"
+#define CAN_PC_FRAMEBOUNDARY	'\n'
+#define CAN_PC_ESCAPE	0X7D // Likely to be changed
+
+By using '\n' for the frame byte, the hub/server can handle binary or ascii 
+without modification.
+
+3.  CAN bus messages
+
+Binary CAN bus messages are various lengths following a fixed bit
+format.  These are carried in the STM32 in 32 bit registers--
+id -
+  11 bit standard address, bits: 31:21, or
+  29 bit extended address, bits: 31:3
+  IDE bit: signifies an extended address, bit: 2
+  RTR bit: remote transmission request, bit: 1
+  bit 0: not used in PC<->gateway communication
+
+dlc -
+  time triggered field, bits 31:16
+  filter match index, bits 15:8
+  number of payload bytes, bits 3:0
+(Only payload byte count is used)
+
+data register low--
+  first 4 bytes of payload (if applicable)
+data register high--
+  second 4 bytes of payload (if applicable)
+
+4.  Compression
+
+Since Time Trigger communication and the filter match index are not
+used, or applicable to PC<->gateway communication, the unused 3 bytes
+in the stm32 mailbox register are not included in the PC<->gateway message.
+
+(Since the max payload count is 8 the dlc could be sent as a single hex
+char, but that adds some complication at the code for a 5% or less gain,
+so it wasn't included.)
+
+Heavier compression, (modes 0, and 1), makes use of the fact that most high
+rate msgs will have 11 bit id's.  The 11b id and dlc count, along with a bit
+that designates 11b or 29b id type, will fit in two bytes.  A typical msg of
+an 11b id plus 16 bit measurement takes 4 bytes (not counting sequence number
+or checksum).
+
+5.  Additional checking
+
+A one byte (binary) sequence number (two hex chars) is added at the beginning of the line,
+and a one byte (binary) checksum (two hex chars) is added at the end of the line.  These
+two checks were added to check the integrity and loss in the buffering and timing.  
+
+A one byte checksum, with carries added, the sum made on the binary msg, 
+before (send)/after(receive) framing/byte stuffing.
+
+The starting value of the checksum is define in 'common_can.h'
+#define CHECKSUM_INITIAL	0xa5a5	// Initial value for computing checksum
+
+See 'CANgenchksum' in '../svn_discoveryf4/common_all/trunk/PC_gateway_comm.c'
+/* **************************************************************************************
+ * u8 CANgenchksum(u8* p, int ct);
+ * @brief	: Generate a one byte checksum
+ * @param	: p = pointer to array to be checksummed
+ * @param	: ct = number of bytes to be checksummed
+ * @return	: Checksum
+ * ************************************************************************************** */
+u8 CANgenchksum(u8* p, int ct)
+{
+	int i = 0;
+	u32 x = CHECKSUM_INITIAL;
+	for (i = 0; i < ct; i++)
+		x += *p++;
+	x += (x >> 16);	// Add carries into high half word
+	x += (x >> 16);	// Add carry if previous add generated a carry
+	x += (x >> 8);  // Add high byte of low half word
+	x += (x >> 8);  // Add carry if previous add generated a carry
+	return (u8)x;
+}
+
+6.  Total line length of a mode 2 ascii msg 
+
+Count of hex chars--
+   2  sequence number (0 - 256)
+   8  id
+   2  dlc (0 - 8)
+   0-16 payload data (0 - 8 bytes)
+   2  checksum
+   1  newline
+
+   Min - 15
+   Typical (4 byte payload) - 23
+   Max - 31
+
+7.  Examples
+
+The following is a "raw" listing of test messages of
+different lengths repetitively sent by the gateway ('gatef.c').
+These "raw" lines would be what a PC program that reads directly
+from a COM or /dev/ttyn port would see before any processing--
+
+sudo cat /dev/ttyUSB0 [linux command *]
+3A4C444444080022446688AACCEE0C
+3B0200804400F3
+3C00002055081032547698BADCFEEB
+3D00002044081032547698BADCFEDB
+3E0000404404DDCCBBAACC
+
+[*] Note: the serial port needs to be setup to the correct speed
+(currently 230,400).  To set the speed start 'minicom' and with
+the CtlA-Z, O, set the speed (E, then A), and exit with CtlA-Z
+Q (exit without resetting).  
+
+Note: the binary words are sent low-order 1st, so the byte order
+of the id's in the raw listing of the serial link is in reverse
+order.
+
+The source for these test messages is the following code in 
+the gateway program--
+
+static const struct CANRCVBUF canPC[CANTESTNUMBER_PC] = \
+{
+{0x44200000, 	/* 11 bit id */
+ 0x00000008, 	/* 8 data bytes */
+{0xfedcba9876543210}, 	/* data bytes */
+},
+{
+ 0x44400000,	/* 11 bit id */
+ 0x00000004,	/* 4 data byte */
+{0xaabbccdd},	/* data byte */
+},
+{
+ 0x44600000,	/* 11 bit id */
+ 0x00000000,	/* zero byte ct */
+{0x00000000},	/* null data */
+},
+{
+ 0x4444444c,	/* 29 bit id */
+ 0x00000008,	/* 8 data byte ct */
+{0xeeccaa8866442200}, 	/* data bytes */
+},
+{
+ 0x44800002,	/* 11 bit id, RTR */
+ 0x00000000,	/* zero byte ct */
+{0x00000000},	/* null data */
+},
+};
+
+Where the struct that holds CAN messages, see--
+"../common_all/trunk/common_can.h",
+is defined as:
+union CANDATA	// Unionize for easier cooperation amongst types
+{
+	unsigned long long ull;
+	signed long long   sll;
+	u32 	   ui[2];
+	u16 	   us[4];
+	u8 	   uc[8];
+	u8	   u8[8];
+	s32        si[2];
+	s16        ss[4];
+	s8         sc[8];
+};
+struct CANRCVBUF		// Combine CAN msg ID and data fields
+{ //                               offset  name:     verbose desciption
+	u32 id;			// 0x00 CAN_TIxR: mailbox receive register ID
+	u32 dlc;		// 0x04 CAN_TDTxR: time & length
+	union CANDATA cd;	// 0x08,0x0C CAN_TDLxR,CAN_TDLxR: Data payload (low, high)
+};
+
+
+Running the PC program, 'cangate', the 'n' command presents 
+the above incoming messages as--
+44200000 8 08 10 32 54 76 98 ba dc 
+44400000 4 04 dd cc bb 
+44600000 0 
+4444444c 8 08 00 22 44 66 88 aa cc 
+44800002 0 
+
+Note: The PC program 'cangate' and STM32 program 'gatef' use common
+routines in '../common_all/trunk/' directory.  A change in these routines
+affects both the PC and stm32 sides of the communication link equally.
+
+8. Compression for modes 1 & 2
+
+Note: The following is before byte stuffing (sending) or after frame
+retrieval (receiving).  
+
+Mode 2 is merely mode 1 (before byte stuffing) converted to ascii/hex 
+with a '\n' at the end.
+
+[0] Sequence number
+
+[1] first byte of frame (low ord byte of 4 byte id register)
+0:0  IDE: 
+
+ if 0 = 11 bit id:
+     4:1 (0-8) = data payload; (9) = RTR
+     7:5 low order bits of id
+    
+     [2] 2nd byte with 1st byte = 16 b half-word--
+     15:5 11 bit id
+
+     [3-10] payload bytes as specified by dlc count
+
+     [3-11] checksum
+     ===============    
+
+ if 1 = 29 bit id:
+     1:1 RTR
+     2:2 extended faux CAN msg id
+     7:3 low order bits of id
+  
+     [2-4] with [0] comprise 32 b word--
+     31:3 29 bit id
+
+     [5] dlc (0-8) payload byte ct
+    
+     [6-13] payload as specified by dlc count
+
+     [6-14] checksum
+     ===============
+
+

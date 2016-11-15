@@ -1,0 +1,48 @@
+#!/bin/bash
+# plot_mmag_setlist
+# Run through list doing mmag_plotR for the list of individual 'R files
+# Example: ./plot_mmag_setlist 0
+# Where arg 1 = option (0-3)
+#         '0': // Tension only
+#         '1': // Tension and GPS
+#         '2': // Tension and Accelerometer
+#         '3': // Tension, GPS, Accelerometer
+
+# Make sure correct number of arguments
+# If no argument supplied setup a default USB port
+if [ $# -ne 1 ] ; then
+	echo "One argument required, e.g. ./plot_mmag_setlist 0"
+	echo "  where 1st = data code--"
+	echo "            0 = tension only"
+	echo "            1 = tension and gps"
+	echo "            2 = tension and accelerometer"
+	echo "            3 = tension, accelerometer, and gps"
+	exit	
+fi
+
+DIR=$HOME/svn_pod/sw_PC/trunk/helper
+FILELIST="\
+set.001R \
+set.002R \
+set.003R \
+set.004R \
+set.005R \
+set.006R \
+set.007R \
+set.008R \
+set.009R \
+set.010R \
+set.011R \
+set.012R \
+set.013R \
+set.014R \
+set.015R \
+set.016R \
+set.017R \
+"
+
+for FILENAME in $FILELIST
+do
+#	echo $FILENAME
+	mmag_plotR $DIR $FILENAME $1
+done

@@ -1,0 +1,41 @@
+Notes.txt
+
+07/02/2012 - Changes for POD 2--On board GPS, (and skipping accelerometer logging)
+
+In, svn_pod/sw_pod/trunk/pod_v1/
+
+gpsfix.c,h
+
+p1_common.h
+Add packet type 6 for logging all non-$GPRMC sentences
+
+p1_PC_handler.c
+Allow for 'h' command and gps fix monitoring
+
+p1_PC_monitor_gpsfix.c,h
+Output line for checking on gps fix when 'h' command used.
+
+p1_common.h
+Add #define PKT_SKIP_ACCEL so that p1_logging_handler.c will
+  skip writing accelerometer packets to the SD card.
+
+p1_ad7799filter.c
+Phasing of the filter so that the output flag and hence timestamp
+  coincides with the 1/64th sec tick.
+
+gps_packetize.c
+Additions to provide for GPS sending more sentences.
+Line length 'if' changed to see if line has a '$'
+Added routines to build & buffer type 6 sentence packets
+
+The following are not part of the 'tags' directory
+
+svn_pod/sw_stm32/trunk/lib/libsupport/gps_time_convert.c
+Search for beginning '$' rather than skip first char.
+
+svn_pod/sw_PC/trunk/dateselect/mm
+
+Change mm to handle x-axis so that seconds start at zero.
+
+
+

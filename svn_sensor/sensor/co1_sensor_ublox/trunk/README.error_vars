@@ -1,0 +1,36 @@
+README.error_vars - summary of error counters, etc. in co1_sensor_ublox/co1
+06/15/2014
+
+gps_poll.c
+(CAN_UNITID_CO_OLI | CAN_DATAID29_1_GPS_CHKSUM_ER )
+(CAN_UNITID_CO_OLI | CAN_DATAID29_2_GPS_NO_FIX )
+static char cGPSpacketctr = 0;		// Skip counter
+unsigned int uiConsecutiveGoodGPSctr;	// Count of consecutive good GPS fixes
+u32 gps_poll_flag_ctr = 0;	// Running count of GPS v SYS time updates
+
+Tim4_pod_se.c
+
+volatile unsigned int		uiTim4ch3_Flag;		// Incremented when a new capture interrupt serviced, TIM4CH3*
+/* Running count of instances where measured tickspersec of clock is outside limits. */
+u32	tim4_tickspersec_err;
+
+/* Count cases where there is a '000' interrupt flag isr entry (not expected) */
+u32	tim4_zeroflag_ctr;
+
+/* Switch to show 'can_log.c' that the time is ready and logging can start */
+u8	tim4_readyforlogging;
+/* Count of instances where strAlltime.ull lower 6 bits were not zero at the en of second */
+u16	tim4_64th_0_er = 0;	// Count of date/time adjustments at interval 0
+u16	tim4_64th_19_er = 0;	// Count of date/time adjustments at interval 19
+static u16	tim4_64th_0_er_prev = 0;	// Count of date/time adjustments at interval 0, previous
+static u16	tim4_64th_19_er_prev = 0;	// Count of date/time adjustments at interval 19, previous
+static u16	tim4_64th_0_ctr = 0;	// Count of changes of 'tim4_64th_0_er'
+static u16	tim4_64th_19_ctr = 0;	// Count of changes of 'tim4_64th_19_er'
+
+unsigned int ticks;	// Number of clock ticks between 1 PPS
+unsigned int ticks_dev;	// Number of ticks between 1 PPS less nominal
+unsigned int ticks_flg;	// Incremented each 1 PPS
+
+
+
+

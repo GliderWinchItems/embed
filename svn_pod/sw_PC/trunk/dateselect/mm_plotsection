@@ -1,0 +1,61 @@
+#!/bin/bash
+# Extract a section of data and convert/plot
+# 05-27-2012 deh
+# Usage: ./mm_plotsection 120211.125217 20 45
+# Where 120211.125217 is an example of 'yymmdd.hhmmss'
+# Where 20 is start percentage
+# Where 45 is the end percentage
+# The above arguments would select a 20-45% portion of the raw data
+#  and plot.
+
+# Directory where scripts and dateselect routine is located.
+DATESELDIR=/home/$USER/svn_pod/sw_PC/trunk/dateselect
+
+# Directory where files retrieved from FIT are stored
+SAVEDIR=/home/$USER/winch/download
+
+# Get number of lines in input file into a variable LINECT
+cat $1 | wc -l > xx
+LINECT=`cat xx`
+echo "Line count = $LINECT"
+
+STARTCT=$(( $LINECT*$2/1000 ))
+echo "Start count = $STARTCT"
+
+ENDCT=$(( $LINECT*$3/1000 ))
+echo "End count = $ENDCT"
+
+TAILCT=$(( $LINECT - $ENDCT ))
+echo "Tail count = $TAILCT"
+
+HEADCT=$(( $ENDCT - $STARTCT ))
+
+tail -$ENDCT $1 | head -$HEADCT - > x
+
+#wc -l x
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'reformat2' outputs stdout with 'RM' appended (ReformattedMerged)
+#cd $DATESELDIR
+../read*/reformat x | sort -k 1 | ../read*/reformat2 > xRM
+
+# Plot the file and save plot image as a png file
+./podplot xRM
+
+exit
+
+
+
+
+# Reformat raw--pipe->sort by tick time--pipe->merge accelerometer and tension lines > output file
+# 'reformat' outputs to stdout plus file with 'R' appended 
+# 'reformat2' outputs stdout with 'RM' appended (ReformattedMerged)
+cd $DATESELDIR
+../read*/reformat $SAVEDIR/$1 | sort -k 1 | tee $SAVEDIR/$1RS | ../read*/reformat2 | tee $SAVEDIR/$1RM
+
+# Plot the file and save plot image as a png file
+./podplot $SAVEDIR/$1RM
+
+exit
+

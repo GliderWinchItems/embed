@@ -1,0 +1,39 @@
+#!/bin/bash
+# 08/27/2012
+# usbimagecopy - use scp to copy compressed image to a 
+#  local file for later uncompressing (possibly multiple times).
+
+# Save USB flash drive image to a compressed file--
+# usbimagecopy <filename of compressed image on FIT> <save path>
+# Example: copies FIT file /usbdriveimage/ubuntu_12.04LTS_live_image.120825.2137.gz to /media/PATRIOT
+# usbimagecopy ubuntu_12.04LTS_live_image.120825.2137.gz /media/PATRIOT
+
+# Copy image to local USB drive
+date
+scp -P 41574 $USER@$FITIP:/usbdriveimage/$1 $2/$1
+
+# Make read-only so some screwup later doesn't erase this precious file!
+chmod 444 $2/$1
+
+echo "copy from remote server complete"
+ls -l $2/$1
+
+# Copy md5sum of comressed image on server
+date
+scp -P 41574 $USER@$FITIP:/usbdriveimage/$1.md5sum.compressed $2/$1.md5sum.compressed.remote
+cat $2/$1.md5sum.compressed.remote
+
+# Copy md5sum of UNcomressed image on server
+scp -P 41574 $USER@$FITIP:/usbdriveimage/$1.md5sum.uncompressed $2/$1.md5sum.uncompressed
+cat $2/$1.md5sum.uncompressed
+
+# Compute md5sum of local (compressed) copy
+echo "compute md5sum of local copy"
+md5sum $2/$1 | tee $2/$1.compressed.md5sum.local
+echo "md5sum of local image copy complete"
+date
+
+# Compare md5sum's
+
+exit
+

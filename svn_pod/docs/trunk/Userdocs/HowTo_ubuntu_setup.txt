@@ -1,0 +1,310 @@
+HowTo_ubuntu_setup.txt
+09/09/2012
+08/18/2013 some updates
+
+
+1. Setup additional repositories (needed for step 3)
+
+The additional repositories have to be added so that the
+"apt-get install" in step 3 can locate the programs.
+
+Applications/Software Center/Edit/Software Sources/
+Ubuntu tab
+
+Have all checkboxes checked, except "Sources"
+
+Use default "Download from:" (Server for United States)
+
+Unchecked box in Installable from CD-ROM/DVD
+
+2. Updating the repository list 
+
+Until this is done Ubuntu doesn't "see" the additional
+repositories.
+
+In a terminal window--
+
+sudo apt-get update
+
+This takes a while as the list is long.
+
+3. Install routines
+
+sudo apt-get ssh [JIC as this may already be installed]
+
+sudo apt-get install ntp [network protocol for time]
+
+sudo apt-get install minicom [a serial port terminal program]
+
+sudo apt-get install subversion [for svn's]
+
+sudo apt-get install gnuplot [for plotting POD data]
+
+
+4. Fixed up versions of files
+
+This is a way to get modified versions of .profile and
+.subversion, /bin, sshFIT copied/installed.
+
+.profile additions to PATH & sets FITIP variable
+.subversion has 'svntunnelFIT' definition
+.ssh has the rsa keys for accessing the FIT server
+bin has the scripts for jtag and ssh'ing into the FIT server
+
+Sequences: 
+I email the attachment that is a tar compressed file, name: x
+
+You copy the file to a USB stick.
+
+On the Ubuntu machine insert USB drive with compressed emailed file "x"
+
+Check USB path: 
+cd /media
+ls [the directory with the USB stick will show]
+
+Unpack the files--
+tar -zxf /media/<path>/x [eXtract the file 'x']
+ls -l [should see "ubuntu_setup" directory]
+shopt -s dotglob [enables copying files starting with '.']
+sudo cp -r ubuntu_setup/* . [Copy all to to ~]
+
+Log out and log back in [to make .profile become effective]
+
+Check that FITIP is present--
+echo $FITIP
+96.228.193.127 [response]
+
+Check that .subversion is present and check config file
+cd .subversion
+less config
+
+5. Setting up the ssh keys
+
+The directory ~/.ssh should have the two rsa keys
+gsm-dt
+gsm-dt.pub
+
+Check that you can access the FIT PC--
+sshFIT
+You should see a bunch of stuff showing it is connected.  When this
+happens you are essentially a terminal into the FIT PC computer.
+
+A little background--
+
+The FIT server has an account setup for 'gsm-dt' and it has the
+gsm-dt.pub key in the ~/ssh/authorized_keys file.  Anyone trying to
+log in to the gsm-dt account would have to have the "private" rsa key
+'gsm-dt' on their machine.  The more secure way this is done is to generate the
+key pair locally and only send the public key out to the server administrator.
+If someone intercepts that key they can't get into the server on your account
+because no one has the private key except you.
+
+The FIT server is setup to not allow password access, so only a set of keys will 
+access the server.  There is also "strict" checking for the "known_hosts" so if
+you try to log in by copying your keys to another computer the FIT server will
+say not allow the access.  One solution is to go in with the original computer and
+'rm known_hosts' file (in ~/.ssh), or generate a 2nd set of keys and have the .pub
+key added to the ~/.ssh/authorized_keys file.  This could be done from the original
+computer that has access to the FIT.
+
+The "known_hosts" file is the one that causes the message asking for a yes/no if it
+is alright to proceed.  A yes, enters the "fingerprint" in the file and it doesn't
+ask the next time.  It is this "fingerprint" that causes it to reject another machine
+trying to log in with the same key.
+
+Note: The svn's use "svn+sshtunnelFIT" and the svn process takes place over ssh.
+Therefore, svn access will fail if the ssh access isn't working.
+
+6.  After ssh access to FIT working checkout copies of svn's
+
+cd ~
+svn co svn+sshtunnelFIT://$FITIP/svn_pod
+svn co svn+sshtunnelFIT://$FITIP/svn_discoveryf4
+svn co svn+sshtunnelFIT://$FITIP/svn_sensor
+svn co svn+sshtunnelFIT://$FITIP/svn_ultrasonic
+
+7.  stlinke_texane (discovery f4 flashing)
+
+Copy the directory from the FIT to ~
+cd ~
+rsync -av -e 'ssh -p 41574' $USER@$FITIP:/stlink .
+
+8.  CodeSourcery
+
+Get copy of binary installer from FIT--
+rsync -av -e 'ssh -p 41574' $USER@$FITIP:/CodeSourcery_4.5.2/*   ~
+
+This will download--
+CodeSourcery_4.5.2.tgz  md5sum
+
+Check the downloaded md5sum--
+md5sum CodeSourcery_4.5.2.tgz
+Compare.  The following should match the above--
+$ cat md5sum
+4cc82ab26c59b3cf08393a992e7ef7d2  CodeSourcery_4.5.2.tgz
+
+Setting it up--
+tar -zxf CodeSourcery_4.5.2.tgz	
+mv CodeSourcery_4.5.2 CodeSourcery [change directory name]
+
+ 9. openocde 0.7.0
+
+Download the following--
+
+http://sourceforge.net/projects/openocd/files/openocd/0.7.0/
+
+Move from Download directory to ~]
+mv ~/Down*/open* ~
+untar the file
+tar -jxf openocd-0.7.0.tar.bz2
+
+Some packages are needed--
+sudo apt-get install libtool autoconf texinfo libusb-dev libftdi-dev build-essential libusb-1.0.0-dev
+
+Configure it--
+cd openocd_0.7.0
+sudo ./configure --enable-rlink
+
+If config completes without errors, compile
+make
+
+If 'make' completed OK, install
+sudo make install
+
+If that goes OK, then check--
+openocd -v
+Version should display.
+
+Other problems along the way--
+The PATH had some of the POD directories in it and as a result 'make' was trying to compile some POD programs!
+Here is what the path looked like--
+deh@dehmain:~$ $PATH
+bash: /home/deh/CodeSourcery/Sourcery_G++_Lite/bin:/home/deh/svn_pod/sw_PC/trunk/tunnel_scripts:/home/deh/svn_pod/sw_PC/trunk/dateselect:/home/deh/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:
+
+To check the path
+echo $PATH
+To temporarily delete somethings--highlight what is desired, right click and copy and paste, e.g.--
+PATH=/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:
+
+10.  Debug
+
+run script to start openocd
+rlinkpermissions
+jtag
+
+Open another window--
+telnet localhost 4444
+
+
+
+========== OBSOLETE but saved =================================================
+9.  Move openocd files to match Makefiles
+
+This is needed to make the flashing work with the Makefiles.
+
+The following has the path definitions in all the Makefiles.  "apt-get install openocd"
+ends up with the installation going into to slightly different directories.  The changes
+move openocd.
+
+
+# Paths for openocd and automatic flashing
+OPENOCD_BASE	= /usr/local
+OPENOCD		= $(OPENOCD_BASE)/bin/openocd
+OPENOCD_SCRIPTS	= $(OPENOCD_BASE)/share/openocd/scripts
+OPENOCD_FLASHER	= $(OPENOCD_SCRIPTS)/interface/rlink.cfg
+OPENOCD_BOARD	= $(OPENOCD_SCRIPTS)/board/olimex_stm32_h103.cfg
+
+sudo cp /usr/bin/openocd /usr/local/bin
+sudo cp -r /usr/share/openocd /usr/local/share
+
+Check that it works. Wit the Olimex board setup (Raisonance plugged in)--
+
+First make sure the USB has permissions--
+lsusb
+Find line with the Raisonance. e.g.,
+Bus 001 Device 010: ID 138e:9000 Jungo LTD Raisonance S.A. STM32 ARM evaluation board
+cd /dev/bus/usb/001
+sudo chown deh:users * [Change permissions from "root" to your login name]
+ls -l [check the permissions]
+
+cd svn_u*/*O*/tr* [cd to svn_ultrasonic, etc.]
+make flash 
+
+If you get something like this, it flashed the Olimex and restarted
+the program--
+deh@P4-1:~/svn_ultrasonic/sw_Olimex/trunk> make flash
+  OBJCOPY oli1.hex
+  OBJCOPY oli1.srec
+  OBJDUMP oli1.list
+  FLASH   oli1.srec
+
+If you get something like this "something" is wrong--
+deh@P4-1:~/svn_ultrasonic/sw_Olimex/trunk> make flash
+  OBJCOPY oli1.hex
+  OBJCOPY oli1.srec
+  OBJDUMP oli1.list
+  FLASH   oli1.srec
+make: *** [flash] Error 1
+
+Time to scratch one's head and bumble about looking for something that was 
+missed.  
+- Olimex board not powered up.
+- Raisonance jtag connector not (fully!) plugged in to board
+- Raisonance jtag ribbon cable to board adaptor not fully plugged in.
+- Permissions setup 
+- Linked program is not present
+- Mistake in the changes in openocd directories
+- The stars are not aligned correctly, or the Tarot cards fell badly
+
+
+========== OBSOLETE but saved =================================================
+Get copy image from FIT.  
+NOTE: This scheme takes up about 1.8 GB of HD space because the image copy 
+includes the files rather than soft-links to the files, which means files
+are repeatedly stored for the various hardware that the compiler handles
+rather than one copy with links to the files.
+
+Due to the size the copy will take a long time.
+
+Copy--
+cd ~
+rsync -av -e 'ssh -p 41574' $USER@$FITIP:/CodeSourcery/image/CodeSourcery  ~
+
+Check that it works--
+cd svn_u*/*O*/tr* [cd to svn_ultrasonic, etc.]
+./m
+Compile should take place, ending with something like the following--
+deh@P4-1:~/svn_pod/docs/trunk/Userdocs> cd ~/svn_u*/*O*/tr*
+deh@P4-1:~/svn_ultrasonic/sw_Olimex/trunk> ./m
+...
+  LD      oli1 
+  OBJCOPY oli1.hex
+  OBJCOPY oli1.srec
+  OBJDUMP oli1.list
+========== OBSOLETE but saved =================================================
+The FIT server requires the ssh public key to be located in the
+user account .ssh directory in "authorized_keys".
+
+cd ~
+mkdir .ssh [don't forget leadning '.']
+cd .ssh
+ssh-keygen [program to generate a key pair]
+When it responds asking for file name enter-
+<somename, e.g. gsmolddt> <enter>
+When it asks for passphrase hit <enter>
+When it asks for same passphrase hit <enter>
+ls -l [look file what was generated]
+E.g. find this pair--
+-rw------- 1 deh  users 1675 2012-09-07 20:55 gsmolddt
+-rw-r--r-- 1 deh  users  390 2012-09-07 20:55 gsmolddt.pub
+
+email the .pub file to me.  The private key remains on your machine.
+
+I put that file in the .ssh file in the FIT server in an account with the same 
+login name.
+
+After that, we test access to the FIT.
+
+sshFIT [Should connect to the FIT]
+exit
+

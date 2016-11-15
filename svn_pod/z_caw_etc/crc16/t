@@ -1,0 +1,1 @@
+rm -f a.out; gcc crc_ccitt_test.c crc_ccitt.c crc16.c; ./a.out; rm -f a.out

@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# command line
+# socat_client2 <port> <uart device> <baud rate>
+# Examples--
+# socat_client2 32123 /dev/ttyUSB0 230400
+# socat_client2 32124 /dev/ttyUSB3 115200
+# socat_client2 32124 /dev/ttyACM0 460800
+#
+# socat   connect ip:port  FILE:device,baud rate, raw, no echo, & = background
+echo "socat_client2: example: socat socat_client2 32123 /dev/ttyUSB0 230400"
+socat TCP4:localhost:$1,nodelay FILE:$2,b$3,raw,echo=0,crtscts=0 &
+
+exit

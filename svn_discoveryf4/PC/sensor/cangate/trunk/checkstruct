@@ -1,0 +1,61 @@
+#!/bin/bash
+# 01/03/02015
+# checkstruct - script to test .txt file generation of structs
+#               versus .txt parsing of parameters
+# checkstruct ~/svn_discoveryf4/PC/sensor/cangate/test/testmsg2B.txt 
+#
+
+#Save current directory (remember to use backquote)
+CURDIR=`pwd`
+
+# Directory for program to strip struct from .txt file
+DIRPRG=$HOME/svn_discoveryf4/PC/sensor/cangate/trunk
+cd $DIRPRG
+#
+# Generate a temp struct file program: "dottexttostruct.c" by,
+#  selecting '//v ' lines and stripping the '//v'.
+# Using $1 for the input file name with the .txt file.
+# Output file name: "tmpstruct.h"
+# gcc dottexttostruct.c -o dottexttostruct -Wall && checkstruct ~/svn_discoveryf4/PC/sensor/cangate/test/testmsg2B.txt
+./dottexttostruct < $1 > tmpstruct.h
+./dottexttostruct < $1
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "dotexttostruct failed"
+	exit
+fi
+#
+# Generate a .c file with the struct names and parameter, calibration, CAN ID area sizes
+#  with program: "dottexttoparmsize.c"
+# Output file name: "sizeof.c"
+gcc dottexttoparmsize.c -o dottexttoparmsize -Wall -I ../../../../sw_discoveryf4/trunk/lib -I ../../../../common_all/trunk parse.c winch_merge2.c
+./dottexttoparmsize $1
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "dottexttoparmsize failed"
+	exit
+fi
+
+# Compile and run a program to do the struct size versus size comparison
+#  "dottextcompare.c"
+gcc dottextcompare.c -o dottextcompare
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "dottextcompare.c failed to compile"
+	echo "  fix any problems with .txt file"
+	exit
+fi
+
+./dottextcompare
+
+cp $DIRPRG/tmpstruct.h $CURDIR
+
+cd $CURDIR
+./mm
+rm tmpstruct.h
+
+exit
+
+
+
+

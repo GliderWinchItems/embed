@@ -1,0 +1,126 @@
+Shaft_sensor_mounting.txt
+01/23/2014
+
+1.  Quick test
+
+- Plug in the wall-wart and the connector to the "power box".
+
+The "power box" regulates the voltage to 8v and limits current to the 
+CAN bus.  For the winch operation the wall-wart will be replaced with 
+a cable with aligator clips to connect to the 12v battery.
+
+- Plug the CAN bus cable into the shaft sensor module.
+
+The CAN bus jacks, two on each unit, are connected in parallel so that
+the CAN bus cables connect in a "daisy-chain."  The very last unit of
+the chain gets a "terimation plug," which I did not include in this shipment.
+
+- The Green LED near CAN bus jack will show that it is receiving power.
+
+- Holding the module and running your finger past the photodectectors on 
+the bottom should make each Red LED light.  This shows the status of the
+detection and provides a way to check that the unit is detecting the 
+white/black segments when it is mounted.
+
+2.  Feel free to open up the shaft encoder box
+
+-  The PC board can be removed as well.
+-  Most likely the underside of the box will mount to the bracket, and to this
+   requires removing the PC board.
+
+3. Printed code wheels
+
+I have a program that prints these.  I only have an inkjet printer and the
+ink will smear with water so they aren't the best.  Charlie has a laser printer
+and the toner is more permanent.  I'll have him print some.
+
+Or, if you have a laser printer I could send you the pdf file.
+
+4. Mounting Magnets
+
+Let me know what you think about using them.  If they look like the way to go
+I'll order some more.  Let me know which configuration (stud or hole) is best.
+I like the idea that you don't have to drill & tap any holes and these things 
+really "stick."
+
+5. Water proofing
+
+I'm a little worried about the water, e.g. rain or driving through a puddle and
+water splashing.  The units are not water proof by any means.  Sealing is difficult,
+given the type of connectors, plus unless it is really waterproof moisture can
+built up inside, so some ventilation is probably good.  
+
+There might be a way to mount a plastic cover, e.g. use one of those plastic boxes 
+for food, that keeps direct rain or splashed water from getting in.
+
+If you have any ideas about this issue let know.  I've thought it about a lot and I 
+haven't come up with any simple, inexpensive scheme, and it seems there ought to be one.
+
+6. Fairlead pulleys
+
+I'm now of the opinion that this first attempt should include the fairlead pulleys.  
+With the drive shaft and fairlead pulleys we can compute effective drum diameter,
+and that should be useful for correlating tension to the pressure sensitive film
+pattern.
+
+I'll prepare two more shaft encoder modules and send them.  They are identical to
+the one in the first shipment, so that can be used a model for making up a bracket.
+
+7.  Cables
+
+I'll need to know the approximate distance between the units, as well as battery for
+making up CAN and power cables.  While not critical the total distance of the CAN bus
+should be minimized.  It just means I cannot supply 15 ft cables when in some cases, e.g.
+going between the fairlead pulleys might only need 1 ft, otherwise we end up with a
+total length that is too long for the data rate, plus the voltage drop is too big 
+(since the CAN bus carries the 8v power to the modules).
+
+8. Mounting
+
+- The sketch, 'sensor_orientation.jpg', shows the orientation of the code bars versus
+  the photodetectors.
+
+  The width of the bars needs to be greater than the spacing of the photodetectors so
+  that a black or white bar will more than cover both photodetectors.  The ideal
+  width is one that as the shaft is turned the sequence is--
+  off off
+  on  off
+  on  on
+  off on
+  with the amount of shaft rotation the same for each of the four states.  Unequal 
+  spacing shows up only as jitter at low rpms.  The distance measurement between
+  'ticks' is slightly different, thought the cumulative count is always correct.
+
+- Drive shaft
+  . Flat black background.
+  . White labels about 1" wide, 1" or more long
+  . The shaft diameter should accommodate 5 labels
+  . Equal spacing, but high precision not really necessary
+
+- Fairled pulleys
+  . Glue a printed code wheel to a disc.
+  . 2" diameter disc is sufficient, 3/4" probably a bit small.
+
+- Distance of the photodetector from the relfective surface
+  . You can experiment by watching the Red LEDs
+  . The datasheet shows it as the distance increases from zero, the response
+    peaks at about 4.5 mm, then falls off more slowly.  At about 15 mm I think the pickup
+    may start to be unreliable.  I would think about 6-7 mm would be a good target.  That
+    allows some play either way.  The optimal distance depends somewhat on the white-to-black
+    contrast (at infrared).  
+
+- Avoid direct sunlight
+  .  The mounting bracket should help shield from direct sunlight
+  .  Flat black spray the bracket and surfaces that might reflect should suffice.
+  .  Flourescent lights are bad since the detectors are fast to enough to follow them.
+ 
+
+
+
+
+
+
+
+
+
+ 

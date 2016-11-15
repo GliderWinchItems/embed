@@ -1,0 +1,48 @@
+
+
+
+1. Install Putty suite: putty-0.61-installer.exe
+
+Web site:
+http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+
+File:
+http://the.earth.li/~sgtatham/putty/latest/x86/putty-0.61-installer.exe
+
+
+2. Execute psftp
+
+Go to & double click
+Computer, drive C, Program Files, Putty, psftp
+A DOS-like window will and this should produce a prompt
+psftp>
+
+3. At the prompt login 
+
+psftp>open FITSSH 
+Where "FITSSH" is the name of the saved session for SSH using 
+PuTTY.  'psftp' picks up the location and name of the ssh
+keys via the settings that were saved in SSH.  See 
+'svn_pod/docs/trunk/HowTo_PuTTY.txt' notes for details of
+setting up PuTTY.
+
+This should return something like--
+Using username "georgesm'
+Remote working directory is /home/georgesm
+
+4.  Sending a file from the PC to the FIT.
+
+After the login, navigate to the download directory:
+
+cd /winch/download
+ls [list files in the directory]
+put E:\putty20111119221324.log [sends file captured from POD with PuTTY]
+
+
+
+5. Online help
+
+http://www.nbcs.rutgers.edu/newdocs/psftp/psftp.php3
+
+http://www.math.tamu.edu/~mpilant/math696/psftp.html
+

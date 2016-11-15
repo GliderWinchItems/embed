@@ -1,0 +1,8 @@
+-- db_update: script (NOTE: this is not a bash script)
+-- connect to database
+connect 'jdbc:derby://localhost:1527//home/deh/gitrepo/svn_common/trunk/db/pcc';
+-- Do a complete rebuild of the database
+run 'LOAD_PCC_DB.sql';
+-- 
+exit;
+

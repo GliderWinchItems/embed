@@ -1,0 +1,3 @@
+hub-server-test 1000000 1999999 17 | nc localhost 32123 >01.tmp &
+hub-server-test 2000000 2999999 31 | nc localhost 32123 >02.tmp &
+hub-server-test 3000000 3999999 43 | nc localhost 32123 >03.tmp &

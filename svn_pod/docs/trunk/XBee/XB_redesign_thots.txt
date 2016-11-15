@@ -1,0 +1,70 @@
+XB_resdesign_thots.txt
+deh
+3/19/2012
+3/21/2012
+
+
+Items for mods for XBee/telemetry pod--
+
+1.	Single LiPo cell
+
+4.15->3.5v voltage stays within voltage regulator dropout for 3.3v.
+
+Still requires auto sleep to prevent overdischarge.  However, just one
+cell to measure & resistor divider switch off.
+
+2.	RS-232 level conversion external (if it saves board space).
+
+An off-board RS-232 converter needed.  The battery charger will most likely
+have to be homemade, i.e. the chargers are for 2 or more cells.  Hence,
+the low battery shutdown, charge contoller, and RS-232 would go on a board
+external to the pod.
+
+
+3.	On/off switch
+
+XBee xmit will be rather heavy battery drain.  
+
+- On/Off switch turns unit ON or OFF.  When ON, the AD779 and load-cell bridge
+are powered.  3.3v on the load-cell instead of 5.0v drops the current a little.
+
+When the load-cell reading is greater than "x" (maybe 10 kg) trigger the xmit (and allow for "y"
+secs below this reading before shutting off).
+
+- Alternate scheme: On/Off switch turns unit ON or OFF.  Pressing the pushbutton turns on the transmit
+"x" secs (maybe augmented by xmit time is extended 30 secs if tension goes above some threshold).
+
+4. 	No xtals
+
+Use internal osc.  Saves board space, etc.
+
+5.	3.3v Bridge excitation
+
+Allows one cell battery, cuts power.
+
+6.	SWD v JTAG
+
+Cut real-estate either by different connector
+or SWD, or both, or ...
+
+7.	4 pin RJ-11 connection
+
++ charging, ground, USART TX, USART RX.
+
+Monitoring the load-cell might be needed for checking load-cell calibration, and that the unit
+is working.
+
+8.	No jacks for software reload
+
+Software reload requires opening it up to get at SWD/JTAG
+
+9.	Beeper?
+
+An on-board beeper might be useful.  It would beep when the On/Off switch is On and
+the XBee is xmitting.  An LED means it has to be visible, and if the board is in some
+protecting case then the LED has to be external, and the means wires and LED mounting,
+etc.  Not desirable.
+
+
+
+

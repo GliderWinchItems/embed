@@ -1,0 +1,16 @@
+Release notes--
+
+pod_v1_r1.0 - First pod 
+
+pod_v1_r2.0 - 6/23/2012 
+  Software workaround should the ADC7799 lockup, apparently due to 
+  static electricity along with the load-cell unplugged/plugged in.
+  ADC7799 power down/up/re-initialization when the readings go off-scale either high or low.
+
+
+09/30/2012
+../svn_pod/sw_pod/branches/pod_v2_r1.0
+Committed revision 661
+
+This tags "../svn_pod/sw_pod/trunk/pod_v1" at 9/30/2012 which is setup for 
+POD #2 (5 Hz GPS no accelerometer). 

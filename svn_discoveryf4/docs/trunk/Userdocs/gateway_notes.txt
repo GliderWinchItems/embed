@@ -1,0 +1,57 @@
+gateway_notes.txt
+12/17/2013
+
+The following are notes on using--
+
+Discovery F4 gateway--
+../sensor/gateway_ftdi/trunk/gatef.c
+
+Linux PC--
+../PC/sensor/cangate/trunk/cangate.c
+
+The Discovery F4<->PC link format is covered in 
+../docs/trunk/Userdocs/ file 'gateway_format.txt'
+
+The directory gatef.c also has a routine that will send test msgs,
+CAN_test_msgs.c
+This routine will periodically send various test msgs defined in an
+array (in flash, i.e. 'const').
+
+static const struct CANRCVBUF canPC[CANTESTNUMBER_PC]
+
+One group of msgs goes from the gateway to the PC.  The other is 
+put out on the CAN bus.  The msgs to the PC gives something to test
+PC routines receiving CAN msgs.  The msgs placed on the CAN bus are
+useful for testing something that receives msgs from off the CAN bus.
+
+'cangate' (PC) is compiled and executed with--
+./mm && sudo ./cangate /dev/ttyUSB2 ../test/testmsg1.txt
+Leave off "./mm &&" to only execute.  (The compiling is so fast that
+it hardly matters.)
+
+The command line argument "../test/testmsg1.txt" is the path/name of
+a file that holds test CAN msgs.  There are single char commands in
+cangate, and the 's' command will cause the test msgs in the file to
+be sent.  This offers a way to the test PC-to-gateway direction.
+
+By connecting two F4 boards together with the CAN bus, and running two
+instances of cangate, msgs on placed on the CAN bus by gateway #1 are
+received by gateway #2 and sent to PC, and vice-versa.  A PC instance
+receives test msgs originating in the gateway it is connected to, plus
+msgs put on the CAN from the other gateway, plus msg sent by the 
+other cangate instance on the PC to the other gateway.
+
+To keep track of things the CAN_test_msgs.c routine has
+#define LEFTMACHINE
+which selects a group of test msgs where the id's are different from
+when the #define is commented out.  By loading the gateways with
+different test msgs it is easier to sort out where msgs are coming from.
+
+cangate is useful for monitoring msgs.  The commands--
+'x' cancel and return to menu
+'n' build a table of msg id's and count the number of msgs during one second.
+'m xxxxxxxx' show all the msgs for just the id xxxxxxxx (which can be copied
+    from the 'n' line.
+'s' Toggle the sending of the file On/OFF of test msgs (if the file was opened) 
+
+

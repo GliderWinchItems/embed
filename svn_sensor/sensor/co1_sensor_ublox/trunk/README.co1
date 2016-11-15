@@ -1,0 +1,30 @@
+README.co1
+
+08/09/2016
+
+Interrupt strategy--
+(the following in low to high priority order)
+
+USART_PRIORITY - 0x40
+
+TIM4_SE	0x60
+
+CAN_RX_IRQHandler 0x70
+   can_msg_reset_msg()--check for unit CAN ID and reset msg
+
+
+I2C2_EV_IRQ - 0x90 Tim4_pod_se.c/gps_1pps_se.h
+	I2C2_EV_IRQHandler - handle 1 pps 
+
+TIM1_BRK_TIM9_IRQ - 0xd0 (timer 9) 1/2 ms ticks
+	CAN_poll_loop_trigger()
+		I2C1_ER_IRQ 
+
+I2C1_ER_IRQ - 0xa0 Can Polling loop, primary polling loop
+
+
+I2C2_ER_IRQ - 0xe0 can_log write
+	can_log_can()
+
+Main - Lowest level: printf 
+

@@ -1,0 +1,278 @@
+portforwarding_instructions.txt
+Portforwarding CAN bus
+02-14-2014
+================================================================================================  
+The following gives the steps for setting up portforwarding of the netbook server
+that is connected via a Discovery F4 gateway to a test CAN bus.  The forwarded
+port can be connected to by (multiple) local programs.
+
+The local connections are made to 'localhost' (127.0.0.1) and port 32123.
+
+The scheme uses ssh for a secure connection to an account on a netbook running Ubuntu 12.04 LTS.
+The account is /home/hub-server and it is setup to only connect with the forwarded port, and as
+such there is no access beyond the hub-server connection.
+
+The netbook is connected to a 'gateway' that passes CAN messages to/from the netbook.  The CAN bus
+is connected to some units that send test messages and readings.
+=================================================================================================
+LINUX  
+
+1. Generate RSA keys
+
+The netbook requires a RSA key to complete a login.  'ssh' listens on port 41576 of my internet
+IP address (currently, 02/26/2014, 72.64.251.177).
+
+If you have the private key file that goes with the public key file in the netbook, then copy
+that file to ~/.ssh/, or if there isn't a .ssh directory make one as shown below.
+
+In your home directory add a directory .ssh if not present.
+  ls -la ~ [display directories and files, including hidden directories, in home directory]
+  mkdir .ssh [add directory if not present]
+  cd .ssh
+  ssh-keygen [generate pair of ssh keys]
+
+
+2. Send public key to be placed in the netbook, unless using the public key.
+
+email address: dhaselwood@verizon.net
+
+I add the public key to 'authorized_keys' file in /home/hub-server/.ssh of the netbook.
+
+In the case of being given the private key, the public key is already in the
+authorized_keys file on netbook in the hub-server account.
+
+3. Log in to the netbook
+
+In a terminal window #1 with the following command-- 
+
+  ssh -T -L32123:127.0.0.1:32123 -p 41576 hub-server@72.64.251.177
+
+Note:
+1) There is no response when it logs in.
+   A simple way to know that the connection has been made and the port has been forwarded
+   is to execute a program the connects to the port (see step 4 below).
+
+2) The IP address may change, i.e. 72.64.251.177 is currently assigned by Verizon
+   and is always subject to change.
+
+   Also the netbook server is sometimes taken down for updating, etc.  I try to keep
+   it up with the hub-server|socat|gateway running live on the CAN bus.
+   
+   Email me if you cannot connect.  A Skype session is often faster way to resolve an issue
+   than bouncing emails back and forth.
+
+4. Connect to the local socket with programs
+
+Once connected, port 32123 appears as a local socket on your machine.  Open additional terminal window to
+start each local program, for example all of the following can be run, all at the same time
+if so desired-- 
+
+  telnet localhost 32123 
+Displays stream of incoming CAN msgs.
+Use ctl ] to stop.
+
+  nc localhost 32123
+Same as telnet, use ctl C to quit.
+
+If you don't have 'nc' ("netcat")--
+  sudo apt-get install netcat
+
+./cangate 127.0.0.1 32123
+Found in directory--
+  ~/svn_discoveryf4/PC/sensor/cangate/trunk
+Provides a summary monitoring of incoming CAN msgs.
+
+./cangate 127.0.0.1 32123 ~/svn_discoveryf4/PC/sensor/cangate/test/testmsg1.txt
+Adding file spec allows 's' command to send CAN msgs from the .txt file.
+
+Additionally, Java programs could connect to localhost 32123.
+
+5. Closing the connection--
+
+Ctl C to kill window #1 drops the connection.
+
+=================================================================================================
+WINDOWS
+
+Note: this has only been tested on XP, and Vista.
+
+1. Install the PuTTY package
+
+http://www.putty.org/
+
+2. Generate RSA keys (unless you want to use the *private* key supplied)
+
+If the *private* key has been supplied copy it to a location where it can be accessed later.  The
+private key extension is '.ppk'.
+
+Run 'PuTTYgen'
+Click "Generate" to start key generation.  Movement of the cursor is used to generate random
+input.
+
+When it is done with the generation--
+- Save the *private* key without passphrase, i.e. "Yes" to skip entering a passphrase.
+  Save it in a file where you know where it is located as you will need the path/name later.
+- Export *public* key
+  "Conversions" tab: 'Export OpenSSH key'
+	Save without passphrase
+  OR the preferred way,
+  Copy/paste the entire window that shows the public key, pasting it into 'Notepad' and
+     saving as a file
+
+3.  Email the public key file to dhaselwood@verizon.net
+
+  The public key along with some prepended commands is added to the netbook in '/home/hub-server/authorized_keys' file.
+
+  At this point one should be able to ssh into the netbook, however there is no shell and there will
+  be no response.
+
+4.1  Configure PuTTY to ssh with port forwarding using PuTTY GUI--
+
+Launch PuTTY.  It opens a window--at top says: "PuTTY Configuration"
+
+In "Host name (or IP address)"
+hub-server@72.64.251.177
+
+In "Port"
+41576
+
+In "Connection Type" select radio button--
+SSH
+
+In "Saved sessions"
+netbook_port [or whatever name you wish]
+
+Click "Save" (so you you don't have to redo the above)
+
+On left column ("Category") select '+' on SSH to open list
+Click on "Auth"
+
+In "Private Key file for authentication", click "Browse"
+and select the file with private key (.ppk), saved earlier.
+
+In "Category:Connection:SSH:TTY" "Remote Terminal Settings"
+Check - "Don't allocate a pseudo-terminal"
+
+In "Category:Connection:SSH:Tunnels"
+Under "Add new forwarded port"
+In "Source Port"
+32123
+
+In "Destination"
+127.0.0.1:32123
+
+Click "Add" it should appear in the box
+L32123 127.0.0.1:32123
+
+This command connects to port 32123 on the netbook, and creates a port
+on the local machine (127.0.0.1) port 32123.  Programs on the local machine
+connect to the port exactly the same if the program were run on netbook.
+
+IMPORTANT--
+Go back to "Category:Session" (top most) and click "SAVE".  If you click "OPEN"
+it will start the session, but settings will be lost and have to be re-entered.
+
+When PuTTY is started again, selecting the name and LOAD will retrieve the settings.
+  Double clicking on the name will do a LOAD and OPEN, thereby starting the ssh port
+  forwarding connection with just a double click.
+
+4.2 Setting port forwarding using a command line
+
+Setting up a .BAT file along with a desktop icon is another way to start a port forwarding
+session.
+
+- Get a "DOS" command window--
+  "Start", in the "Start Search" box enter, command.com<enter>
+  This should bring up a black "DOS window"
+
+The following command line can be used to start the ssh port forwaring.  This can be put into a 
+.BAT file, and by dragging it to the desktop an icon is generated which will  start up the ssh 
+port forward connection.
+
+The following is an example.  The quotes must be included.
+
+"C:\Program Files\PuTTY\putty.exe" -i "C:\Program Files\PuTTY\id_rsa.ppk" -N -x -T -L 32123:127.0.0.1:32123 -l hub-server -P 41576 72.64.251.177
+
+The path/name in the first "..." launches PuTTY.
+
+Don't forget the '-i' 
+
+The second "..." is the path/name for finding the *private* key (.ppk) associated with the public key that is the 
+companion to the public key installed in the netbook authorized_keys file.
+
+The 32123:127.0.0.1:32123 is ssh the port being forwarded from the netbook and the port that is
+setup locally.
+
+'-l hubserver' is the account name for the netbook login
+
+'-P 41576' is the netbook ssh port number
+
+'72.64.251.177' is the ip address, which Verizon changes occasionally.
+
+When the above command line executes successfully connects you should see a box open with--
+
+Using username "hub-server".
+Auathenticating with public key "rsa...." from agent
+
+If there is problem with keys, there will be a message that it failed.
+
+There are a number of reaons the netbook might not connect--
+- Verizon changed the ip address
+- The netbook is down (and/or long term power outage)
+- The key is not in authorized_key file correctly.
+
+Once 'ssh'd into the netbook, CAN msgs will pass to/from the netbook-gateway-CAN bus units.
+
+Note: the CAN msgs are "lines" that terminate with '\n'.  
+
+
+5. Run programs that connect to the local port--
+
+A PuTTY telnet session can be used to display the CAN msgs.  Note that the connection to
+the hub-server must be made first, otherwise the PuTTY telnet session will not have a port
+to connect to.
+
+Start PuTTY
+
+With the "Sessions" (left column) selected, under "Basic options for your PuTTY session"
+ under "Host Name (or IP address) 'localhost'
+ in "Port" 32123
+
+"Connection type"
+  Telnet radio button
+
+"Saved Sessions"
+ use "Default Settings" or give it a name such as 'telnet'
+
+Select "Terminal" (at left column)
+  Check "Implicit CR in every LF"
+
+Go back to "Sessions" and "Save".  When PuTTY is launched the settings can be retrieved with "Load".
+
+"Open" should connect to the 'localhost:32123' and the stream presented.
+
+Multiple instances of PuTTY or any other program connecting to the local socket can be run.  If too many streams
+are connected the streams become "jerky" with pauses, but we have not experienced any loss of data.  The netbook
+hub-server is set to limit to 20 connections and at 20 it is beginning to bog down.  There are also delays in the
+internet depending on the path and loading.
+
+6. ssh 
+
+'-W' switch with ssh acts as a "netcat"--
+
+ ssh -p 41577 deh@72.64.251.177 -W 10.1.1.80:32123
+
+ssh into Toshiba, -W connects, to 10.1.1.80:32123 as if 'nc 10.1.1.80 32123' (which is the netbook local network 
+address and port) was executed on the Toshiba.
+
+7. ssh multi-hop
+
+ssh deh@72.64.251.177 -p 41577 -A [connects to Toshiba]
+And once in the Toshiba--
+ssh deh@72.64.251.177 -p 41576 -A [connects to netbook]
+
+This does the same thing--
+ssh -oproxycommand="ssh -p 41577 deh@72.64.251.177 nc %h %p" -p 41576 deh@72.64.251.177
+
+
+

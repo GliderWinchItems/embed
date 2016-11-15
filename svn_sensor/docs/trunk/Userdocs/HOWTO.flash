@@ -1,0 +1,66 @@
+HOWTO.flash
+
+09/10/2016
+
+1. Raisonance jtag plug in.
+
+2. Optional: FTDI 
+Ground end of connector toward bottom edge of board
+
+3.  Program loader
+
+cd ~/gitrepo/svn_sensor/sensor/ldrfixed/trunk
+
+Edit ldr.c, line 62
+Your board is assigned '_1B'--
+
+#define	  IAMUNITNUMBER		CANID_UNIT_1B
+
+compile and flash--
+
+./mm && flash
+
+4.  High flash parameters
+
+cd ~/gitrepo/svn_sensor/sensor/cansender/trunk/db
+
+./mmdbtest_1B
+
+This will build the database.  If you don't have the
+database stuff loaded, then 
+./mmtest_1B
+will skip the database loading, as it should already be
+loaded.
+
+It ends like this--
+
+  LD      unit_cmd_canid 
+arm-none-eabi-ld: warning: cannot find entry symbol Reset_Handler; not setting start address
+  OBJCOPY unit_cmd_canid.bin
+  OBJCOPY unit_cmd_canid.hex
+  OBJCOPY unit_cmd_canid.srec
+  OBJDUMP unit_cmd_canid.list
+  OBJCOPY unit_cmd_canid.bin
+  OBJCOPY unit_cmd_canid.hex
+  OBJCOPY unit_cmd_canid.srec
+  OBJDUMP unit_cmd_canid.list
+  FLASH   unit_cmd_canid.srec
+/usr/local/bin/openocd -s /usr/local/share/openocd/scripts \
+		       -f /usr/local/share/openocd/scripts/interface/rlink.cfg \
+		       -f /usr/local/share/openocd/scripts/board/olimex_stm32_h103.cfg \
+		       -c "init" -c "reset halt" \
+		       -c "flash write_image erase unit_cmd_canid.srec" \
+		       -c "reset" \
+		       -c "shutdown" 2>/dev/null
+  OBJCOPY .bin
+arm-none-eabi-objcopy: '.bin': No such file
+make: *** [images] Error 1
+
+5. Compile and load program
+
+cd ~/gitrepo/svn_sensor/sensor/cansender/trunk
+./mm
+
+The loader flashes the green led fast for a few seconds then jumps to the program where the
+green led flash is every second. 
+

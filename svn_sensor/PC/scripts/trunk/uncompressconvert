@@ -1,0 +1,54 @@
+#!/bin/bash
+# uncompressconvert - fetch from FIT, uncompress, convert to ascii/hex format
+# 07/11/2014
+# uncompressconvert path/file 
+# Example: ./uncompressconvert winch/instrumentation/Fri_Jul_11_20.33.09_2014
+
+# Make sure correct number of arguments
+# If no argument supplied setup a default USB port
+if [ $# -ne 1 ] ; then
+	echo
+	echo "One argument required: path/name of file, e.g. ./uncompressconvert winch/instrumentation/Fri_Jul_11_15.04.12_2014"
+	echo "NOTE: no .bz2, AND no leading '/'"
+	echo "This script saw $# arguments"
+	echo
+	exit	
+fi
+
+echo
+echo
+echo "SCRIPT: uncompressconvert BEGIN"
+echo "File to be fetched from FIT: /$1.bz2"
+echo " and stored on this machine: $HOME/$1.bz2"
+echo
+
+#echo "CMD: rsync -av -e 'ssh -p 41574' deh@$FITIP:/$1.bz2 $HOME/$1.bz2"
+
+# Fetch from FIT
+echo "START DOWNLOAD: `date`"
+rsync -av -e 'ssh -p 41574' deh@$FITIP:/$1.bz2 $HOME/$1.bz2
+echo "END DOWNLOAD: `date`"
+
+# uncompress
+echo
+echo "UNCOMPRESS--"
+echo "  SOURCE: $HOME/$1.bz2"
+echo "  DEST:   $HOME/$1.RAW"
+cd /
+tar -xjf $HOME/$1.bz2
+
+# Convert to ascii/hex
+echo
+echo "CONVERT BINARY TO ASCII/HEX with 'sdtoascii'"
+echo "CMD: ./sdtoascii $HOME/$1.RAW"
+echo
+cd $HOME/svn_sensor/PC/sdtoascii/trunk/
+./sdtoascii $HOME/$1.RAW
+echo
+echo "SCRIPT uncompressconvert DONE"
+echo
+
+
+
+exit
+

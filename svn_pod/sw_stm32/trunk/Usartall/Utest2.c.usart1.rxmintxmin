@@ -1,0 +1,128 @@
+/******************** (C) COPYRIGHT 2010 **************************************
+* File Name          : Utest2.c.usart1.rxmintxmin
+* Hackor             : deh
+* Date First Issued  : 09/22/2010
+* Description        : Test program for libusart
+*******************************************************************************/
+
+/* 
+Open minicom on the PC with 115200 baud and 8N1 and this routine
+will (should!) echo back chars sent by minicom when "Enter" is typed.
+
+This is setup for the Olimex stm32 board.  If a different board is used
+then here are some of the changes that might be required.
+- LED port and pin
+- USART port
+
+*/
+#include <math.h>
+#include <string.h>
+
+#include "libopenstm32/rcc.h"
+#include "libopenstm32/gpio.h"
+#include "libopenstm32/usart.h"
+
+#include "libusartstm32/usartallproto.h"
+
+
+#include "libmiscstm32/printf.h"
+#include "libmiscstm32/clocksetup.h"
+
+
+/* The following is for checking that static variables are properly intialized */
+char cC[15]={0x0a,0x0d,'M','y','x','w','v','u','t','s','r','q',0x0a,0x0d,0};
+
+/* Some things to check floating point */
+//pi            3.1415926535897932384626433832795028841971 (41)
+double pi = 3.14159265358979323846; // (21 digits)
+double dF = 4.0;
+int nScale = 1000000000;
+
+/* This is for the tiny printf */
+// Note: the compiler will give a warning about conflicting types
+// for the built in function 'putc'.
+void putc ( void* p, char c)
+	{
+		p=p;	// Get rid of the unused variable compiler warning
+		USART1_txmin_putc(c);
+	}
+/* Setup the gpio for the LED on the Olimex stm32 P103 board */
+void gpio_setup(void)
+{
+	/* Setup GPIO pin for LED (PC12) (See Ref manual, page 157) */
+	// 'CRH is high register for bits 8 - 15; bit 12 is therefore the 4th CNF/MODE position (hence 4*4)
+	GPIO_CRH(GPIOC) &= ~((0x000f ) << (4*4));	// Clear CNF reset bit 01 = Floating input (reset state)
+	GPIO_CRH(GPIOC) |=  (( (GPIO_CNF_OUTPUT_PUSHPULL<<2) | (GPIO_MODE_OUTPUT_2_MHZ) ) << (4*4));
+	
+}
+/* Stupid routine for toggling the gpio pin for the LED */
+#define LEDBIT	12
+void toggle_led (void)
+{
+	if ((GPIO_ODR(GPIOC) & (1<<LEDBIT)) == 0)
+	{
+		GPIO_BSRR(GPIOC) = (1<<LEDBIT);	// Set bit
+	}
+	else
+	{
+		GPIO_BRR(GPIOC) = (1<<LEDBIT);	// Reset bit
+	}
+}
+/* And now for the main routine */
+int main(void)
+{
+	char *p;	// Temp pointer for char string
+	int i = 0; 	// Timing loop variable
+	double dS;	// Some floating point mischief
+	int n1,n2;	// Float-to-fix for printing floating pt
+ 
+	clocksetup();		// Get the system clock and bus clocks running
+	gpio_setup();		// Need this to make the LED work
+
+	/* (BaudRate, rcv circular size,  rcv line size, xmt line size, number xmt lines) */
+//	USART1_dma_init(115200,32,64,96,4); // Initialize USART1 and DMA1 channels used by USART1
+
+	USART1_txmin_init(115200);	// Minimal tx
+	USART1_rxmin_init(115200);	// Minimal rx
+
+	init_printf(0,putc);	// This needed by the tiny printf routine
+
+	/* Announce who we are */
+	USART1_txmin_puts("\n\rUsartM/Utest2 USART1 txmin rxmin 10-04-2010\n\r");
+
+	/* Check that printf works  */
+	printf ("\n\rThis is printf - the number is %u\n\r",314159265);
+
+
+	/* Testing that static variables got initialized OK in 'startup_deh' */
+	USART1_txmin_puts(cC);
+	
+	/* A little experimenting with floating point */
+	dS = sin(pi/dF);
+	n1 = dS*nScale; n2 = (pi/dF)*nScale;
+	printf ("sine of %u is %u, scaled upwards by %u\n\r", n1, n2, nScale);
+
+
+	/* Blink the LED on the board so that we can see it is alive */
+	while (1==1) 
+	{
+		/* Make the LED blink so we know it is alive */
+		if ( i++ > 500000)
+		{
+			toggle_led();
+			i = 0;
+		}
+
+		/* Echo incoming chars back to the sender */
+		if ( USART1_rcvflag > 0 )	// Has a char been received?
+		{ // Here, yes.
+			USART1_rcvflag = 0 ;
+			USART1_txmin_putc(USART1_rcvchar);	 	
+			if (USART1_rcvchar == 0x0d)	// Check for eol
+				USART1_txmin_puts ("\n\r");// Add line feed (and zero termination)
+		}
+	}
+	return 0;
+
+}
+

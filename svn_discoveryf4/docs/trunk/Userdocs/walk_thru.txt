@@ -1,0 +1,108 @@
+walk_thru.txt
+11/11/2013
+
+Outline of sequence of walk-thru--
+
+Bare metal approach: no reliance on an OS.
+	Able to fully use the capabilities of the micro
+	Low-end micros getting more complex.
+	
+1. RESET sequence
+
+- BOOT0,1 pins select memory that is aliased to 0x00000000
+  	choices vary with device, but--
+	FLASH (0x08000000)
+	SRAM  (0x20000000)
+	Serial Port loader
+
+- Stack pointer is then loaded from location 0x00000000
+- PC is loaded from location 0x00000004
+  So, execution begins at addresses that is in 0x00000004,
+  which normally is what was stored at 0x08000004.
+
+A this point processor is running--**NOTHING IS SETUP**
+	Driven by internal rc osc (e.g. 8 MHz)--that's all!
+	All registers have reset readings (see Ref Manual)
+	i/o pins are "floating input"
+	power drain increases as more things turned on (enabled)
+
+2. Startup routine
+
+	Example: asm code (.s) 
+	Example: c code (.c)
+
+- This routine--
+	Initializes static variables that are zero
+	Copies flash section into sram for static variables not zero
+	Initializes "other things" (complex if c++ used)
+
+Where does the start code get the addresses?
+
+Linker script--.ld file
+
+- Usually setup just once.
+	Memory layout
+	Arrangement of "sections"
+	malloc allocation
+
+- Interrupt vectors
+  	Sometimes a separate file.
+	Interrupt is by "number" (0 - 81 on the F4)
+	A few are shared
+	.weak statement 
+		easy to add/delete irq handlers
+		easy to make a mistake with the name
+	System vectors
+		Hard Fault (invalid memory)
+3. Call main()
+	Stack pointer must be valid for this call
+	'main' must initialize "everything"
+		Some *could* put it in startup code if one wants
+
+4. Initialization
+	clocks (system, plus bus clocks)
+	basic i/o pins 
+	basic output devices
+	other devices as needed.
+
+5. The "real work" loop
+	Usually endless loop
+
+General setup principles
+
+1. Bus speeds are not the same as system clock speeds
+  	all peripherals run off a bus, except a couple of "core" devices
+		systick timer
+		nvic
+		debugging hardware
+	changing the speed of the bus (clock setup routine) 
+		changes speed of clocking at peripherals
+		best to have peripheral init use bus speed
+			e.g. specify usart baud and compute register setting
+			based on bus speed.
+	Bits in peripheral registers do not turn on "instantly" from an instruction
+
+2. Enable the peripheral "clocking"
+	If not enabled, nothing happens with the peripheral
+	
+3. Enable the i/o pins used by the peripheral
+	Including the i/o pin module (e.g. A, B, ...)!
+	Requires study of the datasheet and ref manual
+
+4. Setup the peripheral registers
+	This is the hardest part.
+	Forgetting 2. and 3. above a common problem.
+	Ref manual is the "bible"...requires careful study.
+	Web code helpful, but often not well written and
+		frequently doesn't quite do what is wanted.
+	
+5. Test routine for each device desirable
+	Too much to go wrong to do it all at one time
+	Test just the peripheral
+	Put peripheral code into a library
+		Never too many comments in the code
+	Frustrating when "nothing happens"
+	Display registers with debugger breakpoints can be useful
+	LEDs are extremely useful debugging tool
+	
+

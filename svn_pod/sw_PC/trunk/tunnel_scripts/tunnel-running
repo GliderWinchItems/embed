@@ -1,0 +1,15 @@
+export pid=$(ps x | fgrep 22222 | fgrep localhost | cut -c 1-5 | sed -e 's/ //g')
+
+if [ -z "$pid" ]; then
+    if [ "$1" != "-z" ]; then
+        echo "# The tunnel is DOWN"
+    else
+        echo 0
+    fi
+else
+    if [ "$1" != "-z" ]; then
+        echo "# The tunnel is UP (with pid == $pid)"
+    else
+        echo $pid
+    fi
+fi

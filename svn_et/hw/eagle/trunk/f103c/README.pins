@@ -1,0 +1,62 @@
+README.pins
+
+09/11/2013
+
+STM32F103CxT6_SENSOR PC board layout--
+
+
+Port|Pin usage
+* = remapped function
+@ = test point, or connection pad
+( ) = function not used, also indented line
+[] = comments
+
+PA
+0				(ADC123_IN0) (USART2_CTS)(TIM2_CH1)(TIM2_ETR)(TIM5_CH1)(TIM5_ETR)(TIM8_ETR)
+1				(ADC123_IN1) (USART2_RTS)(TIM2_CH2)(TIM5_CH2)
+2	(USART2_TX)		(ADC123_IN2) (TIM5_CH3)
+3	Thermistor 1		(USART2_RX)(ADC123_IN3) (TIM2_CH4)(TIM5_CH4)
+4     	Thermistor 2		(ADC12_IN4 ) (SPI1_NSS)  (USART2_CK)(TIM2_CH4)(TIM5_CH4)(DAC_OUT1)
+5				(ADC123IN5)  (SPI1_SCK)  (DAC_OUT2)
+6				(ADC12_IN6)  (SPI1_MISO) (TIM3_CH1)(TIM8_BKIN*)
+7				(ADC12_IN7)  (SPI1_MOSI) (TIM3_CH2)(TIM8_CH1N*)
+8	TIM1_CH1		(TIM1_CH1) (USART1_CK)
+9	USART1_TX:  		(TIM1_CH2 )
+10	USART1_RX: 		(TIM1_CH3)
+11	TIM1_CH4		(USB-DM) (USART1_CTS) (TIM1_CH4) 
+12	LED			(USB-DP) (USART1_RTS) (TIM1_ETR) 
+13	JTMS
+14	JTCK
+15	JTDI
+
+PB
+0				(ADC12_IN8)
+1				(ADC12_IN9)
+2	(10K to ground)		BOOT0
+3	JDTO  			(TIM2_CH2*)(SPI3_SCK)(SPI1_SCK*)
+4	JTRST 			(TIM3_CH1*)(SPI3_MISO)(SPI1_MISO*)
+5				(TIM3 CH2*)(SPI3_MOSI)(SPI1_MOSI*)(I2C1_SMBAI)
+6				(USART1_TX*) (TIM4_CH1)(I2C1_SCL)
+7	TIM4_CH2-PB13		(USART1_RX*) (TIM4_CH2)(I2C1_SDA)
+8	CANRX			(CANRX*)(I2C2_SMBAI)
+9	CANTX	 		(CANTX*)
+10				(TIM2_CH3*)(I2C2_SCL)(I2C1_SDA*)
+11	JUMP PA11		(TIM2_CH4*)(I2C2_SDA)
+12				(USART3_CK)(TIM1_BKIN)
+13	TIM1_CH1N	  	(USART3_CTS)
+14				(USART3_RTS)
+15	
+
+PC
+13				RTC (out) connect to PE9 (in)	(ANTI-TAMP)
+14				32KHz xtal: OSC32_IN
+15				32KHz xtal: OSC32_OUT
+
+Note:
+TIM1_CH1
+TIM1_CH1N - TIM4_CH2
+Allows TIM1_CH1 w deadtime, or TIM1_CH1 for HS FET and TIM4_CH2 for LS FET, providing
+independent deadtimes (with careful programming!)
+
+
+

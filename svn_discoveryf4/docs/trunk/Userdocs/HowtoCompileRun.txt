@@ -1,0 +1,135 @@
+11-26-2013
+HowtoCompileRun.txt
+
+1.  Connect USB to ST-LINK side of Discovery F4
+
+2.  Set permissions: run script
+
+./p [may require entering password]
+
+3.  Compile
+
+make [compiles just the program]
+./mm [script compiles libraries and program]
+
+4.  Load flash
+
+make flash
+
+or to compile and flash
+
+make && make flash
+     or
+./mm && make flash
+
+5.  Running program
+
+After flashing it usually begins running, if not,
+  try reset (black pushbutton).
+
+6.  Debugging
+
+    a.  In another terminal windows start server:
+st-util
+        Note that program that might have started after
+flashing will halt.
+
+    b.  Start gdb in the terminal window used to compile
+by running the script:
+
+./gdbgo <program name>
+
+It should look like the following--
+Reading symbols from /home/deh/svn_discoveryf4/tests/spi2test/trunk/spi2test.elf...done.
+Reset_Handler () at startup_stm32f4xx.s:69
+69	  movs  r1, #0
+(gdb) 
+
+
+It should NOT look like the following--
+Reading symbols from /home/deh/svn_discoveryf4/tests/spi2test/trunk/spi2test.elf...done.
+0x00007f72 in ?? ()
+
+
+    c.  To start program:
+r [Short for "run"]
+y [Start from beginning]
+
+    d.  To stop program:
+Ctl c
+	
+    e.	To exit
+	quit [followed by yes]
+	./k [BEFORE compile & flash]
+
+    f.  To display things
+
+info reg [short for registers]
+display PANIC_x [e.g. display this variable]
+display\32xw 0x20001fe8 [Dump ram from stack pointer upwards, 32 items, in hex ('x'),
+   words ('w', i.e. 32b)]
+
+    g.  Set break point
+break <copy a line from the program> 
+   If the context doesn't permit this,
+       Find the flash address, 
+      - Copy the program line from the .c file
+      - Bring up the .list file and 'search' the
+        to find the location.
+        Note: the optimizer rearranges the sequence so the ascii line may appear 
+           several places, so it may take some examination of the code.
+      - Copy the address and insert:
+      break *0x<address>
+        Note: Don't forget the '*' and the '0x'
+
+    h.  Run with breakpoint.
+        a.  Re-run, as above ('r', etc.)
+        b.  Generally, I would--
+            info reg [show registers]
+            stepi [step on instruction]
+            Up arrow twice to display registers again,
+            Follow the .list listing along with each step.
+
+    h.  Once in a while the F4 is locked up for some reason and requires power
+        down and restart.  Reset doesn't do it.  Each time requires resetting the
+        permissions.
+
+    i.  USB crashing Ubuntu.
+        When the usb ST-LINK side and user usb are plugged I have had it crash Ubuntu 12.04LTS.
+        Likely the ST usb is doing something "bad" that the Linux driver didn't anticipate.  It
+        requires a hard power-down on the PC.  Best not to have files not saved when tinkering with
+        the usb.
+
+    j.  Sequence messed up
+
+	Normal sequence:
+        ./mm && make flash
+        st-util [other terminal window]
+        ./gdbgo <prog>
+        Ctl C
+        quit
+        ./k
+        make changes to prog and repeat
+
+       One way to recover--
+       click to 'x' to close the window that had st-util
+       unplug/plug F4 and ./p to set permissions again
+       open new term window for st-util
+
+    k. Return address have bit 0 on
+
+       Branch addresses have bit 0 in ARM cores even though it isn't needed
+       for the thumb2 with Cortex series.  E.g. the following registers 
+       show the next instruction ending with 'a' whereas the lr register is
+       holding a 'b'.  You will find 0x800086a in the .list file, but not
+       0x800086b.
+lr             0x800086b	134219883
+pc             0x800086a	
+
+
+      
+
+   
+
+
+

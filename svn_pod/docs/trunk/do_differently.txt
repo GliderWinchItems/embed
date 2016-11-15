@@ -1,0 +1,12 @@
+Things to do differently, but not worth the fix of existing stuff
+
+1. libusartstm32
+
+a. Rewrite to use USART/UART number as an argument.  This cuts the number 
+of subroutines, plus the arguement makes it easier to change the USART/UART
+number.
+
+b. Use the system 'malloc' rather than 'mymalloc' since .ld file setup has
+been sorted out.
+
+

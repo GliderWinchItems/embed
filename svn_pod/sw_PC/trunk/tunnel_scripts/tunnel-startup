@@ -1,0 +1,9 @@
+export pid=$(tunnel-running -z)
+
+if [ $pid != 0 ]; then
+    echo "# The tunnel is already up"
+    exit 0
+fi
+
+ssh -f -R 22222:localhost:22  -l $USER -p 41574 $FITIP sleep 10000
+exit 0

@@ -1,0 +1,6 @@
+cd ..
+./m
+
+cp -p ./hub-server ./z_deploy/hub-server-start /usr/local/bin/
+
+echo "# hub-server-deployment complete"

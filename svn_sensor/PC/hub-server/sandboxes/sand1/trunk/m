@@ -1,0 +1,29 @@
+#!/bin/bash
+
+HUBDIR=~/svn_sensor/PC/hub-server/tags/rev_6
+echo "COMPILED WITH hub-server IN DIRECTORY: $HUBDIR"
+echo "SANDBOX EXECUTABLE NAME: $1"
+if [ "$1" = "-?" -o "$1" = "--help" ]; then
+	echo "# Usage: $ m [<sandbox_file>]"
+	exit 0
+fi
+
+if [ -z "$1" ]; then
+	echo "No sandbox file named.  We regret the inconvenience."
+	echo "Please enter file name, e.g--"
+	echo "./m sand1"
+	exit 0
+else
+	echo "# Making \"hub-server\" with sandbox file \"$1.c\""
+	echo "#  using hub-server files in: $HUBDIR"
+	if [ ! -f "$1.c" ]; then
+		echo "# Error: Can't find sandbox file \"$1.c\" and this is not good."
+		exit 1
+	fi
+	SANDBOX="$1"
+fi
+
+CANDIR=~/svn_discoveryf4/common_all/trunk
+
+rm  -f hub-server
+gcc -Wall -I. -o "$SANDBOX" $HUBDIR/hub-server.c $HUBDIR/hub-server-sock.c "$SANDBOX.c" $HUBDIR/hub-server-queue.c $HUBDIR/hub-server-util.c -pthread -I$HUBDIR -I$CANDIR  -I ~/svn_discoveryf4/sw_discoveryf4/trunk/lib -L$CANDIR/PC -lcommon_all

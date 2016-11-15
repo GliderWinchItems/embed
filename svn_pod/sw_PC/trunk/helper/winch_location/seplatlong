@@ -1,0 +1,26 @@
+#!/bin/bash
+# seplatlong - pull out lat/long from raw, formatted file ('R)
+# Example: ./seplatlong ~/winch/download/121208/edited
+# Where arg 1 = source directory
+
+# Make sure correct number of arguments
+# If no argument supplied setup a default USB port
+if [ $# -ne 1 ] ; then
+	echo "One argument required, e.g. ./seplatlong ~/winch/download/121208/121208.174500R"
+	echo " "
+	exit	
+fi
+
+
+#
+#sed -n '/W/p' $1 > x
+
+
+#
+#cat x | sort  > y
+
+
+gcc winch_location.c -o winch_location && ./winch_location  < y
+
+exit
+

@@ -1,0 +1,45 @@
+# gsmcopy - script to mount and copy to separate USB stick for GSM
+# 03/31/2012
+
+# Check that an argument was supplied (either '*' or something such as a file name)
+if [ $# -ne 1 ] ; then
+	echo A command line argument is required, such as * or filename
+	exit
+fi
+
+
+# Mount USB stick on '/mnt'
+echo Mounting USB (/dev/sdc1) on /mnt
+cd /mnt
+sudo mount /dev/sdc1 /mnt
+
+#Check if this was successful
+if [ ! $? ] ; then
+	echo Mount failed
+	exit
+fi
+
+# Copy files
+echo Copying all of ~/winch/download onto USB (/mnt)
+sudo cp ~/winch/download/$1 /mnt
+if [ ! $? ] ; then
+	echo Copy failed
+	exit
+fi
+
+# "eject" USB stick
+echo Ejecting USB
+cd /
+sudo eject /mnt
+if [ ! $? ] ; then
+	echo Eject failed
+	exit
+fi
+
+echo Done...success!
+
+exit
+
+
+
+

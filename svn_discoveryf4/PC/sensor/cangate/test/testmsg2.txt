@@ -1,0 +1,238 @@
+// testmsg2.txt
+// CAN test msgs for 'cangate'
+// PLUS--program loading path/file
+// 11-02-2014
+// 
+// CANGATE COMMAND 's' -- send CAN msgs
+// First rule: if chars [0]-[2] == "// " ignore entire line
+//  "//C" CAN Msg following (hex)
+//    CAN-ID  dlc payload bytes
+//
+//  "//T" Intended for pacing the sending (not implemented)
+//    Time between msgs (ms) (decimal) Time between repeat of sequence (microsec) (decimal)
+//T 16000  0
+//
+// All input is ascii/hex
+//
+// First char 'C' = CAN id for command 's' (send periodically)
+// 11b id  data ct data bytes
+// C 8a200000 00000008 fedcba9876543210
+//
+// 11b id  data ct data bytes
+// C 8a400000 00000004 aabbccdd
+//
+// 11b id  data ct data bytes 
+// C 8a600000 00000000 00000000
+//
+// 29b id  data ct data bytes
+// C 8a88888c 00000008 eeccaa8866442200
+//
+// MASTER RESET
+// C A0000000 00000000 00000000
+//
+// se3 RESET ONLY
+//C D0C00000 00000001 00000008
+//
+//
+
+// For cangate command 'p'--
+
+// Each unique unit CAN ID--line starts with #define
+// Each application CAn ID--line starts with #define
+//   C program name (caps)
+//   Hex CAN ID
+//   Following "//"
+//     'P' = Unit
+//        path/filename of program to load (.srec)
+//        '*' convenient way to find next fields
+//        Skip crc: (0 = do crc check, load if different) (1 = skip crc check)
+//        Skip unit: (0 = load this unit) (1 = skip loading unit)
+//        Skip calib: (0 = no calib, skip) [application does not use calibs]
+//                    (1 = load with .txt data if crc not same) [unit == .txt]
+//                    (2 = skip loading .txt data if unit calib crc is OK) [unit != .txt]
+//        '@' The following are comments taken verbatim
+//     'I' = CAN msg ID
+//        'n' = index into table of CAN ID's
+//        '@' The following are comments taken verbatim
+// Each payload field--line starts with "//$"
+//   size: number of payload bytes (dlc)
+//   pay-idx: First byte of payload (1-8)
+//   pay-idx: Last byte of payload (1-8)
+//   fix: 0 = fixed pt output, 1 = floating pt (double) output, 2 = linux time convert
+//   sign: 1 = not signed, -1 = signed
+//   scale * offset: calibration = (reading * scale) + offset;
+//   outfield = output line field position (0 - 32)
+//   format: format for conversion to ascii, e.g. "%6.1f"
+//   description: for listing purposes.
+
+//   Calibration and parameters "//i "
+//     All are multiples of 4 bytes, i.e. an array defined in high flash as,
+//     u32 x[SIZE];, but referred to in the app program via a locally defined
+//     struct, e.g. (using data in "CAN_SHAFT1" below) --
+//     struct MYAPPCALIBRATION {
+//        u32   segments;
+//        float distance;
+//        char m[19];
+//     };
+//   To use the calibrations set a pointer to where they are stored, e.g.--
+//     struct MYAPPCALIBRATION* pmyappcal = &__hfl1;
+//     int counts_per_rev = raw_value * pmyappcal->segments;
+//     float calibrated_value = raw_value * pmyappcal->distance;
+//     printf("This unit is %s\n\r",(char*)&pmyappcal->m[0]);
+//
+//   The .txt file format for calibrations--
+//   "//i " first four chars on a lines, following the "#define ... // I" line,
+//   which applies to the unit in the preceding "define ... // P" line.
+//     1 struct index (0 - n): index into an array of byte elements (i.e. u32)
+//     2 type of number code:
+//        number type codes
+//        0 - u32 (unsigned int)
+//        1 - s32 (int)
+//        2 - u64 (unsigned long long)
+//        3 - s64 (long long)
+//        4 - float
+//        5 - double
+//        6 - string of chars (zero termination added after 1st double space, or
+//            tab.  It fills four byte "blocks".
+//    3 format used to convert ascii on line to variable
+//    4 data - the data field
+//    5 following '@' describes line (not stored in calibrations)
+//
+
+//  ########################## BEGINNING OF COMMAND P CANID AND CALIBRATION ################################################
+//  ========================================================================================================================
+// Shaft Encoder--Drive Shaft w histogram readout --se4_h
+//      program name     	  	   CAN ID     p  program  path/filename                             crc unit calib      Comments
+#define CANUNIT_2 			0x0040000C // P /home/deh/svn_sensor/sensor/se4_h/trunk/se4_h.srec  *    0   0     1	@Sensor unit: Drive shaft encoder
+#define CAN_SHAFT1			0x30400000 // I	0 @Shaft sensor (upper sheave)
+//   ------------------- for converting payload to output field (winch instrumentation) ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4   0    -1   1              0     11      "%8d"	  	@Shaft counter (ticks)
+//$   8   1   4   1    -1   0.114537232    0      2      "%8.1f"	@Shaft counter (feet/count)
+//$   8   5   8   1     1   4.0            0      3      "%6.0f"	@RPM: 4 black segments
+//   ------------------- Application CAN ID's -----------------------------------------------------------------------------
+#define CAN_SE4H_ERROR2			0xD0400004 // I 1 @ ER: [0]encode_state er ct [1]adctick_diff<2000 ct
+#define CAN_SE4H_ERROR1			0xD0400014 // I 2 @ ER: [2]elapsed_ticks_no_adcticks<2000 ct  [3]cic not in sync
+#define CAN_SE4H_ADC3_HistogramA	0xD0400024 // I 3 @ ADC3 Histogram tx: request count, switch buffers. rx: send count
+#define CAN_SE4H_ADC3_HistogramB	0xD0400034 // I 4 @ ADC3 Histogram tx: bin number, rx: send bin count
+#define CAN_SE4H_ADC2_HistogramA	0xD0400044 // I 5 @ ADC2 Histogram tx: request count, switch buffers; rx send count
+#define CAN_SE4H_ADC2_HistogramB	0xD0400054 // I 6 @ ADC2 Histogram tx: bin number, rx: send bin count
+#define CAN_SE4H_ADC3_ADC2_READOUT	0xD0400064 // I 7 @ ADC3 ADC2 readings readout
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  	Description
+//i     0     0     "%u"    5			@ Number of black segments
+//i     1     4     "%f"  0.11453721234 	@ Shaft counter to distance conversion
+//i     2     0     "%u"    901			@ High threshold register setting, ADC3
+//i     3     0     "%u"    400			@ Low  threshold register setting, ADC3
+//i     4     0     "%u"   1100			@ High threshold register setting, ADC2
+//i     5     0     "%u"    701			@ Low  threshold register setting, ADC2
+//i     6     6     "%c"  "Shaft sensor DRIVE SHAFT" @ Some ascii description about the unit's use
+//    Note: the next available index would be 13, since the above ascii takes up 6+ four byte slots.
+//i    13     5     "%lf" 7.123456789012345 	@ Test double (2 slots)
+//i    15     2     "%llu" 1234567890123456789 	@ Test unsigned long long
+//i    17     0     "%d"   -256			@ Test of index 
+
+//  ========================================================================================================================
+// Engine sensor --se1
+//      program name     	  	   CAN ID     p  program  path/filename                             crc unit calib      Comments
+#define CAN_UNIT_3			0x0060000C // P /home/deh/svn_sensor/sensor/se1/trunk/se1.srec	*       0  0  1	@Sensor unit: Engine 
+//   ------------------- for converting payload to output field (winch instrumentation) ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+#define CAN_ENG_RPMMANIFOLD		0x40600000 // I 0 @Engine: rpm:manifold pressure
+//$   8   1   4   1     1   5.0            0      1      "%6.0f"      @RPM with 5 black segments
+//$   8   5   8   1     1   9.629E-3    -0.5      12       "%5.1f"      @Manifold pressure (inch hg)	
+#define CAN_ENG_TEMP			0x70600000 // I 1 @Engine: thermistor converted to temp
+//$   4   1   4   1     1    0.01          0      5      "%6.1f"      @transmission temp (deg C)
+#define CAN_ENG_THROTTLE		0x50600000 // I 2 @Engine: throttle
+//$   4   1   4   0     1   1              0      4      "%d"         @Throttle setting (0-99)
+#define CAN_ENG_THERMTHROTL		0x60600000 // I 3 @Engine: thermistor:throttle pot
+//$   8   1   4   0     1   1              0     -1      "%d"         @Thermistor reading (ADC reading)
+//$   8   4   8   0     1   1              0     -1      "%d"         @Throttle pot reading (ADC reading)
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  	Description
+//i   0       4     "%f"    -0.5	@ Manifold pressure offset
+//i   1       4     "%f"   9.629E-3	@ Manifold pressure scale (inch hg)
+//i   2       4     "%f"   0.01         @ Transmission temperature (deg C)
+//i   3       0     "%u"   0            @ Spare slot 1
+//i   4       0     "%u"   0            @ Spare slot 2
+//i   5       0     "%u"   0            @ Spare slot 3
+
+//  ========================================================================================================================
+// Shaft Encoder--Lower sheave
+#define CANUNIT_4			0x0080000C // P /home/deh/svn_sensor/sensor/se3/trunk/se3.srec	*      0  1  1	@Sensor unit: Lower sheave shaft encoder
+#define CAN_SE2_COUNTERnSPEED		0x30800000 // I 0 @ 
+#define CAN_SE2_ERROR2			0xD0800004 // I 1 @ 
+#define CAN_SE2_ERROR1			0xD0800014 // I 2 @ 
+#define CAN_SE2_ADC3_HistogramA		0xD0800024 // I 3 @ ADC3 Histogram tx: request count, switch buffers. rx: send count
+#define CAN_SE2_ADC3_HistogramB		0xD0800034 // I 4 @ ADC3 Histogram tx: bin number, rx: send bin count
+#define CAN_SE2_ADC2_HistogramA		0xD0800044 // I 5 @ ADC2 Histogram tx: request count, switch buffers; rx send count
+#define CAN_SE2_ADC2_HistogramB		0xD0800054 // I 6 @ ADC2 Histogram tx: bin number, rx: send bin count
+#define CAN_SE2_ADC3_ADC2_READOUT	0xD0800064 // I 7 @ ADC3 ADC2 readings readout
+//   ------------------- for converting payload to output field (winch instrumentation) ------------------------------------
+//   size pay-idx  fix  sign scale      offset  outfield  format         Field description
+//$   8   1   4   0    -1   1              0     11      "%8d"	  	@Shaft counter (ticks)
+//$   8   1   4   1    -1   0.114537232    0      2      "%8.1f"	@Shaft counter (feet/count)
+//$   8   5   8   1     1   4.0            0      3      "%6.0f"	@RPM: 4 black segments
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  	Description
+//i     0     0     "%u"    5			@ Number of black segments
+//i     1     4     "%f"  0.114 			@ Shaft counter to feet conversion
+//i     2     6     "%c"  "Shaft sensor LOWER SHEAVE"	@ Some ascii description about the unit's use
+//    Note: the next available index would be 9, since the above ascii takes up 6+ four byte slots.
+
+//  ========================================================================================================================
+//  Shaft Encoder--Upper sheave shaft encoder
+#define CANUNIT_5			0x00A0000C // P /home/deh/svn_sensor/sensor/se3/trunk/se3.srec	*       0  1  1	@Sensor unit: Upper sheave shaft encoder
+#define CAN_SE3_COUNTERnSPEED		0x30A00000 // I 0 @ 
+#define CAN_SE3_ERROR2			0xD0A00004 // I 1 @ 
+#define CAN_SE3_ERROR1			0xD0A00014 // I 2 @ 
+#define CAN_SE3_ADC3_HistogramA		0xD0A00024 // I 3 @ ADC3 Histogram tx: request count, switch buffers. rx: send count
+#define CAN_SE3_ADC3_HistogramB		0xD0A00034 // I 4 @ ADC3 Histogram tx: bin number, rx: send bin count
+#define CAN_SE3_ADC2_HistogramA		0xD0A00044 // I 5 @ ADC2 Histogram tx: request count, switch buffers; rx send count
+#define CAN_SE3_ADC2_HistogramB		0xD0A00054 // I 6 @ ADC2 Histogram tx: bin number, rx: send bin count
+#define CAN_SE3_ADC3_ADC2_READOUT	0xD0A00064 // I 7 @ ADC3 ADC2 readings readout
+//   ------------------- for calibrating raw readings ----------------------------------------------------------------------
+//    Array Number read    value,
+//    index  type  format  data		  	Description
+//i     0     0     "%u"    5			@ Number of black segments
+//i     1     4     "%f"  0.114 			@ Shaft counter to feet conversion
+//i     2     6     "%c"  "Shaft sensor UPPER SHEAVE"	@ Some ascii description about the unit's use
+//    Note: the next available index would be 9, since the above ascii takes up 6+ four byte slots.
+
+//  ========================================================================================================================
+#define CANUNIT_8			0x0100000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Sensor unit: Level wind
+//  ========================================================================================================================
+#define CANUNIT_9			0x0120000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Sensor unit: XBee receiver #1
+//  ========================================================================================================================
+#define CANUNIT_A			0x0140000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Sensor unit: XBee receiver #2
+//  ========================================================================================================================
+#define CANUNIT_B			0x0160000C // P /home/deh/svn_sensor/sensor/xxx/trunk/xxx.srec		*       0  1 1	@Display driver/console
+//  ========================================================================================================================
+#define CANUNIT_C			0x0180000C // P /home/deh/svn_sensor/sensor/caw_Olimex/trunk/xxx.srec	*       0  1 1	@CAW's Olimex board
+//  ========================================================================================================================
+#define CANUNIT_D			0x01A0000C // P /home/deh/svn_sensor/sensor/pod6/trunk/pod6.srec	*       0  1 1	@POD board sensor prototype ("6" marked on board)
+//  ========================================================================================================================
+
+// Logger & gps
+#define CANUNIT_E			0x01C0000C // P /home/deh/svn_sensor/sensor/co1_sensor_ublox/trunk/co1.srec *       1  1  1	@Logger: sensor board w ublox gps & SD card
+#define CAN_TIMESYNC			0x00200000 // I 0 	@ GPS time sync distribution msg
+//   size pay-idx   fix  sign scale      offset  outfield  format              Field description
+//$   8     1   8   0     2   1              0     -1      "%s"        @Linux time * 64
+//$   1     1   1   0     1   1              0     -1      "%u"	@ Tick within sec
+//$   4     1   4   0     1   1              0     -1      "%u"	@ Linux time 
+#define CAN_FIX_LATLON			0xA1C00000 // I 1 @GPS winch fix: lattitude:longitude
+//$   4     1   4   1    -1  1.666666666666667E-6  0   6  "%11.8f"      @Lattitude (deg + = North)
+//$   4     5   8   1    -1  1.666666666666667E-6  0   7  "%11.8f"      @Longitude (deg + = West)
+#define CAN_FIX_HT_TYP_NSAT		0xB1C00000 // I	2 @GPS winch fix: heigth:type fix:number sats
+//$   6     1   4  0      1   1              0      8       "%d"        @height (m)
+//$   6     5   5  0      1   1              0      9       "%1d"       @fix type:
+//$   6     6   6  0      1   1              0     10       "%2d"       @number of satellites
+
+#define CAN_LG_ER1			0xD1C00004 // I 3 	@ 1st code  CAN_UNITID_CO_OLI GPS checksum error
+#define CAN_LG_ER2			0xD1C00014 // I 4 	@ 2nd code  CAN_UNITID_CO_OLI GPS Fix error
+#define CAN_LG_ER2			0xD1C00024 // I 5 	@ 3rd code  CAN_UNITID_CO_OLI GPS Time out of step
+//  ========================================================================================================================
+

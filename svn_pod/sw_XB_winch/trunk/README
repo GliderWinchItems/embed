@@ -1,0 +1,41 @@
+README
+
+03-17-2012
+
+gpiotest
+
+The old gpiotest with additions & macros for USART2* and XBee
+pins.
+
+xbsetup
+
+Initially in a loop to send AT commands and display responses.
+'x' as first char breaks loop and a second loop then sends
+lines typed in and displays responses.  'x' breaks this loop
+and the port letter/pin number on/off as above in gpiotest.
+
+
+xbloopbk_w
+
+General scheme:
+
+Sends to the pod end and listens for a repsponse.  The expected
+response is the string sent plus an appended RSSI of that the pod
+end measured.
+
+USART1 outputs the outgoing message and the incoming message and
+adds the RSSI this end measured.
+
+Companion to ~/svn_pod/sw_XB_pod/trunk/xbloopbk_p.
+
+xboneway_w  03-24-2012
+
+Receives from pod end.  Uses API mode with XBee
+
+
+xbrange_w 04-09-2012
+
+Sends a packet to the pod end, then listens for a reply.  If there is a
+reply it displays the count and the RSSI of that the pod end sent as well
+as the RSSI of the packet just received from the pod end.  If the timeout
+occurs it displays '*' and local count.  A hack of xboneway_w.

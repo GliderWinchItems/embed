@@ -1,0 +1,30 @@
+#!/bin/bash
+# podplot - use gnuplot to plot a reformatted/sorted/merged POD data file
+# 02-21-2012 deh
+#
+# To execute this script--
+# podplot <filename>  [The file name ends in 'RM (for Reformatted Merged)]
+
+# Count the number of lines and set GNUDUR
+GNUDUR=$(awk '{ ++x } END { print x }' $1)
+
+# Each line is 1/64th of a second
+GNUSEC=$(echo $(( $GNUDUR / 64 )) )
+
+# Export to environment so that 'gnuplot' can access these variables
+#      filename
+export GNUFILE=$1
+#      Number of input lines
+export GNUDUR
+#      Number of seconds (truncated, of course)
+export GNUSEC
+
+# The following for debugging
+echo GNUFILE is set to $GNUFILE
+echo Number of input lines: $GNUDUR
+echo Number of seconds: $GNUSEC
+
+# Execute 'gnuplot' and graph tension & accelerometer, then save image as a .png file
+gnuplot "plotGNUFILE.gp"
+
+exit

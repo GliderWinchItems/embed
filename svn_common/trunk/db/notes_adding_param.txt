@@ -1,0 +1,46 @@
+notes_adding_param.txt
+Adding a parameter
+
+in directory:
+../svn_common/trunk/db
+
+1. PARAM_LIST_INSERT.sql (function type)
+  Easiest is to copy a line for this function type
+  a. Add parameter name: unique
+  b. Add description: unique
+  c. Update sequence numbers
+
+2. PARAM_VAL_INSERT.sql (values for functioni instance)
+   a.  Copy the added lines above and past into this .sql.
+   b.  Add the function name (instance) as 1st column item.
+   c.  Delete and add to make the other items like the other lines.
+   d.  Add the sequence numbers in the description field for a check
+   e.  Don't forget to update to --
+	INSERT INTO PARAM_VAL
+
+3. Update app program struct
+   e.g.
+   ../svn_sensor/sensor/yogurt/trunk/yogurt_idx_v_struct.h
+ 
+4. Update app program struct versus index
+   e.g.
+   ../svn_sensor/sensor/yogurt/trunk/yogurt_idx_v_struct.c
+
+  These entries MUST be in the same sequence as the PARAM_LIST (and
+    PARAM_VAL tables.  This is a table of pointers to the entries in 
+    the struct, and the struct entries may have gaps due to the ALIGN
+    of structs of structs.  The list of pointers, however, must match
+    the database table list, and this array of pointers does not have
+    any gaps.
+
+5.  Update the debugging printout subroutine
+   e.g.
+   ../svn_sensor/sensor/yogurt/trunk/idx_v_struct_print.c
+   As a debugging/check it prints out the struct values after initialization with the
+   table value.
+
+6.  Run updatej (full rebuild of tables)
+
+7.  After running 'updatej', to update just the values
+    run 'updatev'
+

@@ -1,0 +1,44 @@
+README.isocan
+12/12/2015
+
+Notes on board
+
+Depending the various zero ohm jumpers and parts installed 
+the board can be configured for a variety of ways with the
+CAN bus.
+
+This board carries the CAN bus connectors 8P8C, compatible
+with the 6P6C connectors on old boards, but with power and
+ground tripled.
+
+In the case of the LM2596 switcher, the switcher module is 
+mounted on to this board, and this board mounts to the 
+processor board.
+
+Similarly, the isolated DC-DC module mounts to this board.
+
+The input diode, resistor, and zener are optional and provided
+for the case where the CAN bus may not be well behaved.
+
+Goal--"one pc board fits all" (at modest expense of unused
+pc board space).
+
+1.  Processor ground isolated from CAN bus
+    a.  Isolated DC-DC converter (5v out) to processor board
+    b.  CAN bus driver
+        1) CAN bus side from linear (5v) or,
+	2) switcher (LM2596 module) (5v)
+
+2. Processor ground at CAN bus ground
+   a.  Same power supply as CAN driver (5v)
+        1) linear or,
+        2) switcher
+   b.  Processor and CAN power separate
+        1) processor board direct from CAN bus (8-12v) or,
+        2) processor board from LM2596 switcher module
+
+Mounting/connection to processor board--
+1.  If processor is isolated--
+    a.  CAN bus plus to 
+
+

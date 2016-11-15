@@ -1,0 +1,19 @@
+echo ==================================================================================================================================================================
+export THIS=$(pwd)
+cd ../../../sw_stm32/trunk/devices
+make clean
+make
+cd ../lib/libmi*
+make clean
+make
+cd ../libsu*
+make clean
+make
+cd ../libu*
+#make clean
+make
+cd $THIS
+#cd ../../../../sw_pod/branches/pod_v2b_ublox
+make clean
+make
+

@@ -1,0 +1,263 @@
+CANprogloader.txt
+10/17/2014
+
+0.  General approach
+
+Each unit is has a "loader" at the beginning of flash and at the next block above it.  There
+is one instance of an application program and one source for the CAN ID's and calibrations, which
+eliminates the problem of making a single update has to be applied to multiple files.
+
+Initially the unit is flashed with the loader program and each unit has a unique CAN ID that 
+is stored with the loader.  The application and section outside the program with the CAN ID's, 
+calibrations, parameters, etc. is loaded via the PC/CAN bus.  (For test, the section outside the
+program can be loaded via program run on the unit that uses compiled-in values, followed by the 
+usual compile/link/flash procedure.)
+
+When the unit resets the loader executes.  It sends a response "reset" msg, loops for a few
+seconds, then checks crc's on the program and high flash and if OK jumps the the program.  As well
+as power up, or pushbutton reset, the can be reset by the PC sending a CAN msg to the unique CAN 
+ID for that unit with the command code "RESET".  The CAN routine for both the loader and the app
+check incoming CAN msgs for a RESET.
+
+When the app executes it switches the vector base to point to its vector table, and then
+proceeds as if there were no loader (other than the CAN routine checks for an incoming RESET msg and 
+"squelch" msg (described below).
+
+Key assumptions--
+
+a.  It should make possible the updating of calibrations, parameters, CAN ID's etc. without 
+the need for compiling programs for either the PC or stm32.  Initially, a user would have to edit a 
+.txt file, and at later there could be a PC program that interactively makes changes and hosts
+a database.
+
+b.  The "source" for all calibrations, parameters, CAN ID's, etc., reside on one place, and
+initially in a .txt file, but could be eventually end up in a PC database.  The layout of the
+calibrations and parameters, etc., reside in a common .h file with definitions of the structs.
+
+c.  Application programs are "generic" in that multiple units doing the same thing on the 
+CAN bus would use the same program, but the units would be using different set of CAN ID's and
+calibrations.
+
+This means CAN ID's are not compiled into the program.  (If calibrations are compiled-in, then each 
+unit would require a separately compiled program, and this in turn would mean a multiple copies 
+of the same code (which makes updating error prone), or separate compilations of the same program 
+with different sets of CAN ID's, etc. (which is a similar problem to the multiple copies of the
+program.)
+
+d.  The PC doesn't know where the various things are loaded in the stm32.  This is because the .ld
+file for the stm32 specifies the address and it would require the PC reading that file and determining
+the address with the same logic as the linker, i.e. too much trouble.  Instead the loader in the unit
+responds to command codes from the PC and sends base addresses in its response.
+
+1.  .ld file for apps
+
+Flash areas defined and sections are placed in the areas. For example the
+following defines flash into multiple sections.  The first is an assumed area where the loader 
+program resides, i.e. the beginning of flash to the beginning of the app, e.g. for a processor 
+with 1 MB (1024K) of flash--
+0x08000000 - 0x8003fff
+
+The second is the area for the app--.e.g 0x08004000.  The third is the area in high flash, e.g.
+0x080ff800 - 0x080ffff
+
+The fourth area is optional and holds app related things such as calibrations, and parameters.
+
+The plan is that the FLASHH area would hold structs for application CAN ID's and values for 
+crc checking the loaded program.  These would be the same for all programs.
+
+In the .ld file the memory is arranged as--
+FLASH -- Where the program starts and the length of allowable.
+
+FLASHH -- High end of flash holding the address, count, and crc for check the program segments.
+
+FLASHP -- Below FLASHH holding all CAN ID's, calibrations, parameters, etc.
+
+Snip from ldrapp.ld file--
+MEMORY
+{
+	RAM      (RWX) : ORIGIN = 0x20000000, LENGTH = 96K
+/* FLASH: Application origin follows loader whose origin is 0x08000000 		*/
+	FLASH    (RX)  : ORIGIN = 0x08004000, LENGTH = 1024K-0x4000 - 0x200
+/* FLASHH: One 2048 byte block in high flash for app calibrations, etc. 	*/
+	FLASHH	 (RX)  : ORIGIN = 0x08000000 + 1024K - 0x200, LENGTH = 0x200
+/* FLASHP: Area for structs that the app will use and the PC will load. */
+	FLASHP   (RX)  : ORIGIN = 0x08000000 + 1024K - 0x200 - 0x0C00, LENGTH = 0x0C00
+}
+
+/* Address of application jump address */
+__appjump    = 0x08004004;
+__appoffset  = 0x08004000;
+
+
+2. .ld file for the loader
+
+The .ld file for the loader gives the loader the load address for the app, and does so by 
+having the reset vector point to a another function call that is placed just ahead of the
+struct that holds the unique CAN ID.  The app needs to get the unique CAN ID since the CAN
+routine for the app needs check incoming CAN msgs for one that calls for that unit to reset.
+
+The .ld file for the loader defines FLASHH the same way as the the app .ld file.  
+
+Note--the loader .ld file and app .ld files have to be coordinated, at least for the app load
+address and FLASHH.  The loader does not need to know about FLASHP.
+
+For each size of processor flash there needs to be a pair of .ld files that match.
+
+
+3.  PC
+
+C programs--
+On the PC side, C code, the program(s) use the same .h file as the loader and apps.  
+
+Java programs--
+Initially, for Java  programs the .txt file could be read in, but since at this point Java wouldn't 
+be used for updating and loading.  If at some point an interactive/gui Java program is written for
+setting calibrations, then the PC/Java could host the "source" as a database and generate the same
+format .txt file which is currently the "source".
+
+
+4.  Loader
+
+Application programs--
+
+For loading programs the PC loader reads in the .srec file (specified on the .txt file) and builds
+an image, or images if there are multiple "segements."  A segment is continguous bytes, so if there
+is a gap in consecutive memory addresses the loader will skip the gap.  So far the stm32 programs have
+been written to be one segment.  (However, one could envision compiling in calibrations, parameters, etc.,
+and org'ing them to some location, which would produce a gap.)
+
+The PC loader works with the stm32 loader.  To start the stm32 loader the PC issues a "reset" command which 
+causes the stm32 to do a software forced reset.  The stm32 comes out of reset to the loader, sends a "a reset"
+msg, and loops for a short period.  The PC receives the resest msg and begins a send/response sequence.
+
+(Detail: Other units on the CAN bus are "squelched" by the PC sending a universal msg that says "stop sending CAN msg
+until the count in this payload expires."  This reduces the traffic on the CAN bus which is necessary since if
+many units are sending at full speed the program loading may exceed the bandwidth and buffers will then overflow.)
+
+The PC loader first asks for the flash block size of the stm32.  The PC then begins the sequence for loading all the
+segments of the program.  If the "skip" field in the .txt file is not set, the PC, knowing the start address and
+byte count, computes the local crc-32 and sends a command for the stm32 to send the crc-32, given
+the stm32 start address and count.  If the crc-32's match, then segment in the stm32 is assumed to be up-to-date, and
+the process is repeated for the next segment.  When there are no more segments for the program, then the next
+unit from the .txt file is taken, etc. until the list of units from the .txt file is exhausted.
+
+When the crc-32's do not match, the data for the segment is sent to the stm32.  This is done by the PC sending a
+command "set address point" which the stm32 uses to store bytes from "write" msgs that come from the PC.  The
+"write" msg contains the payload byte count and payload.  
+
+Since flash is generally handled in blocks and the PC might specify writing beginning in the middle of a block and
+possibly ending before the end of the block, or crossing block boundaries, the stm32 must copy the data from the
+existing block into a sram buffer; enter incoming data in the sram buffer.  When the payload data are being loaded
+and the end of the block is reached the stm32 writes the block, reads the next block into the sram buffer and 
+continues.  When the PC is finished with the segment it sends a "write what you have" msg to close out the last
+block.
+
+Since the writing of flash may be slow the PC-stm32 sequence uses a send/ack sequence, i.e. each msg sent by the PC
+gets some type of response msg, usually a msg with a single byte code for "ACK".  The PC side, after sending a msg, 
+uses the 'select' call in the main loop for time out.  If a msg from the stm32 takes too long the PC sends the last
+msg for a retry and after "x" retries goes on to the next unit.  (While the "ACK" approach slows the loading, the
+streaming approach gets into trouble with either/or buffers overflowing (since without pacing the PC would dump the
+entire program load of CAN msgs out), or the CAN bus bandwidth being used up and buffers in some unit are going to
+overflow.  Pacing for the worst case is much slower than doing an ACK.)
+
+
+Calibrations, parameters, etc--
+
+Even though calibrations, parameters, etc., are located outside the program, i.e. a "fixed" area, the
+address doesn't need to baked into the PC progam.  Since the PC can't easily read the linker .ld files used in
+the compilation of the stm32, one of the loader command codes is "get fixed area address."  This gives 
+the PC the address to use for loading an image of the calibrations, parameters, etc.  To build this image the 
+PC uses the .txt file as the source, along with the definitions of the structs in the .h files used by the stm32 
+apps.  This means that the PC needs to know which struct to use.  The .txt file supplies a "struct number" and the PC
+then has to have a function that populates the struct from the .txt file data.  (The problem is similar to the payload
+layouts are not all the same.)  One simple case is merely a struct that has an array of offset & scale, and maybe two
+such arries, one for fixed, and the other for floats.  Another "struct number" would be the XY calibration values for
+the 2-axis load-pin.  The PC, given the "struct number" in the .txt file uses a function that stores the values from
+the .txt file in the particular struct used by that function.  The image is then sent to the stm32 in a similar manner
+as the loading of the program.
+
+To get the address where these calibrations, parameters, etc., are stored in the stm32, the PC sends a command and the
+stm32 returns the address.  The loader gets that address by using the jump in the application vector, e.g. 0x08004004, to
+get the Reset_Handler function call that is just ahead of the table with the adddress(es).  This approach places no
+restrictions on the size and location of the calibrations, parameters, etc.  
+
+Calibrations: source-- .txt file versus unit--
+
+Three codes in the .txt file--
+//        Skip calib: (0 = no calib, skip) [application does not use calibs]
+//                    (1 = load with .txt data if crc not same) [unit == .txt]
+//                    (2 = skip loading .txt data if unit calib crc is OK) [unit != .txt]
+
+(0) If the unit does not use calibrations, etc., i.e. the FLASHP area, then '0' skips the testing/loading of the FLASHP.
+
+(1) The crc-32 of the calibration, etc., image built from the .txt file is compared to the crc-32 in the unit for the
+    FLASHP struct it uses, and if they are different the unit is loaded with the image in the PC.  In effect, the .txt
+    file is the "source" for the calibrations.
+
+(2) If the crc-32 for the calibration, etc. in the unit matches what is stored in the unit, then the loader skips
+    loading the image built from the .txt.  In effect, the unit calibrations are not "updated" (or "pulled back") to the
+    .txt file data, and the unit becomes the "source" of the calibrations.
+
+    In the case where the crc-32 for the unit's calibration is incorrect, then the image built from the
+    .txt file is loaded.  In effect, this is a case where there calibrations, etc. in the unit appear to be corrupt and
+    the .txt file is the source for default set.
+
+    The case of "zeroing" the offset for the tension might fall into the case where calibrations are changed in the unit by
+    something other than the loader program, provided of course, that the new offset is placed in flash.  It might be better
+    if the offset were loaded into the sram upon boot up and and part of the procedure for zeroing stores new offsets.
+
+With (1), if the size of the struct in the application program does not match the number of //i lines on the .txt file, then
+the loader will get a different crc-32 even though the data of interest is the same.  The result is if there is a difference
+the loader will re-load the flashp according to the size sent from the application program, and do so each time. 
+
+crc-32 checking--
+
+Provision is made for all "loadable" images to have a crc-32 check.  When the stm32 resets/boots it needs to know that the
+application program is OK before jumping to it.  When the loader comes up it gets the address where a table of crc-32, 
+address start, and count, are stored in flash (generally high flash).  It gets that address from the .ld file (.ld files
+are board & processor specific).  It checks the crc-32 on the table.  If that table is bad, then loader continues to loop
+waiting for the PC to send of reset command.  If the table is good, it then takes each entry and checks the crc-32.  If
+any fail the loader loops waiting.  
+
+If all pass then the loader checks the calibrations, parameters, CAN ID's table.  It gets the address for these from the 
+vector address of the app (and since the app has been checked and found to be good this address will be OK).  If these areas
+pass the crc-32 check, then the loader waits a few seconds (jic the PC wants to send a new program and the existing app, 
+though good, may not have the ability to force a reset).  After the brief wait it jumps to the app.
+
+
+
+stm32 crashes
+
+
+
+
+
+5.  More calibration area and .txt file notes
+
+The calibration area is readin in to the PC as an array of unsigned ints.  When the PC reads the .txt file the lines starting
+with "//i " signify a calibration line, and that line has the index in the array where the value is stored.  Most values will 
+require 4 bytes, i.e. one "slot" or unsigned int array position: signed int, unsigned int, and float all require one array
+position.  Others require 8 bytes, e.g. long long, unsigned long long, and double.  These will occupy two consecutive array
+positions.
+
+Since the PC is dealing with an array of unsigned ints floats and doubles requires usage of an "int" without conversion to
+a float.  One way to handle this is via a union, e.g.--
+
+// Copy the value in the unsigned int array to the unsigned int in a union
+union VX {unsigned int ui; float f;}vx; vx.ui = ldp[loadpathfileIdx].x[ldp[loadpathfileIdx].calct];
+// Use the float in the union.
+printf("line: %d value: %f\n",linenumber, vx.f);
+
+In the stm32 app program the foregoing is not needed if one defines a struct where the elements will align with the 
+unsigned int array.
+
+Scheme: The application defines an area somewhere in flash, but
+outside the program, (via the .ld file).  A struct is defined to
+suit the needs of the application, and in the application the code
+accesses the struct via a pointer to the address of the flash area 
+(which the linker and .ld provides).  This aspect is about the same 
+as 1. above.
+
+
+If 
+

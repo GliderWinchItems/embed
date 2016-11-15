@@ -1,0 +1,4 @@
+#!/bin/bash
+./mm TENSION_a11 TENSION_a21 CAN_UNIT_12
+cd ..
+make flash

@@ -1,0 +1,153 @@
+// 32 bit ID word
+//  pppp xxxx xxxz zzzz zzzz zzzz zzzz zirt
+//
+//  p ( 4) = priority group
+//  x ( 7) = unit id group
+//    (11) = total bits: standard CAN id
+//  z (18) = extended id
+//    (29) = total bits: extended id
+//
+//  i (1) = IDE bit
+//          1 = extended CAN id
+//          0 
+//            if z's are 0, extended CAN id
+//            if z's are not 0, a non-CAN-bus id
+//   r (1) = RTR bit
+//   t (1) = transmit bit, not used for CAN msg
+//
+//
+
+int maskedID = msgin.id & 0xffe00000;
+        int motor = msgin.id & 0x00600000;
+        int drum  = msgin.id & 0x00e00000;
+
+case 0x26000000: //  State message msgin.get_ubyte(0);
+
+case 0xa0200000: //  evironmental status/data message 
+
+case 0xa0400000: //  wind message
+
+case 0x27000000: //  Launch Parameter Request message
+
+case 0x50200000: //  control lever statu/data message  msgin.get_ubyte(1));
+
+case 0x21000000: //  Brake Command
+
+case 0x22000000: //  Guillotine command
+
+case 0x23000000: //  Contactor command
+
+case 0x51400000: //  zero odometer from embedded controller command
+
+case 0x51800000: //  zero tensiometer from embedded controller command
+
+ switch (msgin.id & 0xff800000)
+
+  case 0x24800000: //  Motor/Controller Status lastMotorSpeed[motor] = msgin.get_short(1);
+
+  case 0x25800000: //  Torque/Speed Command
+
+ switch (msgin.id & 0xff00000)
+
+  case 0x36000000: //  active drum status/data during launch message
+     lastCableOut[drum] = msgin.get_short(1);
+
+  case 0x3800000: //  active tensiometer status/data during launch
+     lastTension[drum] = msgin.get_short(1);
+
+ case 0x3a000000: //  active cable angle status/data during launch message
+
+0x28E00000 // launch parameter message
+
+------- Total 19 --------------------
+
+========== deh assignments ===============================
+
+co1_sensor_ublox: gps & logger--
+
+ 0x00200000 CAN_TIMESYNC1 Time sync w 64/sec unix time
+
+ 0xB4000000 (CAN_UNITID_CO_OLI | (CAN_DATAID_LAT_LONG << CAN_DATAID_SHIFT)) 	Fix Latitude, Longitude (minutes * 1E5)
+
+ 0xC4000000 (CAN_UNITID_CO_OLI | (CAN_DATAID_HEIGHT   << CAN_DATAID_SHIFT)) 	Fix Height (m):fix type:number satellites
+
+ 0xD4000004 (CAN_UNITID_CO_OLI | CAN_DATAID29_1_GPS_CHKSUM_ER)) 		GPS sentence checksum error
+
+ 0xD4000014 (CAN_UNITID_CO_OLI | CAN_DATAID29_2_GPS_NO_FIX )) 			PUBX,00, shows NF - No Fix
+
+ 0xD400001C (CAN_UNITID_CO_OLI | CAN_DATAID29_3_GPS_FLAGCTR)) 			Time out of step counter
+
+
+pod6: dummy test messages from POD board--
+
+ 0x31A00000 (CAN_UNITID_POD6 | (CAN_DATAID_POD6_SHAFT << CAN_DATAID_SHIFT))
+ 
+ 0x41A00000 (CAN_UNITID_POD6 | (CAN_DATAID_POD6_SPEED << CAN_DATAID_SHIFT))
+
+se1: engine sensor
+
+ 0x40800000 (CAN_UNITID_SE1 | (CAN_DATAID_POD6_SHAFT << CAN_DATAID_SHIFT))
+
+ 0x30800000 (CAN_UNITID_SE1 | (CAN_DATAID_POD6_SPEED << CAN_DATAID_SHIFT))
+
+se2: shaft encoder #1 
+se3: shaft encoder #2
+se4: shaft encoder #3 
+
+ Each has 8 msgs--
+	iamunitnumber | (CAN_DATAID_SEN_COUNTERandSPEED << CAN_DATAID_SHIFT);  // CAN msg: count & rpm
+	iamunitnumber | (CAN_DATAID_ERROR1              << CAN_DATAID_SHIFT);	// CAN msg. Errors
+	iamunitnumber | (CAN_DATAID_ERROR2              << CAN_DATAID_SHIFT);	// CAN msg. Errors
+ Example--
+ 0x30E00000
+ 0x50E00000
+ 0x60E00000
+
+	/* CAN messages for histogram readout. */
+	iamunitnumber | CAN_DATAID29_1 | CAN_IDE;	// CAN msg. ADC3 Histogram tx: request count, switch buffers. rx: send count
+	iamunitnumber | CAN_DATAID29_2 | CAN_IDE;	// CAN msg. ADC3 Histogram tx: bin number, rx: send bin count
+	iamunitnumber | CAN_DATAID29_3 | CAN_IDE;	// CAN msg. ADC2 Histogram tx: request count, switch buffers; rx send count
+	iamunitnumber | CAN_DATAID29_4 | CAN_IDE;	// CAN msg. ADC2 Histogram tx: bin number, rx: send bin count
+	iamunitnumber | CAN_DATAID29_5 | CAN_IDE;	// CAN msg. ADC3 ADC2 readings readout
+
+-------- Total 32 --------------------
+
+============== Test messages ===========================================
+
+f4 gateway:
+ 0x33200000
+ 0x33400000
+ 0x33600000
+ 0x33800000
+ 0x3333333C
+
+ 0x55200000
+ 0x55400000
+ 0x55600000
+ 0x5555555c
+
+ 0x44200000
+ 0x44400000
+ 0x44600000
+ 0x4444444c
+
+ 0x88200000
+ 0x88400000
+ 0x88600000
+ 0x8888888c
+
+cangate:
+ 's' command--
+ Sent from a file--
+ 0x8a200000
+ 0x8a400000
+ 0x8a600000
+ 0x8a88888c
+ 
+ Troy's 't' command--
+ 0x44200000
+ 0x44600000
+
+----- Total 23 ------------------------------
+
+

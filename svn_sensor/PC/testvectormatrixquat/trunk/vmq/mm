@@ -1,0 +1,25 @@
+#!/bin/bash
+echo 
+cd ../../../../sw_f103/trunk/lib/libvectormatrixquat
+#ls
+make clean
+make
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "libvectormatrixquat FAILED"
+	exit
+fi
+echo pctestq
+cd ../../../../PC/testvectormatrixquat/trunk/vmq
+#ls
+make clean
+make
+XA=`echo $?`
+if [ $XA -ne 0 ] ; then
+	echo "pctestq FAILED"
+	exit
+fi
+./pctestq $1 $2 $3 $4 $5 $6 $7 $8
+
+
+

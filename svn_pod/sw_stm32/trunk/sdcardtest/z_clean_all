@@ -1,0 +1,7 @@
+echo '# Cleaning "*.log" files'
+rm -f *.log *.tmp
+cd sdlog_test_stuff
+rm -f *.tmp a.out sdlog_test
+cd ..
+cd ../../..
+./z_clean
