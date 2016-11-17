@@ -218,4 +218,30 @@ INSERT INTO PARAM_LIST VALUES ('YOGURT_1_INTEGRATEINIT_A',     	53, 'TYP_FLT','%
 INSERT INTO PARAM_LIST VALUES ('YOGURT_1_INTEGRATEINIT_B',     	54, 'TYP_FLT','%f', 	'YOGURT_1',	'Yogurt: Control, integrator initialization, b of  a + b*x ');
 INSERT INTO PARAM_LIST VALUES ('YOGURT_1_STABILIZETIMEDELAY_P',	55, 'TYP_U32','%d', 	'YOGURT_1',	'Yogurt: Control, time delay for temperature stabilization, Pasteur');
 INSERT INTO PARAM_LIST VALUES ('YOGURT_1_STABILIZETIMEDELAY_F',	56, 'TYP_U32','%d', 	'YOGURT_1',	'Yogurt: Control, time delay for temperature stabilization, Ferment');
+--
+-- MCL: Master Controller Launch parameters
+--                              Parameter name               Code     Type  format Function_type            Description
+INSERT INTO PARAM_LIST VALUES ('MCL_LIST_CRC'	     ,	 	1, 'TYP_U32','%08X', 	'MCL',	'mcl: crc: CRC: Master Controller Launch parameters');
+INSERT INTO PARAM_LIST VALUES ('MCL_LIST_VERSION'     ,	 	2, 'TYP_S32','%d', 	'MCL',	'mcl: version: Master Controller Launch parameters');
+INSERT INTO PARAM_LIST VALUES ('MCL_GROUND_TENSION_FACTOR',    	3, 'TYP_FLT','%f', 	'MCL',	'mcl: ground tension factor: Master Controller Launch parameters ');
+INSERT INTO PARAM_LIST VALUES ('MCL_CLIMB_TENSION_FACTOR',    	4, 'TYP_FLT','%f', 	'MCL',	'mcl: climb tension factor: Master Controller Launch parameters ');
+INSERT INTO PARAM_LIST VALUES ('MCL_GLIDER_MASS',   	 	5, 'TYP_FLT','%f', 	'MCL',	'mcl: glider mass: Master Controller Launch parameters ');
+INSERT INTO PARAM_LIST VALUES ('MCL_GLIDER_WEIGHT',   	 	6, 'TYP_FLT','%f', 	'MCL',	'mcl: glider weight: Master Controller Launch parameters ');
+INSERT INTO PARAM_LIST VALUES ('MCL_SOFT_START_TIME',  	 	7, 'TYP_FLT','%f', 	'MCL',	'mcl: soft start time: Master Controller Launch parameters ');
+INSERT INTO PARAM_LIST VALUES ('MCL_K1',  	 		8, 'TYP_FLT','%f', 	'MCL',	'mcl: soft start constant: k1: Master Controller Launch parameters ');
+INSERT INTO PARAM_LIST VALUES ('MCL_PROFILE_TRIG_CABLE_SPEED',	9, 'TYP_FLT','%f', 	'MCL',	'mcl: rotation taper: cable trigger speed: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_MAX_GROUND_CABLE_SPEED',	10,'TYP_FLT','%f', 	'MCL',	'mcl: rotation taper: max ground cable speed: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_K2',			11,'TYP_FLT','%f', 	'MCL',	'mcl: rotation taper: constant k2: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_PEAK_CABLE_SPEED_DROP',	12,'TYP_FLT','%f', 	'MCL',	'mcl: transition to ramp: peak cable_speed_drop: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_RAMP_TIME'		,	13,'TYP_FLT','%f', 	'MCL',	'mcl: ramp taper up: ramp time: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_K3'			,	14,'TYP_FLT','%f', 	'MCL',	'mcl: ramp taper up: constant k3: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_TAPERANGLETRIG'	,	15,'TYP_FLT','%f', 	'MCL',	'mcl: end of climb taper down: taper angle trig: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_TAPERTIME'	,		16,'TYP_FLT','%f', 	'MCL',	'mcl: end of climb taper down: taper time: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_K4'	,			17,'TYP_FLT','%f', 	'MCL',	'mcl: end of climb taper down: constant k4: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_RELEASEDELTA'	,	18,'TYP_FLT','%f', 	'MCL',	'mcl: end of climb taper down: release delta: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_MAX_PARACHUTE_TENSION',	19,'TYP_FLT','%f', 	'MCL',	'mcl: parachute tension taper: max parachute tension: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_PARACHUTE_TAPER_SPEED',	20,'TYP_FLT','%f', 	'MCL',	'mcl: parachute tension taper: parachute taper speed: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_MAX_PARACHUTE_CABLE_SPEED',	21,'TYP_FLT','%f', 	'MCL',	'mcl: parachute tension taper: max parachute cable speed: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_K5',			22,'TYP_FLT','%f', 	'MCL',	'mcl: parachute tension taper: constant k5: Master Controller Launch parameterS ');
+
 
