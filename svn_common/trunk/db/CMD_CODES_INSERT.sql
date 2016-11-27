@@ -48,6 +48,6 @@ INSERT INTO CMD_CODES  VALUES ('CMD_REVERT',		34,	'Revert (re-initialize) workin
 INSERT INTO CMD_CODES  VALUES ('CMD_SAVE',		35,	'Write current working parameters/calibrations/CANIDs to non-volatile storage');
 INSERT INTO CMD_CODES  VALUES ('CMD_GET_READING',	36,	'Send a reading for the code specified in byte [1] specific to function');
 INSERT INTO CMD_CODES  VALUES ('CMD_GET_READING_BRD',	37,	'Send a reading for the code specified in byte [1] for board; common to functions');
-INSERT INTO CMD_CODES  VALUES ('CMD_REQ_LAUNCH_PARM',	38,	'Send msg to handshake transferring launch parameters');
+INSERT INTO CMD_CODES  VALUES ('CMD_LAUNCH_PARM_HDSHK',	38,	'Send msg to handshake transferring launch parameters');
 INSERT INTO CMD_CODES  VALUES ('CMD_SEND_LAUNCH_PARM',	39,	'Send msg to send burst of parameters');
 

@@ -390,7 +390,7 @@ INSERT INTO PARAM_VAL VALUES ('CABLE_ANGLE_1','CABLE_ANGLE_USEME'    	         ,
 -- ==================================================================================================================================================================================================
 --
 -- Yogurt maker 
---                           FUNCTION_NAME     PARAM_NAME             PARAM_VAL        FUNCTION_TYPE         DESCRIPTION11
+--                           FUNCTION_NAME     PARAM_NAME             PARAM_VAL  FUNCTION_TYPE         DESCRIPTION11
 INSERT INTO PARAM_VAL VALUES ('YOGURT_1','YOGURT_1_LIST_CRC',   	'0',	'YOGURT_1',  'Yogurt_1:  1 CRC for this list');
 INSERT INTO PARAM_VAL VALUES ('YOGURT_1','YOGURT_1_LIST_VERSION',   	'1',	'YOGURT_1',  'Yogurt_1:  2 Version number for Tension List');
 
@@ -458,5 +458,30 @@ INSERT INTO PARAM_VAL VALUES ('YOGURT_1','YOGURT_1_INTEGRATEINIT_B',      '434.0
 INSERT INTO PARAM_VAL VALUES ('YOGURT_1','YOGURT_1_STABILIZETIMEDELAY_P', '200',	'YOGURT_1',	'Yogurt_1: 55  Control, time delay for temperature stabilization, Pasteur');
 INSERT INTO PARAM_VAL VALUES ('YOGURT_1','YOGURT_1_STABILIZETIMEDELAY_F', '1070',	'YOGURT_1',	'Yogurt_1: 56  Control, time delay for temperature stabilization, Ferment');
 -- ==================================================================================================================================================================================================
+--
+-- MCL: Master Controller Launch parameters
+--                           FUNCTION_NAME     PARAM_NAME             PARAM_VAL        FUNCTION_TYPE       DESCRIPTION11
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_LIST_CRC'	     ,	 	'0', 	'MCL',	'mcl: crc: CRC: Master Controller Launch parameters');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_LIST_VERSION'     ,	 	'1', 	'MCL',	'mcl: version: Master Controller Launch parameters');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GROUND_TENSION_FACTOR',    	'1.00', 	'MCL',	'mcl: ground tension factor: Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_CLIMB_TENSION_FACTOR',    	'1.30', 	'MCL',	'mcl: climb tension factor: Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GLIDER_MASS',   	 	'600.0', 	'MCL',	'mcl: glider mass (KG): Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GLIDER_WEIGHT',   	 	'625', 	'MCL',	'mcl: glider weight (KG): Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_SOFT_START_TIME',  	 	'1500', 	'MCL',	'mcl: soft start timeM (MS): Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K1',  	 			'45.95', 	'MCL',	'mcl: soft start constant: k1: Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_PROFILE_TRIG_CABLE_SPEED',	'6.5',	 	'MCL',	'mcl: rotation taper: cable trigger speed (/MS): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_MAX_GROUND_CABLE_SPEED',	'71.0', 	'MCL',	'mcl: rotation taper: max ground cable speed (M/S): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K2',				'0.074', 	'MCL',	'mcl: rotation taper: constant k2: Master Controller Launch parameterS ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_PEAK_CABLE_SPEED_DROP',	'8.5',	 	'MCL',	'mcl: transition to ramp: peak cable_speed_drop (/M/S): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_RAMP_TIME'		,	'6000', 	'MCL',	'mcl: ramp taper up: ramp time (MS): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K3'			,	'1.0',	 	'MCL',	'mcl: ramp taper up: constant k3: Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_TAPERANGLETRIG'	,	'75', 		'MCL',	'mcl: end of climb taper down: taper angle trig (DEG): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_TAPERTIME'	,		'2500', 	'MCL',	'mcl: end of climb taper down: taper time: Master (MS) Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K4'	,			'1.0',	 	'MCL',	'mcl: end of climb taper down: constant k4: Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_RELEASEDELTA'	,		'2.5', 		'MCL',	'mcl: end of climb taper down: release delta: Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_MAX_PARACHUTE_TENSION',	'50.0', 	'MCL',	'mcl: parachute tension taper: max parachute tension (KGF): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_PARACHUTE_TAPER_SPEED',	'65.0', 	'MCL',	'mcl: parachute tension taper: parachute taper speed (M/S): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_MAX_PARACHUTE_CABLE_SPEED',	'80.0', 	'MCL',	'mcl: parachute tension taper: max parachute cable speed (M/S): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K5',				'1.1',	 	'MCL',	'mcl: parachute tension taper: constant k5: Master Controller Launch parameter');
 
 

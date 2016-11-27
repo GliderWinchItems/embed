@@ -21,8 +21,8 @@ cd ../libusartstm32f4
 make
 echo 4444444444444444444  STM32F4_USB_CDC demo  4444444444444444444444444444444444444444
 cd ../../STM32F4_USB_CDC
-#make clean
-#make
+make clean
+make
 make -f Makefile1
 echo 555555555555555555 svn_common 55555555555555555555555555555555555555555555555555555
 cd ../../../../svn_common/trunk

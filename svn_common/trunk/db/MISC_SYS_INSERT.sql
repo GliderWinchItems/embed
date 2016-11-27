@@ -19,7 +19,11 @@ DELETE from MISC_SYS;
 --
 --                                                        MISC_SYS_FMT
 --                             MISC_SYS_NAME    MISC_SYS_VAL                DESCRIPTION_MISC_SYS
-INSERT INTO MISC_SYS VALUES ('LAUNCH_PARAM_BURST_SIZE', '8',   	'TYPE_U32',	'Number of CAN msgs in a burst when sending launch parameters');
+INSERT INTO MISC_SYS VALUES ('LAUNCH_PARAM_BURST_SIZE', '16',   	'TYPE_U32',	'Maximum number of CAN msgs in a burst when sending launch parameters');
 INSERT INTO MISC_SYS VALUES ('LAUNCH_PARAM_RETRY_CT',   '3',   	'TYPE_U32',	'Number of error retries when sending launch parameters');
 INSERT INTO MISC_SYS VALUES ('LAUNCH_PARAM_RETRY_TIMEOUT', '500','TYPE_U32',	'Number of milliseconds to wait for a response when sending launch parameters');
+INSERT INTO MISC_SYS VALUES ('VER_MCL', 		'1','TYPE_U32',	'Version: Master Controller Launch parameters database table PARAM_LIST');
+INSERT INTO MISC_SYS VALUES ('VER_TENSION_a', 		'1','TYPE_U32',	'Version: Tension_a: parameters database table PARAM_LIST');
+INSERT INTO MISC_SYS VALUES ('VER_LOGGER', 		'1','TYPE_U32',	'Version: Logger: parameters database table PARAM_LIST');
+INSERT INTO MISC_SYS VALUES ('VER_GPS', 		'1','TYPE_U32',	'Version: GPS: parameters database table PARAM_LIST');
 

@@ -299,13 +299,36 @@ u32 zctr = 0;
 	for (i = 0; i < 1; i++) 
 	{
 		/* Announce who we are. ('xprintf' uses uart number to deliver the output.) */
-		xprintf(UXPRT,  " \n\rF4 DISCOVERY GATEWAY FTDI w LINKED LIST CAN1 & CAN2 DRIVER: 06-18-2015  hw fp v0\n\r");
+		xprintf(UXPRT,  " \n\rF4 DISCOVERY GATEWAY FTDI w LINKED LIST CAN1 & CAN2 DRIVER: 11-21-2016  hw fp v0\n\r");
 		/* Make sure we have the correct bus frequencies */
 		xprintf (UXPRT, "   hclk_freq (MHz) : %9u...............................\n\r",  hclk_freq/1000000);	
 		xprintf (UXPRT, "  pclk1_freq (MHz) : %9u...............................\n\r", pclk1_freq/1000000);	
 		xprintf (UXPRT, "  pclk2_freq (MHz) : %9u...............................\n\r", pclk2_freq/1000000);	
 		xprintf (UXPRT, " sysclk_freq (MHz) : %9u...............................\n\r",sysclk_freq/1000000);
 	}
+
+/* Unique device ID--12 bytes */
+unsigned int uid[3];
+uid[0] = *(unsigned int *)0x1fff7a10;
+uid[1] = *(unsigned int *)0x1fff7a14;
+uid[2] = *(unsigned int *)0x1fff7a18;
+xprintf(UXPRT,"Unique device ID: 0x%08X 0x%08X 0x%08X\n\r",uid[0],uid[1],uid[2]);
+
+/* Byte-by-byte unique device ID display */
+xprintf(UXPRT,"Unique device ID: 0x%08X ",uid[0]);
+unsigned char* puid = (unsigned char *)0x1fff7a14;
+for (i = 0; i < 8; i++)
+{
+	if (*puid < (unsigned char)0x20)
+		xprintf(UXPRT,"0x%02X ", *puid++);	
+	else
+		xprintf(UXPRT,"%c ", *puid++);
+}
+xprintf (UXPRT,"\n\r");
+
+xprintf (UXPRT,"Flash size: %dK\n\r",(*(unsigned int*)0x1FFF7A22)&0xffff);
+
+
 /* Testing of floating pt. */
 volatile int idelay = 90000;
 while (idelay-- > 0);

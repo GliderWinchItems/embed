@@ -144,6 +144,9 @@ INSERT INTO CANID VALUES ('CANID_MC_RQ_LAUNCH_PARAM',	'27000000', 'MC',	'UNDEF',
 INSERT INTO CANID VALUES ('CANID_MSG_TIME_POLL',	'20000000', 'MC', 	'UNDEF','MC: Time msg/Group polling');
 INSERT INTO CANID VALUES ('CANID_MC_STATE',		'26000000', 'MC', 	'UNDEF','MC: Launch state msg');
 INSERT INTO CANID VALUES ('CANID_MC_TORQUE',		'25800000', 'MC', 	'UNDEF','MC: Motor torque');
+INSERT INTO CANID VALUES ('CANID_CMD_MCLI',		'FFE00000', 'MCL', 	'UNDEF','MCL: Master Controller Launch parameters I (HC)');
+INSERT INTO CANID VALUES ('CANID_CMD_MCLR',		'FFE00004', 'MCL', 	'UNDEF','MCL: Master Controller Launch parameters R (MC)');
+
 
 INSERT INTO CANID VALUES ('CANID_CP_CTL_RMT',		'29000000', 'CP', 	'UNDEF','Control Panel: Control lever remote');
 INSERT INTO CANID VALUES ('CANID_CP_CTL_LCL',		'29200000', 'CP', 	'UNDEF','Control Panel: Control lever local');

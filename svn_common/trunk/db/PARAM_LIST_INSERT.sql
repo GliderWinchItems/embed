@@ -233,7 +233,7 @@ INSERT INTO PARAM_LIST VALUES ('MCL_PROFILE_TRIG_CABLE_SPEED',	9, 'TYP_FLT','%f'
 INSERT INTO PARAM_LIST VALUES ('MCL_MAX_GROUND_CABLE_SPEED',	10,'TYP_FLT','%f', 	'MCL',	'mcl: rotation taper: max ground cable speed: Master Controller Launch parameterS ');
 INSERT INTO PARAM_LIST VALUES ('MCL_K2',			11,'TYP_FLT','%f', 	'MCL',	'mcl: rotation taper: constant k2: Master Controller Launch parameterS ');
 INSERT INTO PARAM_LIST VALUES ('MCL_PEAK_CABLE_SPEED_DROP',	12,'TYP_FLT','%f', 	'MCL',	'mcl: transition to ramp: peak cable_speed_drop: Master Controller Launch parameterS ');
-INSERT INTO PARAM_LIST VALUES ('MCL_RAMP_TIME'		,	13,'TYP_FLT','%f', 	'MCL',	'mcl: ramp taper up: ramp time: Master Controller Launch parameterS ');
+INSERT INTO PARAM_LIST VALUES ('MCL_RAMP_TIME'		,	13,'TYP_U32','%d', 	'MCL',	'mcl: ramp taper up: ramp time: Master Controller Launch parameterS ');
 INSERT INTO PARAM_LIST VALUES ('MCL_K3'			,	14,'TYP_FLT','%f', 	'MCL',	'mcl: ramp taper up: constant k3: Master Controller Launch parameterS ');
 INSERT INTO PARAM_LIST VALUES ('MCL_TAPERANGLETRIG'	,	15,'TYP_FLT','%f', 	'MCL',	'mcl: end of climb taper down: taper angle trig: Master Controller Launch parameterS ');
 INSERT INTO PARAM_LIST VALUES ('MCL_TAPERTIME'	,		16,'TYP_FLT','%f', 	'MCL',	'mcl: end of climb taper down: taper time: Master Controller Launch parameterS ');
