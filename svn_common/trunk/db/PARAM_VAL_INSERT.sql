@@ -466,13 +466,13 @@ INSERT INTO PARAM_VAL VALUES ('MCL','MCL_LIST_VERSION'     ,	 	'1', 	'MCL',	'mcl
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GROUND_TENSION_FACTOR',    	'1.00', 	'MCL',	'mcl: ground tension factor: Master Controller Launch parameters ');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_CLIMB_TENSION_FACTOR',    	'1.30', 	'MCL',	'mcl: climb tension factor: Master Controller Launch parameters ');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GLIDER_MASS',   	 	'600.0', 	'MCL',	'mcl: glider mass (KG): Master Controller Launch parameters ');
-INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GLIDER_WEIGHT',   	 	'625', 	'MCL',	'mcl: glider weight (KG): Master Controller Launch parameters ');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_GLIDER_WEIGHT',   	 	'625', 	'MCL',	'mcl: @ glider weight (KG): Master Controller Launch parameters ');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_SOFT_START_TIME',  	 	'1500', 	'MCL',	'mcl: soft start timeM (MS): Master Controller Launch parameters ');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K1',  	 			'45.95', 	'MCL',	'mcl: soft start constant: k1: Master Controller Launch parameters ');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_PROFILE_TRIG_CABLE_SPEED',	'6.5',	 	'MCL',	'mcl: rotation taper: cable trigger speed (/MS): Master Controller Launch parameter');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_MAX_GROUND_CABLE_SPEED',	'71.0', 	'MCL',	'mcl: rotation taper: max ground cable speed (M/S): Master Controller Launch parameter');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K2',				'0.074', 	'MCL',	'mcl: rotation taper: constant k2: Master Controller Launch parameterS ');
-INSERT INTO PARAM_VAL VALUES ('MCL','MCL_PEAK_CABLE_SPEED_DROP',	'8.5',	 	'MCL',	'mcl: transition to ramp: peak cable_speed_drop (/M/S): Master Controller Launch parameter');
+INSERT INTO PARAM_VAL VALUES ('MCL','MCL_PEAK_CABLE_SPEED_DROP',	'8.5',	 	'MCL',	'mcl: transition to ramp: peak cable_speed_drop (M/S): Master Controller Launch parameter');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_RAMP_TIME'		,	'6000', 	'MCL',	'mcl: ramp taper up: ramp time (MS): Master Controller Launch parameter');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_K3'			,	'1.0',	 	'MCL',	'mcl: ramp taper up: constant k3: Master Controller Launch parameter');
 INSERT INTO PARAM_VAL VALUES ('MCL','MCL_TAPERANGLETRIG'	,	'75', 		'MCL',	'mcl: end of climb taper down: taper angle trig (DEG): Master Controller Launch parameter');
